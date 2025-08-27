@@ -1,3 +1,4 @@
+import re
 import sys
 
 units = {
@@ -71,60 +72,51 @@ units = {
 
 
 def main():
-    amount: float = get_amount()
-    unit_group: str = get_unit_group()
-    from_unit, to_unit = get_converter_unit(unit_group)
-    new_value: float = converter(amount, unit_group, from_unit, to_unit)
+    try:
+        amount: float = get_amount()
+        unit_group: str = get_unit_group()
+        from_unit, to_unit = get_converter_unit(unit_group)
+        new_value: float = converter(amount, unit_group, from_unit, to_unit)
+    except (ValueError, KeyError, ZeroDivisionError) as e:
+        sys.exit(str(e))
 
     print(f"{amount} {from_unit} = {new_value:.05f} {to_unit}")
 
 
 def get_amount() -> float:
     """Gets unit amount"""
-    try:
-        amount: str = input("Amount: ").strip()
-        if not amount:
-            sys.exit("Enter valid amount!")
-        return float(amount)
-    except ValueError:
-        sys.exit("Enter valid amount!")
+    amount: str = input("Amount: ").strip()
+    if not re.search(r"^\d+(\.\d+)?$", amount):
+        raise ValueError("Invalid amount!")
+    if not amount:
+        raise ValueError("Amount cannot be empty")
+    return float(amount)
 
 
 def get_unit_group() -> str:
     """Gets unit group"""
-    try:
-        unit_type: str = input("Unit group: ").strip().lower()
-        if not unit_type:
-            sys.exit("Unit group cannot be empty!")        
-        if unit_type not in units:
-            raise KeyError("Invalid unit group!")
-        return unit_type
-    except KeyError as e:
-        sys.exit(str(e))
+    unit_type: str = input("Unit group: ").strip().lower()
+    if not unit_type:
+        raise ValueError("Unit group cannot be empty!")
+    if unit_type not in units:
+        raise KeyError("Invalid unit group!")
+    return unit_type
 
 
 def get_converter_unit(unit_type) -> tuple[str, str]:
     """Gets types of units user is convertind from and to"""
-    try:
-        from_unit: str = input("From: ").strip().lower()
-        to_unit: str = input("To: ").strip().lower()
-        if not from_unit or not to_unit:
-            sys.exit("Unit type cannot be empty!")
-        if from_unit not in units[unit_type] or to_unit not in units[unit_type]:
-            raise KeyError("Invalid unit type!")
-        return from_unit, to_unit
-    except KeyError as e:
-        sys.exit(str(e))
+    from_unit: str = input("From: ").strip().lower()
+    to_unit: str = input("To: ").strip().lower()
+    if not from_unit or not to_unit:
+        raise ValueError("Unit type cannot be empty!")
+    if from_unit not in units[unit_type] or to_unit not in units[unit_type]:
+        raise KeyError("Invalid unit type!")
+    return from_unit, to_unit
 
 
 def converter(amount, unit_type, from_unit, to_unit) -> float:
     """Convert one value to another"""
-    try:
-        return amount * (units[unit_type][from_unit]/units[unit_type][to_unit])
-    except ValueError:
-        sys.exit("Check your inputs and try again!")
-    except ZeroDivisionError:
-        sys.exit("You can't divide by zero!")
+    return amount * (units[unit_type][from_unit]/units[unit_type][to_unit])
     
 
 if __name__ == "__main__":
