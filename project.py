@@ -1,5 +1,5 @@
-# Nested dictionaries that defines all units available
-# Using SI(Internation System of Units) as base to this program
+import sys
+
 units = {
     "length": {
         "meter": 1.0,  # Base unit
@@ -10,7 +10,7 @@ units = {
         "inches": 0.0254,
         "yard": 0.9144,
         "mile": 1609.344,
-        "nautical mile": 1852.001,
+        "nautical_mile": 1852.001,
     },
 
     "time": {
@@ -25,13 +25,13 @@ units = {
         "gram": 0.001,
         "milligram": 0.000001,
         "tonne": 1000,
-        "US ton": 907.1847,
+        "us_ton": 907.1847,
         "pound": 0.4535924,
         "ounce": 0.02834952,
     },
 
     "temperature": {
-        "celcius": 1.0,  # Base unit
+        "celsius": 1.0,  # Base unit
         "kelvin": -272.15,
         "fahrenheit": -17.22222
     },
@@ -42,43 +42,90 @@ units = {
         "cup": 0.2365875,
         "teaspoon": 0.004928906,
         "gallon": 3.7854,        
-        "cubic centimeter": 0.001,
-        "cubic meter": 1000,
+        "cubic_centimeter": 0.001,
+        "cubic_meter": 1000,
     },  
 
     "area": {
-        "square meter": 1.0,  # Base unit
-        "square centimeter": 0.0001,
-        "square millimeter": 0.000001,
-        "square inch": 0.00064516,
-        "square feet": 0.09290304,
-        "square mile": 2589988,
+        "square_meter": 1.0,  # Base unit
+        "square_centimeter": 0.0001,
+        "square_millimeter": 0.000001,
+        "square_inch": 0.00064516,
+        "square_feet": 0.09290304,
+        "square_mile": 2589988,
         "acre": 4046.86,
         "hectare": 10000,
         "are": 100,
     },
 
     "speed": {
-        "kilometer per hour": 1.0,  # Base unit
-        "meters per second": 3.6,
-        "kilometers per second": 3600,
-        "miles per hour": 1.609344,
-        "foot per second": 1.09728,
+        "km/h": 1.0,  # Base unit
+        "m/s": 3.6,
+        "km/s": 3600,
+        "mph": 1.609344,
+        "ft/s": 1.09728,
         "knot": 1.852001,
-        "sound": 1234.8,
+        "mach": 1234.8,
     },
 }
 
 
 def main():
-    value = int(input("Ammount: ").strip())
-    unit_type = input("Unit type: ").strip().lower()
-    from_unit = input("From: ").strip().lower()
-    to_unit = input("To: ").strip().lower()
+    amount: float = get_amount()
+    unit_group: str = get_unit_group()
+    from_unit, to_unit = get_converter_unit(unit_group)
+    new_value: float = converter(amount, unit_group, from_unit, to_unit)
 
-    print(f"{value} {from_unit} = {units[unit_type][from_unit] / units[unit_type][to_unit]} {to_unit}")
+    print(f"{amount} {from_unit} = {new_value:.05f} {to_unit}")
 
 
+def get_amount() -> float:
+    """Gets unit amount"""
+    try:
+        amount: str = input("Amount: ").strip()
+        if not amount:
+            sys.exit("Enter valid amount!")
+        return float(amount)
+    except ValueError:
+        sys.exit("Enter valid amount!")
+
+
+def get_unit_group() -> str:
+    """Gets unit group"""
+    try:
+        unit_type: str = input("Unit group: ").strip().lower()
+        if not unit_type:
+            sys.exit("Unit group cannot be empty!")        
+        if unit_type not in units:
+            raise KeyError("Invalid unit group!")
+        return unit_type
+    except KeyError as e:
+        sys.exit(str(e))
+
+
+def get_converter_unit(unit_type) -> tuple[str, str]:
+    """Gets types of units user is convertind from and to"""
+    try:
+        from_unit: str = input("From: ").strip().lower()
+        to_unit: str = input("To: ").strip().lower()
+        if not from_unit or not to_unit:
+            sys.exit("Unit type cannot be empty!")
+        if from_unit not in units[unit_type] or to_unit not in units[unit_type]:
+            raise KeyError("Invalid unit type!")
+        return from_unit, to_unit
+    except KeyError as e:
+        sys.exit(str(e))
+
+
+def converter(amount, unit_type, from_unit, to_unit) -> float:
+    """Convert one value to another"""
+    try:
+        return amount * (units[unit_type][from_unit]/units[unit_type][to_unit])
+    except ValueError:
+        sys.exit("Check your inputs and try again!")
+    except ZeroDivisionError:
+        sys.exit("You can't divide by zero!")
+    
 
 if __name__ == "__main__":
     main()
