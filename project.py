@@ -1,77 +1,58 @@
 import re
 import sys
 
-units = {
-    "length": {
-        "meter": 1.0,  # Base unit
-        "centimeter": 0.01,
-        "millimeter": 0.001,
-        "kilometer": 1000.0,
-        "feet": 0.3048,
-        "inches": 0.0254,
-        "yard": 0.9144,
-        "mile": 1609.344,
-        "nautical_mile": 1852.001,
-    },
-
-    "time": {
-        "second": 1.0,  # Base unit
-        "minute": 60.0,
-        "hour": 3600.0,
-        "day": 86400,
-    },
-
-    "mass": {
-        "kilogram": 1.0,  # Base unit
-        "gram": 0.001,
-        "milligram": 0.000001,
-        "tonne": 1000,
-        "us_ton": 907.1847,
-        "pound": 0.4535924,
-        "ounce": 0.02834952,
-    },
-
-    "temperature": {
-        "celsius": 1.0,  # Base unit
-        "kelvin": -272.15,
-        "fahrenheit": -17.22222
-    },
-
-    "volume": {
-        "liter": 1.0,  # Base unit
-        "milliliter": 0.001,
-        "cup": 0.2365875,
-        "teaspoon": 0.004928906,
-        "gallon": 3.7854,        
-        "cubic_centimeter": 0.001,
-        "cubic_meter": 1000,
-    },  
-
-    "area": {
-        "square_meter": 1.0,  # Base unit
-        "square_centimeter": 0.0001,
-        "square_millimeter": 0.000001,
-        "square_inch": 0.00064516,
-        "square_feet": 0.09290304,
-        "square_mile": 2589988,
-        "acre": 4046.86,
-        "hectare": 10000,
-        "are": 100,
-    },
-
-    "speed": {
-        "km/h": 1.0,  # Base unit
-        "m/s": 3.6,
-        "km/s": 3600,
-        "mph": 1.609344,
-        "ft/s": 1.09728,
-        "knot": 1.852001,
-        "mach": 1234.8,
-    },
-}
-
+# Get units dictionary from 'units.py' file
+from units import units
 
 def main():
+    print("Welcome to unit converter!")
+    print("To check all group of units available, enter 'groups'")
+    print("To check all types for a specific group, enter '<group_name>.types'")
+    print("To convert an unit, enter 'convert'")
+    print("To add a new unit group or a new unit type, enter 'add'")
+    print("Quit anytime by entering 'quit' or by pressing ctrl+d or ctrl+c", end="\n\n")
+
+    while True:
+        try:
+            action = input("Let's begin! What do you want to do? ").strip().lower()
+            # Add logic to check action validity
+            if action == "groups":
+                print(f"Groups: {units.keys()}")
+                continue
+            elif action.endswith(".types"):
+                group, _ = action.split(".")
+                print(f"Units: {units[group].keys()}")
+                continue
+            elif action == "convert":
+                conversion_logic()
+                continue
+            elif action == "add":
+                group = input("Enter a group name (if not existed, a new one will be created): ").strip().lower()
+                unit_type = input(f"Enter new type for {group} group: ").strip().lower()
+                value = input(f"Enter convertion factor to base unit: ").strip().lower()
+                if not group or not unit_type or not value:
+                    raise ValueError("You can't leave a field empty! Enter a value!")
+                if group not in units:
+                    units[group] = {}
+                elif unit_type in units[group]:
+                    raise KeyError(f"{unit_type} is already an unit type!")   
+                try:
+                    value = float(value)
+                except:
+                    raise ValueError("Invalid value!")             
+                units[group][unit_type] = value
+                print(f"A new unit type was added on {group} group: {unit_type} = {value}")
+            elif action == "quit":
+                sys.exit("Bye!")
+        except (EOFError, KeyboardInterrupt):
+            sys.exit("Bye!")
+        except (KeyError, ValueError) as e:
+            print(f"Error: {e}")
+            continue
+
+
+def conversion_logic():
+    """Handles all logic if user decides do convert an unit"""
     try:
         amount: float = get_amount()
         unit_group: str = get_unit_group()
@@ -95,28 +76,28 @@ def get_amount() -> float:
 
 def get_unit_group() -> str:
     """Gets unit group"""
-    unit_type: str = input("Unit group: ").strip().lower()
-    if not unit_type:
+    unit_group: str = input("Unit group: ").strip().lower()
+    if not unit_group:
         raise ValueError("Unit group cannot be empty!")
-    if unit_type not in units:
+    if unit_group not in units:
         raise KeyError("Invalid unit group!")
-    return unit_type
+    return unit_group
 
 
-def get_converter_unit(unit_type) -> tuple[str, str]:
+def get_converter_unit(unit_group) -> tuple[str, str]:
     """Gets types of units user is convertind from and to"""
     from_unit: str = input("From: ").strip().lower()
     to_unit: str = input("To: ").strip().lower()
     if not from_unit or not to_unit:
         raise ValueError("Unit type cannot be empty!")
-    if from_unit not in units[unit_type] or to_unit not in units[unit_type]:
+    if from_unit not in units[unit_group] or to_unit not in units[unit_group]:
         raise KeyError("Invalid unit type!")
     return from_unit, to_unit
 
 
-def converter(amount, unit_type, from_unit, to_unit) -> float:
+def converter(amount, unit_group, from_unit, to_unit) -> float:
     """Convert one value to another"""
-    return amount * (units[unit_type][from_unit]/units[unit_type][to_unit])
+    return amount * (units[unit_group][from_unit]/units[unit_group][to_unit])
     
 
 if __name__ == "__main__":
