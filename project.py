@@ -1,10 +1,29 @@
+import json
 import re
 import sys
 
-# Get units dictionary from 'units.py' file
-from units import units
+
+# Import dictionaries
+try:
+    # Dictionary with all units available
+    with open("units.json", "r") as file:
+        units = json.load(file)
+    # Dictionary of base units for each group
+    with open("base_units.json", "r") as file:
+        base_units = json.load(file)
+except FileNotFoundError:
+    sys.exit("Error: file not found!")
+except json.JSONDecodeError:
+    sys.exit("Error: file if corrupted!")
+
 
 def main():
+    print_introductory_messages()    
+    get_action()
+
+
+def print_introductory_messages():
+    """Prints introductory messages and instructions"""
     print("Welcome to unit converter!")
     print("To check all group of units available, enter 'groups'")
     print("To check all types for a specific group, enter '<group_name>.types'")
@@ -12,38 +31,31 @@ def main():
     print("To add a new unit group or a new unit type, enter 'add'")
     print("Quit anytime by entering 'quit' or by pressing ctrl+d or ctrl+c", end="\n\n")
 
+
+def get_action():
     while True:
         try:
-            action = input("Let's begin! What do you want to do? ").strip().lower()
+            action: str = input("Let's begin! What do you want to do? ").strip().lower()
             # Add logic to check action validity
             if action == "groups":
-                print(f"Groups: {units.keys()}")
+                print("Groups: " + ", ".join(units.keys()))
                 continue
             elif action.endswith(".types"):
                 group, _ = action.split(".")
-                print(f"Units: {units[group].keys()}")
+                if group not in units:
+                    raise KeyError("That's not a valid group!")
+                print("Units: " + ", ".join(units[group].keys()))
                 continue
             elif action == "convert":
                 conversion_logic()
                 continue
             elif action == "add":
-                group = input("Enter a group name (if not existed, a new one will be created): ").strip().lower()
-                unit_type = input(f"Enter new type for {group} group: ").strip().lower()
-                value = input(f"Enter convertion factor to base unit: ").strip().lower()
-                if not group or not unit_type or not value:
-                    raise ValueError("You can't leave a field empty! Enter a value!")
-                if group not in units:
-                    units[group] = {}
-                elif unit_type in units[group]:
-                    raise KeyError(f"{unit_type} is already an unit type!")   
-                try:
-                    value = float(value)
-                except:
-                    raise ValueError("Invalid value!")             
-                units[group][unit_type] = value
-                print(f"A new unit type was added on {group} group: {unit_type} = {value}")
+                add_logic()
+                continue            
             elif action == "quit":
                 sys.exit("Bye!")
+            else:
+                raise ValueError("That's not a valid action!")
         except (EOFError, KeyboardInterrupt):
             sys.exit("Bye!")
         except (KeyError, ValueError) as e:
@@ -51,15 +63,12 @@ def main():
             continue
 
 
-def conversion_logic():
-    """Handles all logic if user decides do convert an unit"""
-    try:
-        amount: float = get_amount()
-        unit_group: str = get_unit_group()
-        from_unit, to_unit = get_converter_unit(unit_group)
-        new_value: float = converter(amount, unit_group, from_unit, to_unit)
-    except (ValueError, KeyError, ZeroDivisionError) as e:
-        sys.exit(str(e))
+def conversion_logic() -> None:
+    """Handles all logic of unit convertion"""  
+    amount: float = get_amount()
+    unit_group: str = get_unit_group()
+    from_unit, to_unit = get_converter_unit(unit_group)
+    new_value: float = converter(amount, unit_group, from_unit, to_unit)
 
     print(f"{amount} {from_unit} = {new_value:.05f} {to_unit}")
 
@@ -97,8 +106,66 @@ def get_converter_unit(unit_group) -> tuple[str, str]:
 
 def converter(amount, unit_group, from_unit, to_unit) -> float:
     """Convert one value to another"""
-    return amount * (units[unit_group][from_unit]/units[unit_group][to_unit])
-    
+    if int(units[unit_group][to_unit]) == 0:
+        raise ZeroDivisionError("Can't divide by zero!")
+    return amount * (units[unit_group][from_unit]/units[unit_group][to_unit]) 
+
+
+def add_logic():
+    """Handles all logic of adding new unit type"""
+    group = input("Enter a group name: ").strip().lower()
+    if not group:
+        raise ValueError("Enter a group name before proceeding!")    
+    if group not in units:
+        add_new_group(group)
+        return
+    unit_type = input(f"Enter new type for {group} group: ").strip().lower()
+    value = input(f"Enter convertion factor to base unit of {group} group ({base_units[group]}): ").strip().lower()
+    if not unit_type or not value:
+        raise ValueError("You can't leave a field empty!")
+    elif unit_type in units[group]:
+        raise KeyError(f"{unit_type} is already an unit type!")   
+    try:
+        value = float(value)
+    except:
+        raise ValueError("Invalid value!")             
+    units[group][unit_type] = value
+    print(f"A new unit type was added on {group} group: {unit_type} = {value}")
+    try:
+        with open("units.json", "w") as file:
+            json.dump(units, file, indent=4)
+    except PermissionError:
+        print("Error! You don't have permition to write to units.json!")
+
+
+def add_new_group(group):
+    """Creates a new unit group, with a base unit"""
+    while True:
+        answer: str = input(f"You want to create a new unit group named {group}? ").strip().lower()
+        if answer not in ["no", "n", "yes", "y"]:
+            print("Invalid answer! Just enter 'yes' or 'no'!")
+            continue
+        if answer == "no" or answer == "n":   
+            print("Action cancelled!") 
+            return 
+        units[group] = {}
+        new_base_unit: str = input("Group created! Now, enter the base unit for that group: ").strip().lower()
+        if not new_base_unit:
+            print("You can't leave that field empty! Enter a name for the base unit!")
+            continue
+        units[group][new_base_unit] = 1.0
+        base_units[group] = new_base_unit
+        try:
+            with open("units.json", "w") as file:
+                json.dump(units, file, indent=4)
+            with open("base_units.json", "w") as file:
+                json.dump(base_units, file, indent=4)
+        except PermissionError:
+            print("Error! You don't have permition to write to units.json!")
+
+        print(f"You've just created a {group} group, with {new_base_unit} as its base unit!")
+        return 
+                
 
 if __name__ == "__main__":
     main()
