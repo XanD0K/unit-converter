@@ -9,7 +9,6 @@
 
 
 ## Refactoring tasks
-- [ ] Fix converted value that always has 5 decimal values, even if all zeroes
 - [ ] Create a class to group all related functionalities
 - [ ] Add comments throughout the code
 
@@ -39,3 +38,4 @@
 - [x] Modify "add" action adding more logic and validation checks to new groups (e.g. base unit, valid number)
 - [x] When adding new group/type, display base unit of that type so that user knows the conversion factor
 - [x] Add separate logic for temperature
+- [x] Fix converted value that always has 5 decimal values, even if all zeroes

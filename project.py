@@ -18,7 +18,7 @@ except json.JSONDecodeError:
 
 
 def main() -> None:
-    print_introductory_messages()    
+    print_introductory_messages()
     get_action()
 
 
@@ -51,24 +51,24 @@ def get_action() -> None:
                 continue
             elif action == "add":
                 add_logic()
-                continue            
+                continue
             elif action == "quit":
                 sys.exit("Bye!")
             else:
                 raise ValueError("That's not a valid action!")
         except (EOFError, KeyboardInterrupt):
             sys.exit("Bye!")
-        except (KeyError, ValueError) as e:
+        except (KeyError, ValueError, ZeroDivisionError) as e:
             print(f"Error: {e}")
             continue
 
 
 def conversion_logic() -> None:
-    """Handles all logic of unit convertion"""  
+    """Handles all logic of unit convertion"""
     amount: float = get_amount()
     unit_group: str = get_unit_group()
     from_unit, to_unit = get_converter_unit(unit_group)
-    new_value: float = converter(amount, unit_group, from_unit, to_unit)
+    new_value: float = format_value(converter(amount, unit_group, from_unit, to_unit))
 
     print(f"{amount} {from_unit} = {new_value:.05f} {to_unit}")
 
@@ -76,10 +76,10 @@ def conversion_logic() -> None:
 def get_amount() -> float:
     """Gets unit amount"""
     amount: str = input("Amount: ").strip()
-    if not re.search(r"^\d+(\.\d+)?$", amount):
-        raise ValueError("Invalid amount!")
     if not amount:
         raise ValueError("Amount cannot be empty")
+    if not re.search(r"^\d+(\.\d+)?$", amount):
+        raise ValueError("Invalid amount!")
     return float(amount)
 
 
@@ -108,28 +108,41 @@ def converter(amount, unit_group, from_unit, to_unit) -> float:
     """Convert one value to another"""
     # Separate logic for converting temperature units
     if unit_group == "temperature":
-        factor_from, offset_from = units[unit_group][from_unit]
-        factor_to, offset_to = units[unit_group][to_unit]        
-        if from_unit == "celsius":
-            return (amount * factor_to) + offset_to        
-        temp_in_celsius = (amount - offset_from) / factor_from        
-        if to_unit == "celsius":
-            return temp_in_celsius
-        return (temp_in_celsius * factor_to) + offset_to
-
+        converter_temp(amount, unit_group, from_unit, to_unit)
     if int(units[unit_group][to_unit]) == 0:
         raise ZeroDivisionError("Can't divide by zero!")
-    return amount * (units[unit_group][from_unit]/units[unit_group][to_unit]) 
+    return amount * (units[unit_group][from_unit]/units[unit_group][to_unit])
+
+
+def format_value(value: float) -> str:
+    formatted_value = f"{value:.5f}".rstrip("0").rstrip(".")
+    if "." not in formatted_value:
+        formatted_value += ".0"
+    return formatted_value       
+
+
+def converter_temp(amount, unit_group, from_unit, to_unit) -> float:
+    """Handles conversion for temperature units"""
+    factor_from, offset_from = units[unit_group][from_unit]
+    factor_to, offset_to = units[unit_group][to_unit]
+    if from_unit == "celsius":
+        return (amount * factor_to) + offset_to
+    if factor_from == 0:
+        raise ZeroDivisionError("Can't divide by zero!")
+    temp_in_celsius = (amount - offset_from) / factor_from
+    if to_unit == "celsius":
+        return temp_in_celsius
+    return (temp_in_celsius * factor_to) + offset_to
 
 
 def add_logic() -> None:
     """Handles all logic of adding new unit type"""
     group: str = input("Enter a group name: ").strip().lower()
     if not group:
-        raise ValueError("Enter a group name before proceeding!")    
+        raise ValueError("Enter a group name before proceeding!")
     elif group not in units:
         add_new_group(group)
-        return    
+        return
     unit_type: str = input(f"Enter new type for {group} group: ").strip().lower()
     if group == "temperature":
         add_temp_logic(group, unit_type)
@@ -138,11 +151,11 @@ def add_logic() -> None:
     if not unit_type or not value:
         raise ValueError("You can't leave a field empty!")
     elif unit_type in units[group]:
-        raise KeyError(f"{unit_type} is already an unit type!")   
+        raise KeyError(f"{unit_type} is already an unit type!")
     try:
         value = float(value)
     except:
-        raise ValueError("Invalid value!")             
+        raise ValueError("Invalid value!")
     units[group][unit_type] = value
     print(f"A new unit type was added on {group} group: {unit_type} = {value}")
     try:
@@ -159,7 +172,7 @@ def add_new_group(group) -> None:
         if answer not in ["no", "n", "yes", "y"]:
             print("Invalid answer! Just enter 'yes' or 'no'!")
             continue
-        if answer == "no" or answer == "n":   
+        if answer == "no" or answer == "n":
             print("Action cancelled!") 
             return 
         units[group] = {}
@@ -187,7 +200,7 @@ def add_temp_logic(group, unit_type) -> None:
     if not temp_factor or not temp_offset:
         raise ValueError("You can't leave a field empty!")
     elif unit_type in units[group]:
-        raise KeyError(f"{unit_type} is already an unit type!")   
+        raise KeyError(f"{unit_type} is already an unit type!")
     try:
         temp_factor = float(temp_factor)
         temp_offset = float(temp_offset)
@@ -195,7 +208,7 @@ def add_temp_logic(group, unit_type) -> None:
         raise ValueError("Invalid value!")
     if temp_factor <= 0:
         raise ZeroDivisionError("Conversion factor cannot be zero!")
-    units[group][unit_type] = [temp_factor, temp_offset]       
+    units[group][unit_type] = [temp_factor, temp_offset]
             
     print(f"A new unit type was added on temperature group: {unit_type} = [{temp_factor}, {temp_offset}]")
     try:
