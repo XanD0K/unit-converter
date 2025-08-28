@@ -70,7 +70,7 @@ def conversion_logic() -> None:
     from_unit, to_unit = get_converter_unit(unit_group)
     new_value: float = format_value(converter(amount, unit_group, from_unit, to_unit))
 
-    print(f"{amount} {from_unit} = {new_value:.05f} {to_unit}")
+    print(f"{amount} {from_unit} = {new_value} {to_unit}")
 
 
 def get_amount() -> float:
@@ -115,6 +115,7 @@ def converter(amount, unit_group, from_unit, to_unit) -> float:
 
 
 def format_value(value: float) -> str:
+    """Format converted value by allowing only 5 decimal values and elimitating all trailling zeroes"""
     formatted_value = f"{value:.5f}".rstrip("0").rstrip(".")
     if "." not in formatted_value:
         formatted_value += ".0"
