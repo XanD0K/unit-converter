@@ -26,9 +26,9 @@
         "ounce": 0.02834952
     },
     "temperature": {
-        "celsius": 1.0,
-        "kelvin": -272.15,
-        "fahrenheit": -17.22222
+        "celsius": [1.0, 0.0],
+        "kelvin": [1.0, 273.15],
+        "fahrenheit": [1.8, 32.0]
     },
     "volume": {
         "liter": 1.0,

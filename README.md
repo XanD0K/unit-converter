@@ -1,11 +1,21 @@
 # YOUR PROJECT TITLE
 #### Video Demo:  <URL HERE>
 
-#### Description:
-This program has the purpose of converting different types of units. 
+
+## Description:
+This program has the purpose of converting different types of units. Besides conversion, it also allows users to create their own group and types of units.
+It was created to test and apply all knowledge acquired in cs50p course, from Harvard University.
+
+
+#### Table of Contents
+- [Files](#files)
 
 
 #### Implementation
+
+
+
+#### Usage
 
 
 

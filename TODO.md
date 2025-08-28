@@ -3,7 +3,6 @@
 
 ## New features
 - [ ] Allow users to run the program through command lines
-- [ ] Add separate logic for temperature
 - [ ] Add type hints throughout the codebase
 - [ ] Validate dictionary after importing/using it
 - [ ] Verify both dictionaries matches
@@ -39,3 +38,4 @@
 - [x] Create separate functions for each action
 - [x] Modify "add" action adding more logic and validation checks to new groups (e.g. base unit, valid number)
 - [x] When adding new group/type, display base unit of that type so that user knows the conversion factor
+- [x] Add separate logic for temperature
