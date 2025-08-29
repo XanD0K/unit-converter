@@ -43,7 +43,7 @@ def get_action() -> None:
             elif action.endswith(".types"):
                 group, _ = action.split(".")
                 if group not in units:
-                    raise KeyError("That's not a valid group!")
+                    raise KeyError(f"{group} is not a valid group!")
                 print("Units: " + ", ".join(units[group].keys()))
                 continue
             elif action == "convert":
@@ -64,23 +64,13 @@ def get_action() -> None:
 
 
 def conversion_logic() -> None:
-    """Handles all logic of unit convertion"""
-    amount: float = get_amount()
+    """Handles all logic of unit conversion"""
     unit_group: str = get_unit_group()
-    from_unit, to_unit = get_converter_unit(unit_group)
-    new_value: float = format_value(converter(amount, unit_group, from_unit, to_unit))
+    amount: float = get_amount()
+    from_type, to_type = get_converter_unit(unit_group)
+    new_value: float = format_value(converter(amount, unit_group, from_type, to_type))
 
-    print(f"{amount} {from_unit} = {new_value} {to_unit}")
-
-
-def get_amount() -> float:
-    """Gets unit amount"""
-    amount: str = input("Amount: ").strip()
-    if not amount:
-        raise ValueError("Amount cannot be empty")
-    if not re.search(r"^\d+(\.\d+)?$", amount):
-        raise ValueError("Invalid amount!")
-    return float(amount)
+    print(f"{amount} {from_type} = {new_value} {to_type}")
 
 
 def get_unit_group() -> str:
@@ -93,25 +83,35 @@ def get_unit_group() -> str:
     return unit_group
 
 
+def get_amount() -> float:
+    """Gets unit amount"""
+    amount: str = input("Amount: ").strip()
+    if not amount:
+        raise ValueError("Amount cannot be empty")
+    if not re.search(r"^\d+(\.\d+)?$", amount):
+        raise ValueError("Invalid amount!")
+    return float(amount)
+
+
 def get_converter_unit(unit_group) -> tuple[str, str]:
     """Gets types of units user is convertind from and to"""
-    from_unit: str = input("From: ").strip().lower()
-    to_unit: str = input("To: ").strip().lower()
-    if not from_unit or not to_unit:
+    from_type: str = input("From: ").strip().lower()
+    to_type: str = input("To: ").strip().lower()
+    if not from_type or not to_type:
         raise ValueError("Unit type cannot be empty!")
-    if from_unit not in units[unit_group] or to_unit not in units[unit_group]:
+    if from_type not in units[unit_group] or to_type not in units[unit_group]:
         raise KeyError("Invalid unit type!")
-    return from_unit, to_unit
+    return from_type, to_type
 
 
-def converter(amount, unit_group, from_unit, to_unit) -> float:
+def converter(amount, unit_group, from_type, to_type) -> float:
     """Convert one value to another"""
     # Separate logic for converting temperature units
     if unit_group == "temperature":
-        converter_temp(amount, unit_group, from_unit, to_unit)
-    if float(units[unit_group][to_unit]) == 0:
+        converter_temp(amount, unit_group, from_type, to_type)
+    if float(units[unit_group][to_type]) == 0:
         raise ZeroDivisionError("Can't divide by zero!")
-    return amount * (units[unit_group][from_unit]/units[unit_group][to_unit])
+    return amount * (units[unit_group][from_type]/units[unit_group][to_type])
 
 
 def format_value(value: float) -> str:
@@ -123,16 +123,16 @@ def format_value(value: float) -> str:
     return formatted_value       
 
 
-def converter_temp(amount, unit_group, from_unit, to_unit) -> float:
+def converter_temp(amount, unit_group, from_type, to_type) -> float:
     """Handles conversion for temperature units"""
-    factor_from, offset_from = units[unit_group][from_unit]
-    factor_to, offset_to = units[unit_group][to_unit]
-    if from_unit == "celsius":
+    factor_from, offset_from = units[unit_group][from_type]
+    factor_to, offset_to = units[unit_group][to_type]
+    if from_type == "celsius":
         return (amount * factor_to) + offset_to
     if factor_from == 0:
         raise ZeroDivisionError("Can't divide by zero!")
     temp_in_celsius = (amount - offset_from) / factor_from
-    if to_unit == "celsius":
+    if to_type == "celsius":
         return temp_in_celsius
     return (temp_in_celsius * factor_to) + offset_to
 
@@ -149,7 +149,7 @@ def add_logic() -> None:
     if group == "temperature":
         add_temp_logic(group, unit_type)
         return
-    value: str = input(f"Enter convertion factor to base unit of {group} group ({base_units[group]}): ").strip().lower()
+    value: str = input(f"Enter conversion factor to base unit of {group} group ({base_units[group]}): ").strip().lower()
     if not unit_type or not value:
         raise ValueError("You can't leave a field empty!")
     elif unit_type in units[group]:
@@ -197,7 +197,7 @@ def add_new_group(group) -> None:
 
 
 def add_temp_logic(group, unit_type) -> None:
-    temp_factor: str = input(f"Enter convertion factor to base unit of 'temperature' group ({base_units[group]}): ").strip().lower()
+    temp_factor: str = input(f"Enter conversion factor to base unit of 'temperature' group ({base_units[group]}): ").strip().lower()
     temp_offset: str = input(f"Enter offset value to base unit of 'temperature' group ({base_units[group]}): ").strip().lower()
     if not temp_factor or not temp_offset:
         raise ValueError("You can't leave a field empty!")

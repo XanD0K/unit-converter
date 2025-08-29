@@ -6,7 +6,7 @@
 - [ ] Add type hints throughout the codebase
 - [ ] Validate dictionary after importing/using it
 - [ ] Verify both dictionaries matches
-- [ ] Add style to introductore messages and add separator (with `-`, `=` or `_`)
+- [ ] Add style to introductory messages and add separator (e.g. with `-`, `=` or `_`)
 
 
 ## Refactoring tasks

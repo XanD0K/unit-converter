@@ -7,6 +7,15 @@
 
 ### Fixed
 
+## [0.5.0] - 2025-08-29
+### Changed
+- Changed conversion logic to first get user's input about unit group and then the amount to be converted. It allowed making input validations for a few units type (e.g. Kelvin)
+
+### Fixed
+- Fixed typos
+- Fixed variables names `from_unit` and `to_unit` to be `from_type` and `to_type` respectively, to better describe that variable
+
+
 ## [0.4.0] - 2025-08-28
 ### Added
 - Added logic for "temperature" group of units
