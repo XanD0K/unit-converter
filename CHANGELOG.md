@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- Added comman-line instructions
 
 ### Changed
 
@@ -45,6 +46,8 @@
 - Added `converter_temp` function to handle "temperature" units
 - Added `add_temp_logic` function to handle adding new types for "temperature" group
 
+## Changed
+- Changed temperature group in `units.json` dictionary so that each type accepts a tuple of 2 float values, instead of just one value
 
 ## [0.4.0] - 2025-08-28
 ### Added

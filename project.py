@@ -1,3 +1,4 @@
+import argparse
 import json
 import re
 import sys
@@ -39,8 +40,62 @@ def validate_dictionaries(units, base_units):
 validate_dictionaries(units, base_units)
 
 def main() -> None:
+    # Handles argparse
+    if len(sys.argv) > 1:
+        handle_cli(sys.argv)
     print_introductory_messages()
     get_action()
+
+
+def handle_cli(args):
+    """Handles command-line instructions (CLI)"""
+    # Convert command-line arguments to lowercase
+    modified_args = args[:]  # Creates a copy of all command-line arguments
+    
+    
+
+    # Adds description to program
+    parser = argparse.ArgumentParser(prog="Unit Converter", description="Convert multiple types of units")
+    subparser = parser.add_subparsers(dest="command", help="Available commands")
+    
+    # Convert command 
+    convert_parser = subparser.add_parser("convert", help="Convert value from one type to another")
+    convert_parser.add_argument("amount", type=float, help="Amount to convert")
+    convert_parser.add_argument("unit_group", help="Unit group")
+    convert_parser.add_argument("from_type", help="Source unit type")
+    convert_parser.add_argument("to_type", help="Target unit type")
+
+    # Add command
+    add_parser = subparser.add_parser("add", help="Add new unit group/type")
+    add_parser.add_argument("group", help="Unit group to add new type to")
+    add_parser.add_argument("unit_type", help="New type to be added")
+    add_parser.add_argument("value", type=float, nargs="?", help="Conversion factor to base unit (not used for temperature)")
+    add_parser.add_argument("factor", type=float, nargs="?", help="Conversion factor to temperature's base unit")
+    add_parser.add_argument("offset", type=float, nargs="?", help="Offset to temperature")
+
+    # Groups command
+    subparser.add_parser("groups", help="List all unit groups")
+
+    # Types command
+    types_parser = subparser.add_parser("types", help="List all types of units in a group")
+    types_parser.add_argument("group", help="Unit group used to list unit types")
+
+    # Parse arguments and call their respective functions
+    parsed_args = parser.parse_args(args[:1])  # Skips first argument
+    if parsed_args.command == "groups":
+        print("Groups: " + ", ".join(units.keys()))
+    elif parsed_args.command == "types":
+        if parsed_args.group not in units:
+            sys.exit(f"Error: '{parsed_args.group}' is not a invalid group")    
+    elif parsed_args.command == "convert":
+        try:
+            new_value = converter(parsed_args.amount, parsed_args.unit_group, parsed_args.from_type, parsed_args.to_type)
+            print(f"{parsed_args.amount} {parsed_args.from_type} = {format_value(new_value)} {parsed_args.to_type}")
+        except (ValueError, KeyError, ZeroDivisionError) as e:
+            sys.exit(f"Error: {e}")
+    elif parsed_args.comman == "add":
+        ...
+    
 
 
 def print_introductory_messages() -> None:
