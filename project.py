@@ -109,7 +109,7 @@ def converter(amount, unit_group, from_unit, to_unit) -> float:
     # Separate logic for converting temperature units
     if unit_group == "temperature":
         converter_temp(amount, unit_group, from_unit, to_unit)
-    if int(units[unit_group][to_unit]) == 0:
+    if float(units[unit_group][to_unit]) == 0:
         raise ZeroDivisionError("Can't divide by zero!")
     return amount * (units[unit_group][from_unit]/units[unit_group][to_unit])
 
@@ -117,6 +117,7 @@ def converter(amount, unit_group, from_unit, to_unit) -> float:
 def format_value(value: float) -> str:
     """Format converted value by allowing only 5 decimal values and elimitating all trailling zeroes"""
     formatted_value = f"{value:.5f}".rstrip("0").rstrip(".")
+    # Adds '.0' if formatted value ended up with no decimal values
     if "." not in formatted_value:
         formatted_value += ".0"
     return formatted_value       

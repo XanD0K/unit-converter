@@ -6,6 +6,7 @@
 - [ ] Add type hints throughout the codebase
 - [ ] Validate dictionary after importing/using it
 - [ ] Verify both dictionaries matches
+- [ ] Add style to introductore messages and add separator (with `-`, `=` or `_`)
 
 
 ## Refactoring tasks
@@ -28,14 +29,14 @@
 - [x] Improve Errors checking
 - [x] Centralize try-except block in `main`, making functions to just raise the exception
 - [x] Keep user inside program with `while` loop, until he decides to quit
-- [x] Allow users to modify the unit's dictionary by adding new groups/types
-- [x] Moves dictionary to another file to keep `project.py` cleaner
+- [x] Allow users to modify the unit's dictionary by adding new groups/types (modifies `units.json` and `base_units.json`)
+- [x] Move `units` dictionary to another file to keep `project.py` cleaner
 - [x] Use `json` library to open/save/close that new dictionary file, so that changes won't be lost
 - [x] Remove abrupt ending with `sys.exit` by adding `while` logic
 - [x] Remove actions' logic from `main` to keep it cleaner
 - [x] Fix message that outputs dictionary's keys
 - [x] Create separate functions for each action
-- [x] Modify "add" action adding more logic and validation checks to new groups (e.g. base unit, valid number)
-- [x] When adding new group/type, display base unit of that type so that user knows the conversion factor
-- [x] Add separate logic for temperature
+- [x] Modify "add" action by adding more logic and validation checks to new groups (e.g. base unit, valid number)
+- [x] When adding new group/type, display base unit of that type so that user knows in ehich unit he should calculate the conversion factor
+- [x] Add separate logic for temperature (for converting units and for adding new types)
 - [x] Fix converted value that always has 5 decimal values, even if all zeroes
