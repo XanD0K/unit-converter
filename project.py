@@ -65,9 +65,9 @@ def get_action() -> None:
 
 def conversion_logic() -> None:
     """Handles all logic of unit conversion"""
-    unit_group: str = get_unit_group()
-    amount: float = get_amount()
+    unit_group: str = get_unit_group()    
     from_type, to_type = get_converter_unit(unit_group)
+    amount: float = get_amount(from_type)
     new_value: float = format_value(converter(amount, unit_group, from_type, to_type))
 
     print(f"{amount} {from_type} = {new_value} {to_type}")
@@ -83,16 +83,6 @@ def get_unit_group() -> str:
     return unit_group
 
 
-def get_amount() -> float:
-    """Gets unit amount"""
-    amount: str = input("Amount: ").strip()
-    if not amount:
-        raise ValueError("Amount cannot be empty")
-    if not re.search(r"^\d+(\.\d+)?$", amount):
-        raise ValueError("Invalid amount!")
-    return float(amount)
-
-
 def get_converter_unit(unit_group) -> tuple[str, str]:
     """Gets types of units user is convertind from and to"""
     from_type: str = input("From: ").strip().lower()
@@ -104,9 +94,24 @@ def get_converter_unit(unit_group) -> tuple[str, str]:
     return from_type, to_type
 
 
+def get_amount(from_type) -> float:
+    """Gets unit amount"""
+    while True:        
+        amount: str = input("Amount: ").strip()
+        if not amount:
+            raise ValueError("Amount cannot be empty")
+        if not re.search(r"^-?\d+(\.\d+)?$", amount):
+            raise ValueError("Invalid amount! Please, insert integer or decimals!")
+        # Prevents negative value for "Kelvin"
+        if from_type == "kelvin":
+            if float(amount) < 0:
+                raise ValueError("Kelvin temperature cannot be negative!")
+        return float(amount)
+
+
 def converter(amount, unit_group, from_type, to_type) -> float:
     """Convert one value to another"""
-    # Separate logic for converting temperature units
+    # Separates logic for converting temperature units
     if unit_group == "temperature":
         converter_temp(amount, unit_group, from_type, to_type)
     if float(units[unit_group][to_type]) == 0:
