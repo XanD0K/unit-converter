@@ -11,6 +11,13 @@
 ### Removed
 
 
+## [0.6.0] - 2025-08-59
+### Added
+- Added first functional structure to handle comman-line arguments
+
+### Changed
+- Moved "groups" action to `print_groups` function and "types" action to `print_types` function to also be used with command-line arguments
+- Modified command lines logic to exit the program after output, preventing users to continue in the program
 
 
 ## [0.5.4] - 2025-08-29

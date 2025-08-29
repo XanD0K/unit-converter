@@ -3,6 +3,8 @@
 
 ## New features
 - [ ] Allow users to run the program through command lines
+- [ ] Validate command line arguments to allow variations (e.g. "convert", "Convert", "CONVERT", "CoNvErT")
+- [ ] Add aliases to all command lines to be more flexible (e.g "convert", "-c" and "--convert" will all be used to convert units)
 - [ ] Add style to introductory messages and add separator (e.g. with `-`, `=` or `_`)
 
 
@@ -13,6 +15,7 @@
 - [ ] Clean program by removing multiple repetitive logic throught the codebase and transforming it into a single function
 - [ ] Reestructure `project.py` file into multiple files to keep program cleaner
 - [ ] Reestructure `final-project` directory
+- [ ] Add `groups` and `types` functions to also be used with comman-line arguments
 
 
 ## Testing

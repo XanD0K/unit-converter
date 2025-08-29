@@ -39,31 +39,37 @@ def validate_dictionaries(units, base_units):
 
 validate_dictionaries(units, base_units)
 
+
 def main() -> None:
-    # Handles argparse
-    if len(sys.argv) > 1:
-        handle_cli(sys.argv)
+    # Handles command-line arguments
+    try:
+        if len(sys.argv) > 1:
+            handle_cli(sys.argv)
+            sys.exit(0)  # Exits program after command-line execution
+    except (ValueError, KeyError, ZeroDivisionError) as e:
+        print(f"Error: {e}")
+    # Access the program without command lines
     print_introductory_messages()
     get_action()
 
 
 def handle_cli(args):
-    """Handles command-line instructions (CLI)"""
+    """Handles command-line interface (CLI)"""
     # Convert command-line arguments to lowercase
-    modified_args = args[:]  # Creates a copy of all command-line arguments
-    
+    # Creates a copy of all command-line arguments   
     
 
     # Adds description to program
     parser = argparse.ArgumentParser(prog="Unit Converter", description="Convert multiple types of units")
-    subparser = parser.add_subparsers(dest="command", help="Available commands")
     
+    # Defines subparser to handle multiple commands
+    subparser = parser.add_subparsers(dest="command", help="Available commands")
     # Convert command 
     convert_parser = subparser.add_parser("convert", help="Convert value from one type to another")
-    convert_parser.add_argument("amount", type=float, help="Amount to convert")
     convert_parser.add_argument("unit_group", help="Unit group")
     convert_parser.add_argument("from_type", help="Source unit type")
     convert_parser.add_argument("to_type", help="Target unit type")
+    convert_parser.add_argument("amount", type=float, help="Amount to convert")
 
     # Add command
     add_parser = subparser.add_parser("add", help="Add new unit group/type")
@@ -72,21 +78,18 @@ def handle_cli(args):
     add_parser.add_argument("value", type=float, nargs="?", help="Conversion factor to base unit (not used for temperature)")
     add_parser.add_argument("factor", type=float, nargs="?", help="Conversion factor to temperature's base unit")
     add_parser.add_argument("offset", type=float, nargs="?", help="Offset to temperature")
-
     # Groups command
     subparser.add_parser("groups", help="List all unit groups")
-
     # Types command
     types_parser = subparser.add_parser("types", help="List all types of units in a group")
     types_parser.add_argument("group", help="Unit group used to list unit types")
 
     # Parse arguments and call their respective functions
-    parsed_args = parser.parse_args(args[:1])  # Skips first argument
+    parsed_args = parser.parse_args(args[1:])  # Skips first argument
     if parsed_args.command == "groups":
-        print("Groups: " + ", ".join(units.keys()))
+        print_groups()
     elif parsed_args.command == "types":
-        if parsed_args.group not in units:
-            sys.exit(f"Error: '{parsed_args.group}' is not a invalid group")    
+        print_types(parsed_args.group)
     elif parsed_args.command == "convert":
         try:
             new_value = converter(parsed_args.amount, parsed_args.unit_group, parsed_args.from_type, parsed_args.to_type)
@@ -95,7 +98,7 @@ def handle_cli(args):
             sys.exit(f"Error: {e}")
     elif parsed_args.comman == "add":
         ...
-    
+
 
 
 def print_introductory_messages() -> None:
@@ -114,13 +117,11 @@ def get_action() -> None:
             action: str = input("Let's begin! What do you want to do? ").strip().lower()
             # Add logic to check action validity
             if action == "groups":
-                print("Groups: " + ", ".join(units.keys()))
+                print_groups()
                 continue
             elif action.endswith(".types"):
                 group, _ = action.split(".")
-                if group not in units:
-                    raise KeyError(f"{group} is not a valid group!")
-                print("Units: " + ", ".join(units[group].keys()))
+                print_types(group)
                 continue
             elif action == "convert":
                 conversion_logic()
@@ -137,6 +138,16 @@ def get_action() -> None:
         except (KeyError, ValueError, ZeroDivisionError) as e:
             print(f"Error: {e}")
             continue
+
+
+def print_groups():
+    print("Groups: " + ", ".join(units.keys()))
+
+
+def print_types(group):
+    if group not in units:
+        raise KeyError(f"{group} is not a valid group!")
+    print("Units: " + ", ".join(units[group].keys()))
 
 
 def conversion_logic() -> None:
