@@ -1,20 +1,33 @@
 # Changelog
 
-## [Unrelease]
+## [Unreleased]
 ### Added
 
 ### Changed
 
 ### Fixed
 
+### Removed
 
-## [0.5.1] - 2025-08-29
+
+
+
+## [0.5.4] - 2025-08-29
+### Added
+- Validated dictionaries structure before running
+- Ensure dictionaries keys match
+
+
+## [0.5.3] - 2025-08-29
 ### Added
 - Added validation on user's input for Kelvin temperature
 - Alert users for negative values!
 
+### Changed
+- Improved users input validation based on unit group
 
-## [0.5.0] - 2025-08-29
+
+## [0.5.2] - 2025-08-29
 ### Changed
 - Changed conversion logic to first get user's input about unit group and unit type and then get the amount to be converted, which allows making input validations (e.g. for Kelvin units)
 
@@ -22,9 +35,21 @@
 - Fixed variables names `from_unit` and `to_unit` to be `from_type` and `to_type` respectively, to better describe that variable
 
 
+## [0.5.1] - 2025-08-28
+### Fixed
+- Fixed print message by removing trailling zeroes
+
+
+## [0.5.0] - 2025-08-28
+### Added
+- Added `converter_temp` function to handle "temperature" units
+- Added `add_temp_logic` function to handle adding new types for "temperature" group
+
+
 ## [0.4.0] - 2025-08-28
 ### Added
-- Added logic for "temperature" group of units
+- Added validation logic when adding new group/type
+- Created separate functions for "add" and "convert" actions
 
 ### Changed
 - Moved introductory messages and instructions out of `main`

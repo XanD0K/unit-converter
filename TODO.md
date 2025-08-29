@@ -3,13 +3,13 @@
 
 ## New features
 - [ ] Allow users to run the program through command lines
-- [ ] Add remmaining type hints throughout the codebase
 - [ ] Add style to introductory messages and add separator (e.g. with `-`, `=` or `_`)
 
 
 ## Refactoring tasks
-- [ ] Create a class to group all related functionalities
+- [ ] Reestructure the code by adding a class that encapsulates all programs logic
 - [ ] Add remmaining comments throughout the codebase
+- [ ] Add remmaining type hints throughout the codebase
 - [ ] Clean program by removing multiple repetitive logic throught the codebase and transforming it into a single function
 - [ ] Reestructure `project.py` file into multiple files to keep program cleaner
 - [ ] Reestructure `final-project` directory
