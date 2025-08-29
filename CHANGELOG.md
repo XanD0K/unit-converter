@@ -16,10 +16,9 @@
 
 ## [0.5.0] - 2025-08-29
 ### Changed
-- Changed conversion logic to first get user's input about unit group and then the amount to be converted. It allowed making input validations for a few units type (e.g. Kelvin)
+- Changed conversion logic to first get user's input about unit group and unit type and then get the amount to be converted, which allows making input validations (e.g. for Kelvin units)
 
 ### Fixed
-- Fixed typos
 - Fixed variables names `from_unit` and `to_unit` to be `from_type` and `to_type` respectively, to better describe that variable
 
 

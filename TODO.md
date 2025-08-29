@@ -3,15 +3,16 @@
 
 ## New features
 - [ ] Allow users to run the program through command lines
-- [ ] Add type hints throughout the codebase
-- [ ] Validate dictionary after importing/using it
-- [ ] Verify both dictionaries matches
+- [ ] Add remmaining type hints throughout the codebase
 - [ ] Add style to introductory messages and add separator (e.g. with `-`, `=` or `_`)
 
 
 ## Refactoring tasks
 - [ ] Create a class to group all related functionalities
-- [ ] Add comments throughout the code
+- [ ] Add remmaining comments throughout the codebase
+- [ ] Clean program by removing multiple repetitive logic throught the codebase and transforming it into a single function
+- [ ] Reestructure `project.py` file into multiple files to keep program cleaner
+- [ ] Reestructure `final-project` directory
 
 
 ## Testing
@@ -40,3 +41,5 @@
 - [x] Add separate logic for temperature (for converting units and for adding new types)
 - [x] Fix converted value that always has 5 decimal values, even if all zeroes
 - [x] Improve inputs validation based on unit group
+- [x] Validate dictionary after importing/using it
+- [x] Verify both dictionaries matches

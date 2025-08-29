@@ -3,12 +3,12 @@ import re
 import sys
 
 
-# Import dictionaries
+# Imports dictionaries
 try:
-    # Dictionary with all units available
+    # Opens dictionary with all units available
     with open("units.json", "r") as file:
         units = json.load(file)
-    # Dictionary of base units for each group
+    # Opens dictionary of base units for each group
     with open("base_units.json", "r") as file:
         base_units = json.load(file)
 except FileNotFoundError:
@@ -16,6 +16,27 @@ except FileNotFoundError:
 except json.JSONDecodeError:
     sys.exit("Error: file if corrupted!")
 
+
+def validate_dictionaries(units, base_units):
+    """Validates dictionaries before entering the program"""
+    # Ensures 'units.json' is a dictionary and it's not empty
+    if not isinstance(units, dict) or not units:
+        raise ValueError("'units.json' dictionary structure is corrupted!")
+    # Ensures 'base_units.json' is a dictionary and it's not empty
+    if not isinstance(base_units, dict) or not base_units:
+        raise ValueError("'base_units.json' dictionary structure is corrupted!")
+    for key in units:
+        # Ensures every key in 'units.json' is also a dictionary
+        if not isinstance(units[key], dict):
+            raise ValueError(f"'units.json' disctionary is corrupted! Its '{units[key]}' key should also be a dictionary!")
+        # Ensures every group in 'units.json' is also a group in 'base_units.json'
+        if key not in base_units.keys():
+            raise ValueError(f"Dictionaries don't match! '{key}' should also be a key in 'base_units.json' dictionary!")
+        # Ensures base unit for each group is correctly define in 'units.json'
+        if base_units[key] not in units[key]:
+            raise ValueError(f"The base unit '{base_units[key]}' for {key} group is not present on 'units.json' dictionary!")
+
+validate_dictionaries(units, base_units)
 
 def main() -> None:
     print_introductory_messages()
@@ -101,6 +122,7 @@ def get_amount(from_type) -> float:
         if not amount:
             print("Amount cannot be empty")
             continue
+        # Ensures amount is a number
         elif not re.search(r"^-?\d+(\.\d+)?$", amount):
             print("Invalid amount! Please, insert integer or decimals! (e.g. 10 or 10.0)")
             continue
@@ -109,6 +131,7 @@ def get_amount(from_type) -> float:
             if from_type == "kelvin":
                 raise ValueError("Kelvin temperature cannot be negative!")
             while True:
+                # Ensures user really want convert negative value
                 answer: str = input("WARNING! Negative values might not have physical meanings! Proceed anyway? ").strip().lower()
                 if answer not in ["yes", "y", "no", "n"]:
                     print("Invalid answer! Just enter 'yes' or 'no'!")
@@ -124,7 +147,7 @@ def get_amount(from_type) -> float:
 
 def converter(amount, unit_group, from_type, to_type) -> float:
     """Convert one value to another"""
-    # Separates logic for converting temperature units
+    # Separates conversion logic when dealing with temperature
     if unit_group == "temperature":
         converter_temp(amount, unit_group, from_type, to_type)
     if float(units[unit_group][to_type]) == 0:
@@ -138,11 +161,12 @@ def format_value(value: float) -> str:
     # Adds '.0' if formatted value ended up with no decimal values
     if "." not in formatted_value:
         formatted_value += ".0"
-    return formatted_value       
+    return formatted_value
 
 
 def converter_temp(amount, unit_group, from_type, to_type) -> float:
     """Handles conversion for temperature units"""
+    # Get's conversion factor and offset for temperature calculation
     factor_from, offset_from = units[unit_group][from_type]
     factor_to, offset_to = units[unit_group][to_type]
     if from_type == "celsius":
