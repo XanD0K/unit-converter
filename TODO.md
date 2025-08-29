@@ -17,7 +17,6 @@
 ## Testing
 - [ ] Implement a test suite (`test_project.py`)
 - [ ] Validade type checking (by using `mypy`)
-- [ ] Improve inputs validation based on unit group
 
 
 ## BACKLOG
@@ -40,3 +39,4 @@
 - [x] When adding new group/type, display base unit of that type so that user knows in ehich unit he should calculate the conversion factor
 - [x] Add separate logic for temperature (for converting units and for adding new types)
 - [x] Fix converted value that always has 5 decimal values, even if all zeroes
+- [x] Improve inputs validation based on unit group

@@ -96,17 +96,30 @@ def get_converter_unit(unit_group) -> tuple[str, str]:
 
 def get_amount(from_type) -> float:
     """Gets unit amount"""
-    while True:        
+    while True:
         amount: str = input("Amount: ").strip()
         if not amount:
-            raise ValueError("Amount cannot be empty")
-        if not re.search(r"^-?\d+(\.\d+)?$", amount):
-            raise ValueError("Invalid amount! Please, insert integer or decimals!")
-        # Prevents negative value for "Kelvin"
-        if from_type == "kelvin":
-            if float(amount) < 0:
+            print("Amount cannot be empty")
+            continue
+        elif not re.search(r"^-?\d+(\.\d+)?$", amount):
+            print("Invalid amount! Please, insert integer or decimals! (e.g. 10 or 10.0)")
+            continue
+        elif float(amount) < 0:
+            # Prevents negative value for "Kelvin"
+            if from_type == "kelvin":
                 raise ValueError("Kelvin temperature cannot be negative!")
-        return float(amount)
+            while True:
+                answer: str = input("WARNING! Negative values might not have physical meanings! Proceed anyway? ").strip().lower()
+                if answer not in ["yes", "y", "no", "n"]:
+                    print("Invalid answer! Just enter 'yes' or 'no'!")
+                    continue
+                if answer == "no" or answer == "n":
+                    print("Action cancelled!")
+                    break
+                return float(amount)
+            continue
+        break
+    return float(amount)
 
 
 def converter(amount, unit_group, from_type, to_type) -> float:
