@@ -2,7 +2,6 @@
 
 ## [Unreleased]
 ### Added
-- Added comman-line instructions
 
 ### Changed
 
@@ -11,13 +10,21 @@
 ### Removed
 
 
-## [0.6.0] - 2025-08-59
+## [0.6.1] - 2025-08-30
 ### Added
-- Added first functional structure to handle comman-line arguments
+- Added comman-line logic for add action
+
+### Fixed
+- Fixed convertion logic for "temperature" units (was missing a `return` statement)
+
+
+## [0.6.0] - 2025-08-29
+### Added
+- Added first functional structure to handle comman-line arguments (missing logic for "add" action)
 
 ### Changed
 - Moved "groups" action to `print_groups` function and "types" action to `print_types` function to also be used with command-line arguments
-- Modified command lines logic to exit the program after output, preventing users to continue in the program
+- Modified command-line logic to exit the program after output, preventing users to continue in the program
 
 
 ## [0.5.4] - 2025-08-29
