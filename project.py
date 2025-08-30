@@ -48,7 +48,7 @@ def main() -> None:
             sys.exit(0)  # Exits program after command-line execution
     except (ValueError, KeyError, ZeroDivisionError) as e:
         print(f"Error: {e}")
-        sys.exit(1)
+        sys.exit(1) # Exits the program if any error happens
     # Access the program without command lines
     print_introductory_messages()
     get_action()
@@ -56,9 +56,8 @@ def main() -> None:
 
 def handle_cli(args):
     """Handles command-line interface (CLI)"""
-    # Convert command-line arguments to lowercase
     # Creates a copy of all command-line arguments
-    
+    formatted_args = args[:]
 
     # Adds description to program
     parser = argparse.ArgumentParser(prog="Unit Converter", description="Convert multiple types of units")
@@ -66,27 +65,39 @@ def handle_cli(args):
     # Defines subparser to handle multiple commands
     subparser = parser.add_subparsers(dest="command", help="Available commands")
     # Convert command 
-    convert_parser = subparser.add_parser("convert", help="Convert value from one type to another")
+    convert_parser = subparser.add_parser("convert", aliases=["-c", "--convert"], help="Convert value from one type to another")
     convert_parser.add_argument("unit_group", help="Unit group")
     convert_parser.add_argument("from_type", help="Source unit type")
     convert_parser.add_argument("to_type", help="Target unit type")
     convert_parser.add_argument("amount", type=float, help="Amount to convert")
 
     # Add command
-    add_parser = subparser.add_parser("add", help="Add new unit group/type")
+    add_parser = subparser.add_parser("add", aliases=["-a", "--add"], help="Add new unit group/type")
     add_parser.add_argument("group", help="Unit group to add new type to")
     add_parser.add_argument("unit_type", help="New type to be added")
     add_parser.add_argument("value", type=float, nargs="?", help="Conversion factor to base unit (not used for temperature)")
     add_parser.add_argument("--factor", type=float, help="Conversion factor to temperature's base unit")
     add_parser.add_argument("--offset", type=float, help="Offset to temperature")
     # Groups command
-    subparser.add_parser("groups", help="List all unit groups")
+    subparser.add_parser("groups", aliases=["-g", "--groups"], help="List all unit groups")
     # Types command
-    types_parser = subparser.add_parser("types", help="List all types of units in a group")
+    types_parser = subparser.add_parser("types", aliases=["-t", "--types"], help="List all types of units in a group")
     types_parser.add_argument("group", help="Unit group used to list unit types")
 
-    # Parse arguments and call their respective functions
-    parsed_args = parser.parse_args(args[1:])  # Skips first argument
+    # Parses arguments
+    parsed_args = parser.parse_args(formatted_args[1:])  # Skips first argument
+    # Lowercase arguments
+    if parsed_args.command == "types":
+        parsed_args.group = parsed_args.group.lower()
+    elif parsed_args.command == "convert":
+        parsed_args.unit_group = parsed_args.unit_group.lower()
+        parsed_args.from_type = parsed_args.from_type.lower()
+        parsed_args.to_type = parsed_args.to_type.lower()
+    elif parsed_args.command == "add":
+        parsed_args.group = parsed_args.group.lower()
+        parsed_args.unit_type = parsed_args.unit_type.lower()
+    
+    # Calls argument respective function
     if parsed_args.command == "groups":
         print_groups()
     elif parsed_args.command == "types":
