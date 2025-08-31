@@ -2,8 +2,6 @@
 
 
 ## New features
-- [ ] Validate command-line arguments to allow variations (e.g. "convert", "Convert", "CONVERT", "CoNvErT")
-- [ ] Add aliases to all command lines to be more flexible (e.g "convert", "-c" and "--convert" will all be used to convert units)
 - [ ] Add style to introductory messages and add separator (e.g. with `-`, `=` or `_`)
 
 
@@ -47,3 +45,5 @@
 - [x] Allow users to run the program through command lines
 - [x] Add `groups` and `types` functions to also be used with comman-line arguments
 - [x] Implement comman-line arguments to "add" action
+- [x] Add aliases to all command lines to improve UX (e.g "convert" and "c" will both be used to convert units)
+- [x] Modify argument's name to keep consistency throughout the code

@@ -65,60 +65,59 @@ def handle_cli(args):
     # Defines subparser to handle multiple commands
     subparser = parser.add_subparsers(dest="command", help="Available commands")
     # Convert command 
-    convert_parser = subparser.add_parser("convert", aliases=["-c", "--convert"], help="Convert value from one type to another")
+    convert_parser = subparser.add_parser("convert", aliases=["c"], help="Convert value from one type to another")
     convert_parser.add_argument("unit_group", help="Unit group")
     convert_parser.add_argument("from_type", help="Source unit type")
     convert_parser.add_argument("to_type", help="Target unit type")
     convert_parser.add_argument("amount", type=float, help="Amount to convert")
-
     # Add command
-    add_parser = subparser.add_parser("add", aliases=["-a", "--add"], help="Add new unit group/type")
-    add_parser.add_argument("group", help="Unit group to add new type to")
+    add_parser = subparser.add_parser("add", aliases=["a"], help="Add new unit group/type")
+    add_parser.add_argument("unit_group", help="Unit group to add new type to")
     add_parser.add_argument("unit_type", help="New type to be added")
     add_parser.add_argument("value", type=float, nargs="?", help="Conversion factor to base unit (not used for temperature)")
     add_parser.add_argument("--factor", type=float, help="Conversion factor to temperature's base unit")
     add_parser.add_argument("--offset", type=float, help="Offset to temperature")
     # Groups command
-    subparser.add_parser("groups", aliases=["-g", "--groups"], help="List all unit groups")
+    subparser.add_parser("groups", aliases=["g"], help="List all unit groups")
     # Types command
-    types_parser = subparser.add_parser("types", aliases=["-t", "--types"], help="List all types of units in a group")
-    types_parser.add_argument("group", help="Unit group used to list unit types")
+    types_parser = subparser.add_parser("types", aliases=["t"], help="List all types of units in a group")
+    types_parser.add_argument("unit_group", help="Unit group used to list unit types")
 
     # Parses arguments
     parsed_args = parser.parse_args(formatted_args[1:])  # Skips first argument
-    # Lowercase arguments
-    if parsed_args.command == "types":
-        parsed_args.group = parsed_args.group.lower()
-    elif parsed_args.command == "convert":
+    # Lowercases arguments
+    if parsed_args.command in ["types", "t"]:
+        parsed_args.unit_group = parsed_args.unit_group.lower()
+    elif parsed_args.command in ["convert", "c"]:
         parsed_args.unit_group = parsed_args.unit_group.lower()
         parsed_args.from_type = parsed_args.from_type.lower()
         parsed_args.to_type = parsed_args.to_type.lower()
-    elif parsed_args.command == "add":
-        parsed_args.group = parsed_args.group.lower()
+    elif parsed_args.command in ["add", "a"]:
+        parsed_args.unit_group = parsed_args.unit_group.lower()
         parsed_args.unit_type = parsed_args.unit_type.lower()
     
     # Calls argument respective function
-    if parsed_args.command == "groups":
+    if parsed_args.command in ["groups", "g"]:
         print_groups()
-    elif parsed_args.command == "types":
-        print_types(parsed_args.group)
-    elif parsed_args.command == "convert":
+    elif parsed_args.command in ["types", "t"]:
+        print_types(parsed_args.unit_group)
+    elif parsed_args.command in ["convert", "c"]:
         new_value = converter(parsed_args.amount, parsed_args.unit_group, parsed_args.from_type, parsed_args.to_type)
         print(f"{parsed_args.amount} {parsed_args.from_type} = {format_value(new_value)} {parsed_args.to_type}")
-    elif parsed_args.command == "add":
-        # Add temperature type
-        if parsed_args.group == "temperature":
+    elif parsed_args.command in ["add", "a"]:
+        # Adds temperature type
+        if parsed_args.unit_group == "temperature":
             if parsed_args.factor is None or parsed_args.offset is None:
                 raise ValueError("Adding temperature type requires --factor and --offset")
-            add_temp_logic(parsed_args.group, parsed_args.unit_type, parsed_args.factor, parsed_args.offset)
-        # Add unit type for existed group
-        elif parsed_args.group in units:
+            add_temp_logic(parsed_args.unit_group, parsed_args.unit_type, parsed_args.factor, parsed_args.offset)
+        # Adds unit type for existed group
+        elif parsed_args.unit_group in units:
             if parsed_args.value is None:
                 raise ValueError("Adding non-temperature type requires a value")
-            add_logic(parsed_args.group, parsed_args.unit_type, parsed_args.value)
-        # Create new group and new type
+            add_logic(parsed_args.unit_group, parsed_args.unit_type, parsed_args.value)
+        # Creates new group and new type
         else:
-            add_new_group(parsed_args.group)
+            add_new_group(parsed_args.unit_group)
 
 def print_introductory_messages() -> None:
     """Prints introductory messages and instructions"""
@@ -134,13 +133,13 @@ def get_action() -> None:
     while True:
         try:
             action: str = input("Let's begin! What do you want to do? ").strip().lower()
-            # Add logic to check action validity
+            # Adds logic to check action validity
             if action == "groups":
                 print_groups()
                 continue
             elif action.endswith(".types"):
-                group, _ = action.split(".")
-                print_types(group)
+                unit_group, _ = action.split(".")
+                print_types(unit_group)
                 continue
             elif action == "convert":
                 conversion_logic()
@@ -163,10 +162,10 @@ def print_groups():
     print("Groups: " + ", ".join(units.keys()))
 
 
-def print_types(group):
-    if group not in units:
-        raise KeyError(f"{group} is not a valid group!")
-    print("Units: " + ", ".join(units[group].keys()))
+def print_types(unit_group):
+    if unit_group not in units:
+        raise KeyError(f"{unit_group} is not a valid group!")
+    print("Units: " + ", ".join(units[unit_group].keys()))
 
 
 def conversion_logic() -> None:
@@ -264,32 +263,32 @@ def converter_temp(amount, unit_group, from_type, to_type) -> float:
     return (temp_in_celsius * factor_to) + offset_to
 
 
-def add_logic(group=None, unit_type=None, value=None) -> None:
+def add_logic(unit_group=None, unit_type=None, value=None) -> None:
     """Handles all logic of adding new unit type"""
-    if group is None:
-        group: str = input("Enter a group name: ").strip().lower()
-    if not group:
+    if unit_group is None:
+        unit_group: str = input("Enter a group name: ").strip().lower()
+    if not unit_group:
         raise ValueError("Enter a group name before proceeding!")
-    elif group not in units:
-        add_new_group(group)
+    elif unit_group not in units:
+        add_new_group(unit_group)
         return
     if unit_type is None:
-        unit_type: str = input(f"Enter new type for {group} group: ").strip().lower()
-    if group == "temperature":
-        add_temp_logic(group, unit_type)
+        unit_type: str = input(f"Enter new type for {unit_group} group: ").strip().lower()
+    if unit_group == "temperature":
+        add_temp_logic(unit_group, unit_type)
         return
     if value is None:
-        value: str = input(f"Enter conversion factor to base unit of {group} group ({base_units[group]}): ").strip().lower()
+        value: str = input(f"Enter conversion factor to base unit of {unit_group} group ({base_units[unit_group]}): ").strip().lower()
     if not unit_type or not value:
         raise ValueError("You can't leave a field empty!")
-    elif unit_type in units[group]:
+    elif unit_type in units[unit_group]:
         raise KeyError(f"{unit_type} is already an unit type!")
     try:
         value = float(value)
     except:
         raise ValueError("Invalid value!")
-    units[group][unit_type] = value
-    print(f"A new unit type was added on {group} group: {unit_type} = {value}")
+    units[unit_group][unit_type] = value
+    print(f"A new unit type was added on {unit_group} group: {unit_type} = {value}")
     try:
         with open("units.json", "w") as file:
             json.dump(units, file, indent=4)
@@ -297,23 +296,23 @@ def add_logic(group=None, unit_type=None, value=None) -> None:
         print("Error! You don't have permition to write to units.json!")
 
 
-def add_new_group(group) -> None:
+def add_new_group(unit_group) -> None:
     """Creates a new unit group, with a base unit"""
     while True:
-        answer: str = input(f"You want to create a new unit group named {group}? ").strip().lower()
+        answer: str = input(f"You want to create a new unit group named {unit_group}? ").strip().lower()
         if answer not in ["no", "n", "yes", "y"]:
             print("Invalid answer! Just enter 'yes' or 'no'!")
             continue
         if answer == "no" or answer == "n":
             print("Action cancelled!") 
             return 
-        units[group] = {}
+        units[unit_group] = {}
         new_base_unit: str = input("Group created! Now, enter the base unit for that group: ").strip().lower()
         if not new_base_unit:
             print("You can't leave that field empty! Enter a name for the base unit!")
             continue
-        units[group][new_base_unit] = 1.0
-        base_units[group] = new_base_unit
+        units[unit_group][new_base_unit] = 1.0
+        base_units[unit_group] = new_base_unit
         try:
             with open("units.json", "w") as file:
                 json.dump(units, file, indent=4)
@@ -322,18 +321,18 @@ def add_new_group(group) -> None:
         except PermissionError:
             print("Error! You don't have permition to write to units.json!")
 
-        print(f"You've just created a {group} group, with {new_base_unit} as its base unit!")
+        print(f"You've just created a {unit_group} group, with {new_base_unit} as its base unit!")
         return 
 
 
-def add_temp_logic(group, unit_type, temp_factor=None, temp_offset=None) -> None:
+def add_temp_logic(unit_group, unit_type, temp_factor=None, temp_offset=None) -> None:
     if temp_factor == None:
-        temp_factor: str = input(f"Enter conversion factor to base unit of 'temperature' group ({base_units[group]}): ").strip().lower()
+        temp_factor: str = input(f"Enter conversion factor to base unit of 'temperature' group ({base_units[unit_group]}): ").strip().lower()
     if temp_offset == None:
-        temp_offset: str = input(f"Enter offset value to base unit of 'temperature' group ({base_units[group]}): ").strip().lower()
+        temp_offset: str = input(f"Enter offset value to base unit of 'temperature' group ({base_units[unit_group]}): ").strip().lower()
     if not temp_factor or not temp_offset:
         raise ValueError("You can't leave a field empty!")
-    elif unit_type in units[group]:
+    elif unit_type in units[unit_group]:
         raise KeyError(f"{unit_type} is already an unit type!")
     try:
         temp_factor = float(temp_factor)
@@ -342,7 +341,7 @@ def add_temp_logic(group, unit_type, temp_factor=None, temp_offset=None) -> None
         raise ValueError("Invalid value!")
     if temp_factor <= 0:
         raise ZeroDivisionError("Conversion factor cannot be zero!")
-    units[group][unit_type] = [temp_factor, temp_offset]
+    units[unit_group][unit_type] = [temp_factor, temp_offset]
             
     print(f"A new unit type was added on temperature group: {unit_type} = [{temp_factor}, {temp_offset}]")
     try:

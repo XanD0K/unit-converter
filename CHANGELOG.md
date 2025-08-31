@@ -9,6 +9,19 @@
 
 ### Removed
 
+## [0.6.3] - 2025-08-31
+### Changed
+- Changed argument's name `group` to `unit_group`, to keep consistency throughout codebase
+
+### Fixed
+- Fixed command-line aliases to accept aliases
+
+
+## [0.6.2] - 2025-08-30
+### Added
+- Added aliases to each command, improving UX
+- Created a copy of all arguments, lowering some of them, improving UX
+
 
 ## [0.6.1] - 2025-08-30
 ### Added
@@ -80,18 +93,20 @@
 ## [0.3.0] - 2025-08-27
 ### Changed
 - Moved `units` dictionary to `units.json` file, modifying it with `json` library
-- Removed "actions" logic from `main`
+- Moved "actions" logic from `main`
 
 
 ## [0.2.0] - 2025-08-26
 ### Added
 - Implemented `while` loops to keep user inside the program until he proactively quits
-- Removed `sys.exit` to prevent abrupt exits from the program
 - Implemented actions to allow user choose what to do
 
 ### Changed
-- Removed multiple try-except blocks throughout the code, centralizing all in `main`
+- Removed multiple try-except blocks throughout the codebase, centralizing all in `main`
 - Improved error checking for user's input
+
+### Removed
+- Removed `sys.exit` to prevent abrupt exits from the program
 
 
 ## [0.1.0] - 2025-08-26
