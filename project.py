@@ -179,8 +179,8 @@ def print_history(limit: int = 10) -> None:
     if not conversion_log:
         print("Conversion history is empty!")
         return
-    for entry in conversion_log[-limit:]:  # Get the last 10 entries
-        print(f"{entry["amount"]} {entry["from_type"]} = {format_value(entry["result"])} {entry["to_type"]} - Group: {entry["unit_group"]}")
+    for entry in conversion_log[-limit:]:  # Gets the last 10 entries
+        print(f"{entry["amount"]} {entry["from_type"]} = {format_value(entry["result"])} {entry["to_type"]} (Group: {entry["unit_group"]})")
 
 
 def print_types(unit_group) -> None:
