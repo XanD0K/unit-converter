@@ -3,6 +3,8 @@
 
 ## New features
 - [ ] Add style to introductory messages and add separator (e.g. with `-`, `=` or `_`)
+- [ ] Add aliases to unit types (e.g. "km" for "kilometer", "ft" for "feet", "min" for "minute")
+- [ ] Improve time conversion with `datetime` library
 
 
 ## Refactoring tasks
@@ -47,3 +49,4 @@
 - [x] Implement comman-line arguments to "add" action
 - [x] Add aliases to all command lines to improve UX (e.g "convert" and "c" will both be used to convert units)
 - [x] Modify argument's name to keep consistency throughout the code
+- [x] Add log file, keeping track of user's previous actions

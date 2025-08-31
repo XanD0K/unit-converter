@@ -12,13 +12,16 @@ try:
     # Opens dictionary of base units for each group
     with open("base_units.json", "r") as file:
         base_units = json.load(file)
+    # Opens dictionary containing all conversions history
+    with open("conversion_log.json", "r") as file:
+        conversion_log = json.load(file)
 except FileNotFoundError:
     sys.exit("Error: file not found!")
 except json.JSONDecodeError:
     sys.exit("Error: file if corrupted!")
 
 
-def validate_dictionaries(units, base_units):
+def validate_dictionaries(units, base_units, conversion_log):
     """Validates dictionaries before entering the program"""
     # Ensures 'units.json' is a dictionary and it's not empty
     if not isinstance(units, dict) or not units:
@@ -26,6 +29,8 @@ def validate_dictionaries(units, base_units):
     # Ensures 'base_units.json' is a dictionary and it's not empty
     if not isinstance(base_units, dict) or not base_units:
         raise ValueError("'base_units.json' dictionary structure is corrupted!")
+    if not isinstance(conversion_log, list):
+        raise ValueError("'convert_history' dictionary structure is corrupted!")
     for key in units:
         # Ensures every key in 'units.json' is also a dictionary
         if not isinstance(units[key], dict):
@@ -37,7 +42,7 @@ def validate_dictionaries(units, base_units):
         if base_units[key] not in units[key]:
             raise ValueError(f"The base unit '{base_units[key]}' for {key} group is not present on 'units.json' dictionary!")
 
-validate_dictionaries(units, base_units)
+validate_dictionaries(units, base_units, conversion_log)
 
 
 def main() -> None:
@@ -82,6 +87,9 @@ def handle_cli(args):
     # Types command
     types_parser = subparser.add_parser("types", aliases=["t"], help="List all types of units in a group")
     types_parser.add_argument("unit_group", help="Unit group used to list unit types")
+    # History command
+    history_parser = subparser.add_parser("history", aliases=["h"], help="List conversion history (default=10)")
+    history_parser.add_argument("--limit", "-l", type=int, default=10, help="Number of conversion entries that will be printed")
 
     # Parses arguments
     parsed_args = parser.parse_args(formatted_args[1:])  # Skips first argument
@@ -99,6 +107,8 @@ def handle_cli(args):
     # Calls argument respective function
     if parsed_args.command in ["groups", "g"]:
         print_groups()
+    elif parsed_args.command in ["history", "h"]:
+        print_history(parsed_args.limit)
     elif parsed_args.command in ["types", "t"]:
         print_types(parsed_args.unit_group)
     elif parsed_args.command in ["convert", "c"]:
@@ -137,6 +147,9 @@ def get_action() -> None:
             if action == "groups":
                 print_groups()
                 continue
+            elif action == "history":
+                print_history()
+                continue
             elif action.endswith(".types"):
                 unit_group, _ = action.split(".")
                 print_types(unit_group)
@@ -158,11 +171,19 @@ def get_action() -> None:
             continue
 
 
-def print_groups():
+def print_groups() -> None:
     print("Groups: " + ", ".join(units.keys()))
 
 
-def print_types(unit_group):
+def print_history(limit: int = 10) -> None:
+    if not conversion_log:
+        print("Conversion history is empty!")
+        return
+    for entry in conversion_log[-limit:]:  # Get the last 10 entries
+        print(f"{entry["amount"]} {entry["from_type"]} = {format_value(entry["result"])} {entry["to_type"]} - Group: {entry["unit_group"]}")
+
+
+def print_types(unit_group) -> None:
     if unit_group not in units:
         raise KeyError(f"{unit_group} is not a valid group!")
     print("Units: " + ", ".join(units[unit_group].keys()))
@@ -173,7 +194,7 @@ def conversion_logic() -> None:
     unit_group: str = get_unit_group()    
     from_type, to_type = get_converter_unit(unit_group)
     amount: float = get_amount(from_type)
-    new_value: float = format_value(converter(amount, unit_group, from_type, to_type))
+    new_value: str = format_value(converter(amount, unit_group, from_type, to_type))
 
     print(f"{amount} {from_type} = {new_value} {to_type}")
 
@@ -236,16 +257,25 @@ def converter(amount, unit_group, from_type, to_type) -> float:
         return converter_temp(amount, unit_group, from_type, to_type)
     if float(units[unit_group][to_type]) == 0:
         raise ZeroDivisionError("Can't divide by zero!")
-    return amount * (units[unit_group][from_type]/units[unit_group][to_type])
 
+    new_value = amount * (units[unit_group][from_type]/units[unit_group][to_type])
 
-def format_value(value: float) -> str:
-    """Format converted value by allowing only 5 decimal values and elimitating all trailling zeroes"""
-    formatted_value = f"{value:.5f}".rstrip("0").rstrip(".")
-    # Adds '.0' if formatted value ended up with no decimal values
-    if "." not in formatted_value:
-        formatted_value += ".0"
-    return formatted_value
+    # Adds successfull conversion to 'conversion_log.json' file
+    entry = {
+        "unit_group": unit_group,
+        "from_type": from_type,
+        "to_type": to_type,
+        "amount": amount,
+        "result": float(new_value)
+    }
+    conversion_log.append(entry)
+    try:
+        with open("conversion_log.json", "w") as file:
+            json.dump(conversion_log, file, indent=4)
+    except PermissionError:
+        print("Error! You don't have permition to write to conversion_log.json!")
+
+    return new_value
 
 
 def converter_temp(amount, unit_group, from_type, to_type) -> float:
@@ -261,6 +291,15 @@ def converter_temp(amount, unit_group, from_type, to_type) -> float:
     if to_type == "celsius":
         return temp_in_celsius
     return (temp_in_celsius * factor_to) + offset_to
+
+
+def format_value(value: float) -> str:
+    """Format converted value by allowing only 5 decimal values and elimitating all trailling zeroes"""
+    formatted_value = f"{value:.5f}".rstrip("0").rstrip(".")
+    # Adds '.0' if formatted value ended up with no decimal values
+    if "." not in formatted_value:
+        formatted_value += ".0"
+    return formatted_value
 
 
 def add_logic(unit_group=None, unit_type=None, value=None) -> None:

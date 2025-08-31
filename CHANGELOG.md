@@ -9,7 +9,15 @@
 
 ### Removed
 
+## [0.6.4] - 2025-08-31
+
+
+
 ## [0.6.3] - 2025-08-31
+### Added
+- Created `conversion_logic.json` file to keep track of user's previous conversions
+- Added `history` command and logic to fill the new `.json` file and to print 
+
 ### Changed
 - Changed argument's name `group` to `unit_group`, to keep consistency throughout codebase
 
