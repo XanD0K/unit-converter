@@ -1,4 +1,5 @@
 import argparse
+from datetime import timedelta
 import json
 import re
 import sys
@@ -172,10 +173,12 @@ def get_action() -> None:
 
 
 def print_groups() -> None:
+    """Prints all available group of units"""
     print("Groups: " + ", ".join(units.keys()))
 
 
 def print_history(limit: int = 10) -> None:
+    """Prints previous conversion request (default = last 10 entries)"""
     if not conversion_log:
         print("Conversion history is empty!")
         return
@@ -184,6 +187,7 @@ def print_history(limit: int = 10) -> None:
 
 
 def print_types(unit_group) -> None:
+    """Prints all unit types for a specific unit group"""
     if unit_group not in units:
         raise KeyError(f"{unit_group} is not a valid group!")
     print("Units: " + ", ".join(units[unit_group].keys()))
@@ -254,26 +258,21 @@ def converter(amount, unit_group, from_type, to_type) -> float:
     """Convert one value to another"""
     # Separates conversion logic when dealing with temperature
     if unit_group == "temperature":
-        return converter_temp(amount, unit_group, from_type, to_type)
+        new_temp = converter_temp(amount, unit_group, from_type, to_type)
+        # Adds to log file
+        add_to_log(unit_group, from_type, to_type, amount, new_temp)
+        return new_temp
+    elif unit_group == "time":
+        new_time = converter_time(amount, unit_group, from_type, to_type)
+        # Adds to log file
+        add_to_log(unit_group, from_type, to_type, amount, new_time)
+        return new_time
     if float(units[unit_group][to_type]) == 0:
         raise ZeroDivisionError("Can't divide by zero!")
 
     new_value = amount * (units[unit_group][from_type]/units[unit_group][to_type])
-
-    # Adds successfull conversion to 'conversion_log.json' file
-    entry = {
-        "unit_group": unit_group,
-        "from_type": from_type,
-        "to_type": to_type,
-        "amount": amount,
-        "result": float(new_value)
-    }
-    conversion_log.append(entry)
-    try:
-        with open("conversion_log.json", "w") as file:
-            json.dump(conversion_log, file, indent=4)
-    except PermissionError:
-        print("Error! You don't have permition to write to conversion_log.json!")
+    # Adds to log file
+    add_to_log(unit_group, from_type, to_type, amount, new_value)
 
     return new_value
 
@@ -291,6 +290,29 @@ def converter_temp(amount, unit_group, from_type, to_type) -> float:
     if to_type == "celsius":
         return temp_in_celsius
     return (temp_in_celsius * factor_to) + offset_to
+
+
+def converter_time(amount, unit_group, from_type, to_type) -> float:
+    """Handles conversion for time units"""
+    delta = timedelta(seconds=amount * units[unit_group][from_type])
+    total_seconds = delta.total_seconds() / units[unit_group][to_type]
+
+
+def add_to_log(unit_group, from_type, to_type, amount, new_value) -> None:
+    """Adds successfully converted value to log file (conversion_log.json)"""
+    entry = {
+        "unit_group": unit_group,
+        "from_type": from_type,
+        "to_type": to_type,
+        "amount": amount,
+        "result": float(new_value)
+    }
+    conversion_log.append(entry)
+    try:
+        with open("conversion_log.json", "w") as file:
+            json.dump(conversion_log, file, indent=4)
+    except PermissionError:
+        print("Error! You don't have permition to write to conversion_log.json!")
 
 
 def format_value(value: float) -> str:

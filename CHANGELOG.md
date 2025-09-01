@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- Used Python's `datetime` library to improve date and time conversion
 
 ### Changed
 
@@ -10,7 +11,8 @@
 ### Removed
 
 ## [0.6.4] - 2025-08-31
-
+### Fixed
+- Created `add_to_log` function to also be used with temperature conversions
 
 
 ## [0.6.3] - 2025-08-31

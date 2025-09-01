@@ -5,6 +5,7 @@
 - [ ] Add style to introductory messages and add separator (e.g. with `-`, `=` or `_`)
 - [ ] Add aliases to unit types (e.g. "km" for "kilometer", "ft" for "feet", "min" for "minute")
 - [ ] Improve time conversion with `datetime` library
+- [ ] Allow time conversion between units (e.g. 5 hours to minutes) and between dates given a specified unit (e.g. 2023-12-17 2024-12-01 minutes)
 
 
 ## Refactoring tasks
@@ -50,3 +51,4 @@
 - [x] Add aliases to all command lines to improve UX (e.g "convert" and "c" will both be used to convert units)
 - [x] Modify argument's name to keep consistency throughout the code
 - [x] Add log file, keeping track of user's previous actions
+- [ ] Add temperature conversions to history log
