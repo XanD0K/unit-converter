@@ -6,6 +6,8 @@
 - [ ] Add aliases to unit types (e.g. "km" for "kilometer", "ft" for "feet", "min" for "minute")
 - [ ] Improve time conversion with `datetime` library
 - [ ] Allow time conversion between units (e.g. 5 hours to minutes) and between dates given a specified unit (e.g. 2023-12-17 2024-12-01 minutes)
+- [ ] Use `inflect` library to output singular/plural unit group/type
+- [ ] Improve converted output
 
 
 ## Refactoring tasks

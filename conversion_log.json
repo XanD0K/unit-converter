@@ -47,5 +47,75 @@
         "to_type": "minute",
         "amount": 2.0,
         "result": 120.0
+    },
+    {
+        "unit_group": "time",
+        "from_type": "days",
+        "to_type": "minutes",
+        "amount": 7.0,
+        "result": 10080.0
+    },
+    {
+        "unit_group": "time",
+        "from_type": "microseconds",
+        "to_type": "hours",
+        "amount": 50.0,
+        "result": 1.388888888888889e-08
+    },
+    {
+        "unit_group": "time",
+        "from_type": "microseconds",
+        "to_type": "hours",
+        "amount": 50.0,
+        "result": 1.388888888888889e-08
+    },
+    {
+        "unit_group": "time",
+        "from_type": "milliseconds",
+        "to_type": "hours",
+        "amount": 50.0,
+        "result": 1.388888888888889e-05
+    },
+    {
+        "unit_group": "time",
+        "from_type": "hours",
+        "to_type": "seconds",
+        "amount": 700.0,
+        "result": 2520000.0
+    },
+    {
+        "unit_group": "time",
+        "from_type": "microseconds",
+        "to_type": "minutes",
+        "amount": 50.0,
+        "result": 8.333333333333333e-07
+    },
+    {
+        "unit_group": "time",
+        "from_type": "milliseconds",
+        "to_type": "hours",
+        "amount": 70000.0,
+        "result": 0.019444444444444445
+    },
+    {
+        "unit_group": "time",
+        "from_type": "centuries",
+        "to_type": "minutes",
+        "amount": 1.0,
+        "result": 52596000.0
+    },
+    {
+        "unit_group": "length",
+        "from_type": "meter",
+        "to_type": "yard",
+        "amount": 5.0,
+        "result": 5.468066491688539
+    },
+    {
+        "unit_group": "length",
+        "from_type": "meter",
+        "to_type": "yard",
+        "amount": 5.0,
+        "result": 5.468066491688539
     }
 ]

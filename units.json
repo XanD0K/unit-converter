@@ -11,10 +11,17 @@
         "nautical_mile": 1852.001
     },
     "time": {
-        "second": 1.0,
-        "minute": 60.0,
-        "hour": 3600.0,
-        "day": 86400.0
+        "seconds": 1.0,
+        "minutes": 60.0,
+        "hours": 3600.0,
+        "days": 86400.0,
+        "weeks": 604800.0,
+        "month": 2592000.0,
+        "years": 31557600.0,
+        "decades": 315576000.0,
+        "centuries": 3155760000.0,
+        "milliseconds": 0.001,
+        "microseconds": 0.000001
     },
     "mass": {
         "kilogram": 1.0,

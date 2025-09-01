@@ -1,6 +1,6 @@
 {
     "length": "meter",
-    "time": "second",
+    "time": "seconds",
     "mass": "kilogram",
     "temperature": "celsius",
     "volume": "liter",
