@@ -78,9 +78,9 @@ def handle_cli(args):
     # Convert command 
     convert_parser = subparser.add_parser("convert", aliases=["c"], help="Convert value from one type to another")
     convert_parser.add_argument("unit_group", help="Unit group")
-    convert_parser.add_argument("from_type", help="Source unit type")
-    convert_parser.add_argument("to_type", help="Target unit type")
-    convert_parser.add_argument("amount", type=float, help="Amount to convert")
+    convert_parser.add_argument("from_type", aliases=["from_time"], help="Source unit type")
+    convert_parser.add_argument("to_type", aliases=["to_time"], help="Target unit type")
+    convert_parser.add_argument("amount", aliases=["factor_time"], type=float, help="Amount to convert")
     # Add command
     add_parser = subparser.add_parser("add", aliases=["a"], help="Add new unit group/type")
     add_parser.add_argument("unit_group", help="Unit group to add new type to")
@@ -188,7 +188,13 @@ def print_history(limit: int = 10) -> None:
         print("Conversion history is empty!")
         return
     for entry in conversion_log[-limit:]:  # Gets the last 10 entries
-        print(f"{entry["amount"]} {entry["from_type"]} = {format_value(entry["result"])} {entry["to_type"]} (Group: {entry["unit_group"]})")
+        if entry["unit_group"] == "time":
+            if entry["from_time"] in units["time"]:
+                print(f"{format_value(entry['factor_time'])} {entry['from_time']} = {format_value(entry['result'])} {entry['to_time']} (Group: {entry['unit_group']})")
+            elif ":" in entry["from_time"] or entry["from_time"] in days_to_month or "-" in entry["from_time"]:
+                print(f"{format_value(entry['result'])} {entry['factor_time']} between {entry['from_time']} {entry['to_time']} (Group: {entry['unit_group']})")
+        else:
+            print(f"{format_value(entry['amount'])} {entry['from_type']} = {format_value(entry['result'])} {entry['to_type']} (Group: {entry['unit_group']})")
 
 
 def print_types(unit_group) -> None:
@@ -206,9 +212,9 @@ def conversion_logic() -> None:
         return
     from_type, to_type = get_converter_unit(unit_group)
     amount: float = get_amount(from_type)
-    new_value: str = format_value(converter(amount, unit_group, from_type, to_type))
+    new_value: str = converter(amount, unit_group, from_type, to_type)
 
-    print(f"{amount} {from_type} = {new_value} {to_type}")   
+    print(f"{format_value(amount)} {from_type} = {format_value(new_value)} {to_type}")   
 
 
 def get_unit_group() -> str:
@@ -268,14 +274,14 @@ def converter(amount, unit_group, from_type, to_type) -> float:
     if unit_group == "temperature":
         new_temp = converter_temp(amount, unit_group, from_type, to_type)
         # Adds to log file
-        add_to_log(unit_group, from_type, to_type, amount, new_temp)
+        add_to_log(unit_group=unit_group, from_type=from_type, to_type=to_type, amount=amount, new_value=new_temp, is_time_convertion=True)
         return new_temp   
     if float(units[unit_group][to_type]) == 0:
         raise ZeroDivisionError("Can't divide by zero!")
 
     new_value = amount * (units[unit_group][from_type]/units[unit_group][to_type])
     # Adds to log file
-    add_to_log(unit_group, from_type, to_type, amount, new_value)
+    add_to_log(unit_group=unit_group, from_type=from_type, to_type=to_type, amount=amount, new_value=new_value, is_time_convertion=False)
 
     return new_value
 
@@ -316,7 +322,8 @@ def converter_time(unit_group) -> float:
             else:
                 total_seconds = timedelta(seconds=factor_time * units[unit_group][from_time]).total_seconds()
                 new_time = total_seconds / units[unit_group][to_time]
-                print(f"{factor_time} {from_time} = {new_time} {to_time}")
+                add_to_log(unit_group=unit_group, from_time=from_time, to_time=to_time, factor_time=factor_time, new_time=new_time, is_time_convertion=True)
+                print(f"{format_value(factor_time)} {from_time} = {format_value(new_time)} {to_time}")
                 return
 
         # E.g. 17:28:36 04:15:22 seconds
@@ -327,22 +334,26 @@ def converter_time(unit_group) -> float:
             new_from_time = parse_time_input(from_time)
             new_to_time = parse_time_input(to_time)
             new_time = fabs((new_from_time - new_to_time) / units[unit_group][factor_time])
-            print(f"There are {new_time} {factor_time} between {from_time} and {to_time}")
+            add_to_log(unit_group=unit_group, from_time=from_time, to_time=to_time, factor_time=factor_time, new_time=new_time, is_time_convertion=True)
+            print(f"There are {format_value(new_time)} {factor_time} between {from_time} and {to_time}")
             return
+        
         # E.g. JAN NOV minutes
         elif from_time in days_to_month and to_time in days_to_month:
-            if not factor_time not in units[unit_group]:
+            if factor_time not in units[unit_group]:
                 print(f"{factor_time} is not a valid unit type!")
                 continue
             from_datetime = datetime(2023, days_to_month[from_time], 1)
             to_datetime = datetime(2023, days_to_month[to_time], 1) if days_to_month[to_time] > days_to_month[from_time] else datetime(2024, days_to_month[to_time], 1)
             days = abs((from_datetime - to_datetime)).days
             if factor_time == "days":
-                print(f"Between {from_time} and {to_time} there are {days} {factor_time}")
+                add_to_log(unit_group=unit_group, from_time=from_time, to_time=to_time, factor_time=factor_time, new_time=days, is_time_convertion=True)
+                print(f"Between {from_time} and {to_time} there are {format_value(days)} {factor_time}")
                 return
             total_seconds = (timedelta(seconds=days * units[unit_group]["days"])).total_seconds()
             new_time = total_seconds / units[unit_group][factor_time]
-            print(f"Between {from_time} and {to_time} there are {new_time} {factor_time}")
+            add_to_log(unit_group=unit_group, from_time=from_time, to_time=to_time, factor_time=factor_time, new_time=new_time, is_time_convertion=True)
+            print(f"Between {from_time} and {to_time} there are {format_value(new_time)} {factor_time}")
             return
         
         # E.g. 2019-11-04 2056-04-28 days
@@ -355,11 +366,14 @@ def converter_time(unit_group) -> float:
             delta = abs(new_from_time - new_to_time)
             total_seconds = delta.total_seconds()
             if factor_time == "seconds":
-                print(f"Between {from_time} and {to_time} there are {new_time} {factor_time}")
+                add_to_log(unit_group=unit_group, from_time=from_time, to_time=to_time, factor_time=factor_time, new_time=total_seconds, is_time_convertion=True)
+                print(f"Between {from_time} and {to_time} there are {format_value(total_seconds)} {factor_time}")
                 return
             new_time = total_seconds / units[unit_group][factor_time]
-            print(f"Between {from_time} and {to_time} there are {new_time} {factor_time}")
+            add_to_log(unit_group=unit_group, from_time=from_time, to_time=to_time, factor_time=factor_time, new_time=new_time, is_time_convertion=True)
+            print(f"Between {from_time} and {to_time} there are {format_value(new_time)} {factor_time}")
             return
+
 
 def print_time_instructions():
     print("For date-time conversion, you can choose from different approaches for conversion:")
@@ -394,15 +408,28 @@ def parse_date_input(time_str):
     return None
 
 
-def add_to_log(unit_group, from_type, to_type, amount, new_value) -> None:
+def add_to_log(unit_group, from_type=None, to_type=None, amount=None, new_value=None, from_time=None, to_time=None, factor_time=None, new_time=None, is_time_convertion=False) -> None:
     """Adds successfully converted value to log file (conversion_log.json)"""
-    entry = {
+    if is_time_convertion:
+        if None in (from_time, to_time, factor_time, new_time):
+            raise ValueError("Missing required argument!")
+        entry = {
         "unit_group": unit_group,
-        "from_type": from_type,
-        "to_type": to_type,
-        "amount": amount,
-        "result": float(new_value)
+        "from_time": from_time,
+        "to_time": to_time,
+        "factor_time": factor_time,
+        "result": float(new_time)
     }
+    else:
+        if None in (from_type, to_type, amount, new_value):
+            raise ValueError("Missing required argument!")            
+        entry = {
+            "unit_group": unit_group,
+            "from_type": from_type,
+            "to_type": to_type,
+            "amount": amount,
+            "result": float(new_value)
+        }
     conversion_log.append(entry)
     try:
         with open("conversion_log.json", "w") as file:
@@ -413,7 +440,7 @@ def add_to_log(unit_group, from_type, to_type, amount, new_value) -> None:
 
 def format_value(value: float) -> str:
     """Format converted value by allowing only 5 decimal values and elimitating all trailling zeroes"""
-    formatted_value = f"{value:.5f}".rstrip("0").rstrip(".")
+    formatted_value = f"{value:,.5f}".rstrip("0").rstrip(".")
     # Adds '.0' if formatted value ended up with no decimal values
     if "." not in formatted_value:
         formatted_value += ".0"

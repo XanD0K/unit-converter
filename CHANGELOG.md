@@ -2,13 +2,33 @@
 
 ## [Unreleased]
 ### Added
-- Used Python's `datetime` library to improve date and time conversion
+- Modified `handle_cli` function to add conversion log to `conversion_log.json` file
 
 ### Changed
+- Changed `handle_cli` function to accept that new logic for date and time unit conversions through command lines
+
 
 ### Fixed
 
 ### Removed
+
+
+
+## [0.7.1] - 2025-09-01
+### Changed
+- Changed `format_value` function to apply `,` to every group of 3 digits
+- Also applying `format_value` function to inputs and to `history` command
+- Modified `add_to_log` function to add date and time unit conversions to `conversin_log.json` file
+- Modified `print_history` function to handle time conversions on log history
+
+
+## [0.7.0] - 2025-09-01
+### Added
+- Created `converter_time` function to handle all date and time unit conversions
+- Created `days_to_month.json` file to be used on date and time conversions
+- Used Python's `datetime` library to improve date and time conversions
+- Used Python's `math` library to always get positive values from date and time unit conversions
+
 
 ## [0.6.4] - 2025-08-31
 ### Fixed
@@ -17,7 +37,7 @@
 
 ## [0.6.3] - 2025-08-31
 ### Added
-- Created `conversion_logic.json` file to keep track of user's previous conversions
+- Created `conversion_log.json` file to keep track of user's previous conversions
 - Added `history` command and logic to fill the new `.json` file and to print 
 
 ### Changed
