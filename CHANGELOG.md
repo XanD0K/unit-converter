@@ -2,16 +2,22 @@
 
 ## [Unreleased]
 ### Added
-- Modified `handle_cli` function to add conversion log to `conversion_log.json` file
 
 ### Changed
-- Changed `handle_cli` function to accept that new logic for date and time unit conversions through command lines
 
 
 ### Fixed
 
 ### Removed
 
+
+
+## [0.7.2] - 2025-09-02
+### Added
+- Modified `handle_cli` function to add conversion log to `conversion_log.json` file
+
+### Changed
+- Changed `handle_cli` function to accept that new logic for date and time unit conversions through command lines
 
 
 ## [0.7.1] - 2025-09-01

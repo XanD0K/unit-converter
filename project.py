@@ -6,6 +6,7 @@ import sys
 from datetime import datetime, timedelta
 from math import fabs
 
+
 # Imports dictionaries
 try:
     # Opens dictionary with all units available
@@ -78,9 +79,9 @@ def handle_cli(args):
     # Convert command 
     convert_parser = subparser.add_parser("convert", aliases=["c"], help="Convert value from one type to another")
     convert_parser.add_argument("unit_group", help="Unit group")
-    convert_parser.add_argument("from_type", aliases=["from_time"], help="Source unit type")
-    convert_parser.add_argument("to_type", aliases=["to_time"], help="Target unit type")
-    convert_parser.add_argument("amount", aliases=["factor_time"], type=float, help="Amount to convert")
+    convert_parser.add_argument("from_type", help="Source unit type")
+    convert_parser.add_argument("to_type", help="Target unit type")
+    convert_parser.add_argument("amount", nargs="?", help="Amount to convert")
     # Add command
     add_parser = subparser.add_parser("add", aliases=["a"], help="Add new unit group/type")
     add_parser.add_argument("unit_group", help="Unit group to add new type to")
@@ -98,7 +99,7 @@ def handle_cli(args):
     history_parser.add_argument("--limit", "-l", type=int, default=10, help="Number of conversion entries that will be printed")
 
     # Parses arguments
-    parsed_args = parser.parse_args(formatted_args[1:])  # Skips first argument
+    parsed_args = parser.parse_args(formatted_args[1:])  # Skips first argument (program's name)
     # Lowercases arguments
     if parsed_args.command in ["types", "t"]:
         parsed_args.unit_group = parsed_args.unit_group.lower()
@@ -118,8 +119,15 @@ def handle_cli(args):
     elif parsed_args.command in ["types", "t"]:
         print_types(parsed_args.unit_group)
     elif parsed_args.command in ["convert", "c"]:
-        new_value = converter(parsed_args.amount, parsed_args.unit_group, parsed_args.from_type, parsed_args.to_type)
-        print(f"{parsed_args.amount} {parsed_args.from_type} = {format_value(new_value)} {parsed_args.to_type}")
+        if parsed_args.unit_group == "time":
+            # Maps to time-specific name for clarity (keeps consistency throughout the code)
+            from_time = parsed_args.from_type
+            to_time = parsed_args.to_type
+            factor_time = parsed_args.amount
+            converter_time(parsed_args.unit_group, from_time, to_time, factor_time)
+        else:
+            new_value = converter(parsed_args.amount, parsed_args.unit_group, parsed_args.from_type, parsed_args.to_type)
+            print(f"{parsed_args.amount} {parsed_args.from_type} = {format_value(new_value)} {parsed_args.to_type}")
     elif parsed_args.command in ["add", "a"]:
         # Adds temperature type
         if parsed_args.unit_group == "temperature":
@@ -274,7 +282,7 @@ def converter(amount, unit_group, from_type, to_type) -> float:
     if unit_group == "temperature":
         new_temp = converter_temp(amount, unit_group, from_type, to_type)
         # Adds to log file
-        add_to_log(unit_group=unit_group, from_type=from_type, to_type=to_type, amount=amount, new_value=new_temp, is_time_convertion=True)
+        add_to_log(unit_group=unit_group, from_type=from_type, to_type=to_type, amount=amount, new_value=new_temp, is_time_convertion=False)
         return new_temp   
     if float(units[unit_group][to_type]) == 0:
         raise ZeroDivisionError("Can't divide by zero!")
@@ -301,78 +309,76 @@ def converter_temp(amount, unit_group, from_type, to_type) -> float:
     return (temp_in_celsius * factor_to) + offset_to
 
 
-def converter_time(unit_group) -> float:
+def converter_time(unit_group, from_time=None, to_time=None, factor_time=None) -> None:
     """Handles conversion for time units"""
-    print_time_instructions()
-    while True:
-        time_input = input("Enter time conversion: ").strip().lower()
-        try:            
-            from_time, to_time, factor_time = time_input.split(" ")
-        except ValueError:
-            print("Enter a valid format! Read previous instructions!")            
-            continue
-
-        # E.g. seconds minutes 10
-        if from_time in units[unit_group] and to_time in units[unit_group]:
-            try:
-                factor_time = float(factor_time)
+    
+    if from_time is None or to_time is None or factor_time is None:
+        print_time_instructions()
+        while True:
+            time_input = input("Enter time conversion: ").strip().lower()
+            try:            
+                from_time, to_time, factor_time = time_input.split(" ")
+                break
             except ValueError:
-                print("Enter a valid value for conversion!")
+                print("Enter a valid format! Read previous instructions!")            
                 continue
-            else:
-                total_seconds = timedelta(seconds=factor_time * units[unit_group][from_time]).total_seconds()
-                new_time = total_seconds / units[unit_group][to_time]
-                add_to_log(unit_group=unit_group, from_time=from_time, to_time=to_time, factor_time=factor_time, new_time=new_time, is_time_convertion=True)
-                print(f"{format_value(factor_time)} {from_time} = {format_value(new_time)} {to_time}")
-                return
 
-        # E.g. 17:28:36 04:15:22 seconds
-        elif parse_time_input(from_time) is not None and parse_time_input(to_time) is not None:
-            if factor_time not in units[unit_group]:
-                print(f"{factor_time} is not a valid unit type!")
-                continue
-            new_from_time = parse_time_input(from_time)
-            new_to_time = parse_time_input(to_time)
-            new_time = fabs((new_from_time - new_to_time) / units[unit_group][factor_time])
-            add_to_log(unit_group=unit_group, from_time=from_time, to_time=to_time, factor_time=factor_time, new_time=new_time, is_time_convertion=True)
-            print(f"There are {format_value(new_time)} {factor_time} between {from_time} and {to_time}")
+    # E.g. seconds minutes 10
+    if from_time in units[unit_group] and to_time in units[unit_group]:
+        try:
+            factor_time = float(factor_time)
+        except ValueError:
+            print("Enter a valid value for conversion!")
             return
-        
-        # E.g. JAN NOV minutes
-        elif from_time in days_to_month and to_time in days_to_month:
-            if factor_time not in units[unit_group]:
-                print(f"{factor_time} is not a valid unit type!")
-                continue
-            from_datetime = datetime(2023, days_to_month[from_time], 1)
-            to_datetime = datetime(2023, days_to_month[to_time], 1) if days_to_month[to_time] > days_to_month[from_time] else datetime(2024, days_to_month[to_time], 1)
-            days = abs((from_datetime - to_datetime)).days
-            if factor_time == "days":
-                add_to_log(unit_group=unit_group, from_time=from_time, to_time=to_time, factor_time=factor_time, new_time=days, is_time_convertion=True)
-                print(f"Between {from_time} and {to_time} there are {format_value(days)} {factor_time}")
-                return
+        total_seconds = timedelta(seconds=factor_time * units[unit_group][from_time]).total_seconds()
+        new_time = total_seconds / units[unit_group][to_time]
+        print(f"{format_value(factor_time)} {from_time} = {format_value(new_time)} {to_time}")
+        add_to_log(unit_group=unit_group, from_time=from_time, to_time=to_time, factor_time=factor_time, new_time=new_time, is_time_convertion=True)
+
+    # E.g. 17:28:36 04:15:22 seconds
+    elif parse_time_input(from_time) is not None and parse_time_input(to_time) is not None:
+        if factor_time not in units[unit_group]:
+            print(f"{factor_time} is not a valid unit type!")
+            return
+        new_from_time = parse_time_input(from_time)
+        new_to_time = parse_time_input(to_time)
+        new_time = fabs((new_from_time - new_to_time) / units[unit_group][factor_time])
+        print(f"There are {format_value(new_time)} {factor_time} between {from_time} and {to_time}")
+        add_to_log(unit_group=unit_group, from_time=from_time, to_time=to_time, factor_time=factor_time, new_time=new_time, is_time_convertion=True)
+    
+    # E.g. JAN NOV minutes
+    elif from_time in days_to_month and to_time in days_to_month:
+        if factor_time not in units[unit_group]:
+            print(f"{factor_time} is not a valid unit type!")
+            return
+        from_datetime = datetime(2023, days_to_month[from_time], 1)
+        to_datetime = datetime(2023, days_to_month[to_time], 1) if days_to_month[to_time] > days_to_month[from_time] else datetime(2024, days_to_month[to_time], 1)
+        days = abs((from_datetime - to_datetime)).days
+        if factor_time == "days":
+            new_time = days
+        else:
             total_seconds = (timedelta(seconds=days * units[unit_group]["days"])).total_seconds()
-            new_time = total_seconds / units[unit_group][factor_time]
-            add_to_log(unit_group=unit_group, from_time=from_time, to_time=to_time, factor_time=factor_time, new_time=new_time, is_time_convertion=True)
-            print(f"Between {from_time} and {to_time} there are {format_value(new_time)} {factor_time}")
-            return
-        
-        # E.g. 2019-11-04 2056-04-28 days
-        elif parse_date_input(from_time) is not None and parse_date_input(to_time) is not None:
-            if not factor_time in units[unit_group]:
-                print(f"{factor_time} is not a valid unit type!")
-                continue            
-            new_from_time = parse_date_input(from_time)
-            new_to_time = parse_date_input(to_time)
-            delta = abs(new_from_time - new_to_time)
-            total_seconds = delta.total_seconds()
-            if factor_time == "seconds":
-                add_to_log(unit_group=unit_group, from_time=from_time, to_time=to_time, factor_time=factor_time, new_time=total_seconds, is_time_convertion=True)
-                print(f"Between {from_time} and {to_time} there are {format_value(total_seconds)} {factor_time}")
-                return
-            new_time = total_seconds / units[unit_group][factor_time]
-            add_to_log(unit_group=unit_group, from_time=from_time, to_time=to_time, factor_time=factor_time, new_time=new_time, is_time_convertion=True)
-            print(f"Between {from_time} and {to_time} there are {format_value(new_time)} {factor_time}")
-            return
+            new_time = total_seconds / units[unit_group][factor_time]                
+        print(f"Between {from_time} and {to_time} there are {format_value(new_time)} {factor_time}")
+        add_to_log(unit_group=unit_group, from_time=from_time, to_time=to_time, factor_time=factor_time, new_time=new_time, is_time_convertion=True)
+
+    
+    # E.g. 2019-11-04 2056-04-28 days
+    elif parse_date_input(from_time) is not None and parse_date_input(to_time) is not None:
+        if not factor_time in units[unit_group]:
+            print(f"{factor_time} is not a valid unit type!")
+            return            
+        new_from_time = parse_date_input(from_time)
+        new_to_time = parse_date_input(to_time)
+        delta = abs(new_from_time - new_to_time)
+        total_seconds = delta.total_seconds()
+        new_time = total_seconds / units[unit_group][factor_time]        
+        print(f"Between {from_time} and {to_time} there are {format_value(new_time)} {factor_time}")
+        add_to_log(unit_group=unit_group, from_time=from_time, to_time=to_time, factor_time=factor_time, new_time=new_time, is_time_convertion=True)
+
+    # Any other (invalid) format
+    else:
+        print("Invalid time conversion format!")
 
 
 def print_time_instructions():

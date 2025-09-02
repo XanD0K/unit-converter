@@ -201,5 +201,54 @@
         "to_type": "yard",
         "amount": 50.0,
         "result": 54.68066491688539
+    },
+    {
+        "unit_group": "length",
+        "from_type": "meter",
+        "to_type": "kilometer",
+        "amount": 1.0,
+        "result": 0.001
+    },
+    {
+        "unit_group": "length",
+        "from_type": "meter",
+        "to_type": "yard",
+        "amount": 50.0,
+        "result": 54.68066491688539
+    },
+    {
+        "unit_group": "temperature",
+        "from_type": "celsius",
+        "to_type": "kelvin",
+        "amount": 0.0,
+        "result": 273.15
+    },
+    {
+        "unit_group": "temperature",
+        "from_type": "celsius",
+        "to_type": "kelvin",
+        "amount": 0.0,
+        "result": 273.15
+    },
+    {
+        "unit_group": "temperature",
+        "from_type": "celsius",
+        "to_type": "kelvin",
+        "amount": 0.0,
+        "result": 273.15
+    },
+    {
+        "unit_group": "time",
+        "from_time": "hours",
+        "to_time": "seconds",
+        "factor_time": 5.0,
+        "result": 18000.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": "nov",
+        "factor_time": "minutes",
+        "result": 437760.0
     }
 ]

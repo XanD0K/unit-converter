@@ -2,11 +2,10 @@
 
 
 ## New features
-- [ ] Add style to introductory messages and add separator (e.g. with `-`, `=` or `_`)
+- [ ] Add style to introductory messages and instruction messages and add separator (e.g. with `-`, `=` or `_`)
 - [ ] Add aliases to unit types (e.g. "km" for "kilometer", "ft" for "feet", "min" for "minute")
 - [ ] Use `inflect` library to output singular/plural unit group/type
-- [ ] Add new date and time conversion logic to be handled through command-line commands
-- [ ] Allow conversions through command lines to also add data to history log
+- [ ] Add `money` group to allow currency conversion through API requests
 
 
 ## Refactoring tasks
@@ -14,7 +13,7 @@
 - [ ] Add remmaining comments throughout the codebase
 - [ ] Add remmaining type hints throughout the codebase
 - [ ] Clean program by removing multiple repetitive logic throught the codebase and transforming it into a single function
-- [ ] Reestructure `project.py` file into multiple files to keep program cleaner
+- [ ] Reestructure `project.py` file into multiple files to keep program cleaner (after adding Class)
 - [ ] Reestructure `final-project` directory
 
 
@@ -58,3 +57,4 @@
 - [x] Improve converted output
 - [x] Changed `add_to_log` function to accept new logic for date time unit conversion
 - [x] Changed `print_history` function also print new
+- [x] Add new date and time conversion logic to be handled through command-line commands
