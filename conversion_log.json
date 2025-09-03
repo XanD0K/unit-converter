@@ -75,5 +75,54 @@
         "to_time": "minutes",
         "factor_time": 10.0,
         "result": 0.16666666666666666
+    },
+    {
+        "unit_group": "length",
+        "from_type": "meters",
+        "to_type": "yards",
+        "amount": 50.0,
+        "result": 54.68066491688539
+    },
+    {
+        "unit_group": "length",
+        "from_type": "meters",
+        "to_type": "yards",
+        "amount": 50.0,
+        "result": 54.68066491688539
+    },
+    {
+        "unit_group": "length",
+        "from_type": "meters",
+        "to_type": "yards",
+        "amount": 50.0,
+        "result": 54.68066491688539
+    },
+    {
+        "unit_group": "length",
+        "from_type": "meters",
+        "to_type": "yards",
+        "amount": 1.0,
+        "result": 1.0936132983377078
+    },
+    {
+        "unit_group": "length",
+        "from_type": "meters",
+        "to_type": "yards",
+        "amount": 1.0,
+        "result": 1.0936132983377078
+    },
+    {
+        "unit_group": "length",
+        "from_type": "meters",
+        "to_type": "yards",
+        "amount": 1.0,
+        "result": 1.0936132983377078
+    },
+    {
+        "unit_group": "time",
+        "from_time": "minutes",
+        "to_time": "seconds",
+        "factor_time": 1.0,
+        "result": 60.0
     }
 ]

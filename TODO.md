@@ -5,7 +5,6 @@
 - [ ] Add style to introductory messages and instruction messages and add separator (e.g. with `-`, `=` or `_`)
 - [ ] Use `inflect` library to output singular/plural unit group/type
 - [ ] Add `money` group to allow currency conversion through API requests
-- [ ] Add aliases to unit types (e.g. "km" for "kilometer", "ft" for "feet", "min" for "minute")
 
 ## Refactoring tasks
 - [ ] Reestructure the code by adding a class that encapsulates all programs logic
@@ -57,3 +56,4 @@
 - [x] Changed `add_to_log` function to accept new logic for date time unit conversion
 - [x] Changed `print_history` function also print new
 - [x] Add new date and time conversion logic to be handled through command-line commands
+- [x] Add aliases to unit types (e.g. "km" for "kilometer", "ft" for "feet", "min" for "minute")

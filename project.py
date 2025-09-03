@@ -18,38 +18,58 @@ try:
     # Opens dictionary containing all conversions history
     with open("conversion_log.json", "r") as file:
         conversion_log = json.load(file)
-    with open("days_to_month.json", "r") as file:
-        days_to_month = json.load(file)
+    # Opens dictionary that relates each month with a index
+    with open("month_indexes.json", "r") as file:
+        month_indexes = json.load(file)
+    # Opens dictionary that contains all aliases for each unit type
+    with open("unit_aliases.json", "r") as file:
+        unit_aliases = json.load(file)
 except FileNotFoundError:
     sys.exit("Error: file not found!")
 except json.JSONDecodeError:
     sys.exit("Error: file if corrupted!")
 
 
-def validate_dictionaries(units, base_units, conversion_log, days_to_month):
+def validate_dictionaries(units, base_units, conversion_log, month_indexes, unit_aliases):
     """Validates dictionaries before entering the program"""
     # Ensures 'units.json' is a dictionary and it's not empty
     if not isinstance(units, dict) or not units:
-        raise ValueError("'units.json' dictionary structure is corrupted!")
+        raise ValueError("'units.json' file structure is corrupted!")
     # Ensures 'base_units.json' is a dictionary and it's not empty
     if not isinstance(base_units, dict) or not base_units:
-        raise ValueError("'base_units.json' dictionary structure is corrupted!")
-    if not isinstance(conversion_log, list):
-        raise ValueError("'convert_history' dictionary structure is corrupted!")
-    if not isinstance(days_to_month, dict):
-        raise ValueError("'days_to_month' dictionary structure is corrupted!")
-    for key in units:
-        # Ensures every key in 'units.json' is also a dictionary
-        if not isinstance(units[key], dict):
-            raise ValueError(f"'units.json' disctionary is corrupted! Its '{units[key]}' key should also be a dictionary!")
+        raise ValueError("'base_units.json' file structure is corrupted!")
+    for unit_group in units:
+        # Ensures every unit group in 'units.json' is also a dictionary
+        if not isinstance(units[unit_group], dict):
+            raise ValueError(f"'units.json' disctionary is corrupted! Its '{units[unit_group]}' key should also be a dictionary!")
         # Ensures every group in 'units.json' is also a group in 'base_units.json'
-        if key not in base_units.keys():
-            raise ValueError(f"Dictionaries don't match! '{key}' should also be a key in 'base_units.json' dictionary!")
+        if unit_group not in base_units.keys():
+            raise ValueError(f"Dictionaries don't match! '{unit_group}' should also be a key in 'base_units.json' dictionary!")
         # Ensures base unit for each group is correctly define in 'units.json'
-        if base_units[key] not in units[key]:
-            raise ValueError(f"The base unit '{base_units[key]}' for {key} group is not present on 'units.json' dictionary!")
+        if base_units[unit_group] not in units[unit_group]:
+            raise ValueError(f"The base unit '{base_units[unit_group]}' for {unit_group} group is not present on 'units.json' dictionary!")
+    # Ensures 'convert_history' is a list
+    if not isinstance(conversion_log, list):
+        raise ValueError("'convert_history' file structure is corrupted!")
+    # Ensures 'month_indexes' is a dictionary and it's not empty
+    if not isinstance(month_indexes, dict) or not month_indexes:
+        raise ValueError("'month_indexes' file structure is corrupted!")
+    # Ensures 'unit_aliases' is a dictionary and it's not empty
+    if not isinstance(unit_aliases, dict) or not unit_aliases:
+        raise ValueError("'unit_aliases.json' file structure is corrupted!")
+    for unit_group in unit_aliases:
+        # Ensures every unit group in 'unit_aliases.json' is also a dictionary
+        if not isinstance(unit_aliases[unit_group], dict):
+            raise ValueError(f"'unit_aliases.json' disctionary is corrupted! Its '{unit_aliases[unit_group]}' key should also be a dictionary!")
+        # Ensures no duplicate aliases in the same unit group
+        seen_aliases = set()
+        for alias in unit_aliases[unit_group]:
+            if alias in seen_aliases:
+                raise ValueError(f"'unit_aliases.json' disctionary is corrupted! There are duplicate aliases in '{unit_aliases[unit_group]}' group !")
+            seen_aliases.add(alias)
 
-validate_dictionaries(units, base_units, conversion_log, days_to_month)
+
+validate_dictionaries(units, base_units, conversion_log, month_indexes, unit_aliases)
 
 
 def main() -> None:
@@ -61,7 +81,7 @@ def main() -> None:
     except (ValueError, KeyError, ZeroDivisionError) as e:
         print(f"Error: {e}")
         sys.exit(1) # Exits the program if any error happens
-    # Access the program without command lines
+    # Access the program without commandline arguments
     print_introductory_messages()
     get_action()
 
@@ -106,7 +126,7 @@ def handle_cli(args):
     elif parsed_args.command in ["convert", "c"]:
         unit_group = parsed_args.unit_group.lower()
         from_type = parsed_args.from_type.lower()
-        to_type = parsed_args.to_type.lower()        
+        to_type = parsed_args.to_type.lower()
     elif parsed_args.command in ["add", "a"]:
         unit_group = parsed_args.unit_group.lower()
         unit_type = parsed_args.unit_type.lower()
@@ -120,18 +140,17 @@ def handle_cli(args):
         print_types(unit_group)
     elif parsed_args.command in ["convert", "c"]:
         if unit_group == "time":
-            # Maps to time-specific name for clarity (keeps consistency throughout the code)
-            from_time = parsed_args.from_type
-            to_time = parsed_args.to_type
-            factor_time = parsed_args.amount
-            converter_time(parsed_args.unit_group, from_time, to_time, factor_time)
+            converter_time(parsed_args.unit_group, from_type, to_type, parsed_args.amount)
         else:
+            from_type = resolve_aliases(unit_group, from_type)
+            to_type = resolve_aliases(unit_group, to_type)
             if not parsed_args.amount:
                 raise ValueError("You need to enter an amount to convert!")
             try:
                 amount = float(parsed_args.amount)
             except (ValueError, TypeError):
-                raise ValueError("Invalid amount!")            
+                raise ValueError("Invalid amount!")
+            print(from_type)        
             new_value = converter(amount, unit_group, from_type, to_type)
             print(f"{parsed_args.amount} {from_type} = {format_value(new_value)} {to_type}")
     elif parsed_args.command in ["add", "a"]:
@@ -149,6 +168,17 @@ def handle_cli(args):
         else:
             add_new_group(unit_group)
 
+
+def resolve_aliases(unit_group, unit_type):
+    """Checks user's input for any match with unit type or unit's aliases"""
+    if unit_type in units[unit_group]:
+        return unit_type
+    elif unit_type in unit_aliases[unit_group]:
+        return unit_aliases[unit_group][unit_type]
+    else:
+        raise ValueError(f"{unit_type} is not a valid type or neither a valid alais in {unit_group}!")
+
+
 def print_introductory_messages() -> None:
     """Prints introductory messages and instructions"""
     print("Welcome to unit converter!")
@@ -164,20 +194,20 @@ def get_action() -> None:
         try:
             action: str = input("Let's begin! What do you want to do? ").strip().lower()
             # Adds logic to check action validity
-            if action == "groups":
+            if action in ["groups", "g"]:
                 print_groups()
                 continue
-            elif action == "history":
+            elif action in ["history", "h"]:
                 print_history()
                 continue
             elif action.endswith(".types"):
                 unit_group, _ = action.split(".")
                 print_types(unit_group)
                 continue
-            elif action == "convert":
+            elif action in ["convert", "c"]:
                 conversion_logic()
                 continue
-            elif action == "add":
+            elif action in ["add", "a"]:
                 add_logic()
                 continue
             elif action == "quit":
@@ -205,7 +235,7 @@ def print_history(limit: int = 10) -> None:
         if entry["unit_group"] == "time":
             if entry["from_time"] in units["time"]:
                 print(f"{format_value(entry['factor_time'])} {entry['from_time']} = {format_value(entry['result'])} {entry['to_time']} (Group: {entry['unit_group']})")
-            elif ":" in entry["from_time"] or entry["from_time"] in days_to_month or "-" in entry["from_time"]:
+            elif ":" in entry["from_time"] or entry["from_time"] in month_indexes or "-" in entry["from_time"]:
                 print(f"{format_value(entry['result'])} {entry['factor_time']} between {entry['from_time']} {entry['to_time']} (Group: {entry['unit_group']})")
         else:
             print(f"{format_value(entry['amount'])} {entry['from_type']} = {format_value(entry['result'])} {entry['to_type']} (Group: {entry['unit_group']})")
@@ -243,8 +273,8 @@ def get_unit_group() -> str:
 
 def get_converter_unit(unit_group) -> tuple[str, str]:
     """Gets types of units user is convertind from and to"""
-    from_type: str = input("From: ").strip().lower()
-    to_type: str = input("To: ").strip().lower()
+    from_type: str = resolve_aliases(unit_group, input("From: ").strip().lower())
+    to_type: str = resolve_aliases(unit_group, input("To: ").strip().lower())
     if not from_type or not to_type:
         raise ValueError("Unit type cannot be empty!")
     if from_type not in units[unit_group] or to_type not in units[unit_group]:
@@ -330,7 +360,7 @@ def converter_time(unit_group, from_time=None, to_time=None, factor_time=None) -
                 continue
 
     # E.g. seconds minutes 10
-    if from_time in units[unit_group] and to_time in units[unit_group]:
+    if resolve_aliases(unit_group, from_time) in units[unit_group] and resolve_aliases(unit_group, to_time) in units[unit_group]:
         try:
             factor_time = float(factor_time)
         except ValueError:
@@ -343,6 +373,7 @@ def converter_time(unit_group, from_time=None, to_time=None, factor_time=None) -
 
     # E.g. 17:28:36 04:15:22 seconds
     elif parse_time_input(from_time) is not None and parse_time_input(to_time) is not None:
+        factor_time = resolve_aliases(unit_group, factor_time)
         if factor_time not in units[unit_group]:
             print(f"{factor_time} is not a valid unit type!")
             return
@@ -353,12 +384,13 @@ def converter_time(unit_group, from_time=None, to_time=None, factor_time=None) -
         add_to_log(unit_group=unit_group, from_time=from_time, to_time=to_time, factor_time=factor_time, new_time=new_time, is_time_convertion=True)
     
     # E.g. JAN NOV minutes
-    elif from_time in days_to_month and to_time in days_to_month:
+    elif from_time in month_indexes and to_time in month_indexes:
+        factor_time = resolve_aliases(unit_group, factor_time)
         if factor_time not in units[unit_group]:
             print(f"{factor_time} is not a valid unit type!")
             return
-        from_datetime = datetime(2023, days_to_month[from_time], 1)
-        to_datetime = datetime(2023, days_to_month[to_time], 1) if days_to_month[to_time] > days_to_month[from_time] else datetime(2024, days_to_month[to_time], 1)
+        from_datetime = datetime(2023, month_indexes[from_time], 1)
+        to_datetime = datetime(2023, month_indexes[to_time], 1) if month_indexes[to_time] > month_indexes[from_time] else datetime(2024, month_indexes[to_time], 1)
         days = abs((from_datetime - to_datetime)).days
         if factor_time == "days":
             new_time = days
@@ -371,6 +403,7 @@ def converter_time(unit_group, from_time=None, to_time=None, factor_time=None) -
     
     # E.g. 2019-11-04 2056-04-28 days
     elif parse_date_input(from_time) is not None and parse_date_input(to_time) is not None:
+        factor_time = resolve_aliases(unit_group, factor_time)
         if not factor_time in units[unit_group]:
             print(f"{factor_time} is not a valid unit type!")
             return            
@@ -382,7 +415,7 @@ def converter_time(unit_group, from_time=None, to_time=None, factor_time=None) -
         print(f"Between {from_time} and {to_time} there are {format_value(new_time)} {factor_time}")
         add_to_log(unit_group=unit_group, from_time=from_time, to_time=to_time, factor_time=factor_time, new_time=new_time, is_time_convertion=True)
 
-    # Any other (invalid) format
+    # Any other format is invalid!
     else:
         print("Invalid time conversion format!")
 

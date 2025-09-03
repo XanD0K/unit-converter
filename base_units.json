@@ -1,9 +1,9 @@
 {
-    "length": "meter",
+    "length": "meters",
     "time": "seconds",
-    "mass": "kilogram",
+    "mass": "kilograms",
     "temperature": "celsius",
-    "volume": "liter",
-    "area": "square_meter",
-    "speed": "kilometer_per_hour"
+    "volume": "liters",
+    "area": "square_meters",
+    "speed": "kilometers_per_hour"
 }

@@ -9,6 +9,11 @@
 
 ### Removed
 
+## [0.8.0] - 2025-09-03
+### Added
+- Created the `unit_alises.json` file that contains all aliases for each unit type
+- Created 
+- Modifies codebase to allow users accessing and modifying that `unit_alises.json` file
 
 
 ## [0.7.2] - 2025-09-02
