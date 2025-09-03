@@ -117,7 +117,12 @@ def handle_cli(args):
     # History command
     history_parser = subparser.add_parser("history", aliases=["h"], help="List conversion history (default=10)")
     history_parser.add_argument("--limit", "-l", type=int, default=10, help="Number of conversion entries that will be printed")
-
+    # Aliases comman
+    aliases_parser = subparser.add_parser("aliases", aliases=["al"], help="Manage unit's aliases")
+    aliases_parser.add_argument("unit_group", help="Unit group")
+    aliases_parser.add_argument("unit_type", help="Unit type")
+    aliases_parser.add_argument("action", choices=["add", "remove"], help="Action to perform")
+    aliases_parser.add_argument("alias", help="Alias used to add/remove to/from an unit")
     # Parses arguments
     parsed_args = parser.parse_args(formatted_args[1:])  # Skips first argument (program's name)
     # Lowercases arguments
@@ -130,6 +135,11 @@ def handle_cli(args):
     elif parsed_args.command in ["add", "a"]:
         unit_group = parsed_args.unit_group.lower()
         unit_type = parsed_args.unit_type.lower()
+    elif parsed_args.command in ["aliases", "al"]:
+        unit_group = parsed_args.unit_group.lower()
+        unit_type = parsed_args.unit_type.lower()
+        action = parsed_args.action.lower()
+        alias = parsed_args.alias.lower()
     
     # Calls argument respective function
     if parsed_args.command in ["groups", "g"]:
@@ -167,6 +177,8 @@ def handle_cli(args):
         # Creates new group and new type
         else:
             add_new_group(unit_group)
+    elif parsed_args.command in ["aliases", "al"]:
+        manage_aliases(unit_group, unit_type, action, alias)
 
 
 def resolve_aliases(unit_group, unit_type):
@@ -176,7 +188,7 @@ def resolve_aliases(unit_group, unit_type):
     elif unit_type in unit_aliases[unit_group]:
         return unit_aliases[unit_group][unit_type]
     else:
-        raise ValueError(f"{unit_type} is not a valid type or neither a valid alais in {unit_group}!")
+        return False
 
 
 def print_introductory_messages() -> None:
@@ -209,6 +221,9 @@ def get_action() -> None:
                 continue
             elif action in ["add", "a"]:
                 add_logic()
+                continue
+            elif action in ["aliases", "al"]:
+                manage_aliases()
                 continue
             elif action == "quit":
                 sys.exit("Bye!")
@@ -245,7 +260,18 @@ def print_types(unit_group) -> None:
     """Prints all unit types for a specific unit group"""
     if unit_group not in units:
         raise KeyError(f"{unit_group} is not a valid group!")
-    print("Units: " + ", ".join(units[unit_group].keys()))
+    # Used to construct the sequence of unit_type with its respective aliases
+    formated_output = []
+    # Iterates over the outter keys of 'units' dictionary
+    for unit_type in units[unit_group].keys():
+        # Gets all aliases for a specific unit type
+        aliases = [alias for alias, unit in unit_aliases.get(unit_group, {}).items() if unit == unit_type]
+        if aliases:
+            formated_output.append(f"{unit_type} ({', '.join(f'\'{alias}\'' for alias in aliases)})")
+        else:
+            formated_output.append(unit_type)
+
+    print("Units: " + ", ".join(formated_output))
 
 
 def conversion_logic() -> None:
@@ -361,6 +387,8 @@ def converter_time(unit_group, from_time=None, to_time=None, factor_time=None) -
 
     # E.g. seconds minutes 10
     if resolve_aliases(unit_group, from_time) in units[unit_group] and resolve_aliases(unit_group, to_time) in units[unit_group]:
+        from_time = resolve_aliases(unit_group, from_time)
+        to_time = resolve_aliases(unit_group, to_time)
         try:
             factor_time = float(factor_time)
         except ValueError:
@@ -477,11 +505,12 @@ def add_to_log(unit_group, from_type=None, to_type=None, amount=None, new_value=
         }
     conversion_log.append(entry)
     try:
+        conversion_log_backup = conversion_log.copy()
         with open("conversion_log.json", "w") as file:
             json.dump(conversion_log, file, indent=4)
     except PermissionError:
         print("Error! You don't have permition to write to conversion_log.json!")
-
+        conversion_log = conversion_log_backup
 
 def format_value(value: float) -> str:
     """Format converted value by allowing only 5 decimal values and elimitating all trailling zeroes"""
@@ -519,11 +548,12 @@ def add_logic(unit_group=None, unit_type=None, value=None) -> None:
     units[unit_group][unit_type] = value
     print(f"A new unit type was added on {unit_group} group: {unit_type} = {value}")
     try:
+        units_backup = units.copy()
         with open("units.json", "w") as file:
             json.dump(units, file, indent=4)
     except PermissionError:
         print("Error! You don't have permition to write to units.json!")
-
+        units = units_backup
 
 def add_new_group(unit_group) -> None:
     """Creates a new unit group, with a base unit"""
@@ -543,12 +573,16 @@ def add_new_group(unit_group) -> None:
         units[unit_group][new_base_unit] = 1.0
         base_units[unit_group] = new_base_unit
         try:
+            units_backup = units.copy()
+            base_units_backup = base_units.copy()
             with open("units.json", "w") as file:
                 json.dump(units, file, indent=4)
             with open("base_units.json", "w") as file:
                 json.dump(base_units, file, indent=4)
         except PermissionError:
             print("Error! You don't have permition to write to units.json!")
+            units = units_backup
+            base_units = base_units_backup
 
         print(f"You've just created a {unit_group} group, with {new_base_unit} as its base unit!")
         return 
@@ -574,12 +608,67 @@ def add_temp_logic(unit_group, unit_type, temp_factor=None, temp_offset=None) ->
             
     print(f"A new unit type was added on temperature group: {unit_type} = [{temp_factor}, {temp_offset}]")
     try:
+        units_backup = units.copy()
         with open("units.json", "w") as file:
             json.dump(units, file, indent=4)
     except PermissionError:
         print("Error! You don't have permition to write to units.json!")
+        units = units_backup
     return
 
+
+def manage_aliases(unit_group=None, unit_type=None, action=None, alias=None):
+    """Handles aliases, allowing users to add or remove aliases to/from an unit type"""
+    if unit_group is None:
+        unit_group: str = input("Enter a group name: ").strip().lower()
+    if unit_group not in units:
+        raise ValueError(f"{unit_group} is not a valid group!")           
+    if unit_type is None:
+        unit_type: str = resolve_aliases(unit_group, input(f"Enter unit type for '{unit_group}' group: ").strip().lower())
+    if unit_type not in units[unit_group]:
+        raise ValueError(f"{unit_type} is not a valid unit type for '{unit_group}' group!")
+    all_aliases = [alias for alias in unit_aliases[unit_group] if unit_type == unit_aliases[unit_group].get(alias)]
+    if action is None:
+        action = input(f"Existed aliases for '{unit_type}': {all_aliases}. What do you want to do? (enter 'add' or 'remove') ").strip().lower()
+    if alias is None:
+        alias = input(f"Which alias do you want to {action} {"to" if action == "add" else "from"} '{unit_type}'? ").strip().lower()
+    if not action or action not in ["add", "remove"]:
+        raise ValueError(f"Invalid action. Decide if you want to 'add' or 'remove' an alias for '{unit_type}'")
+    
+    if not alias:
+        raise ValueError("You need to enter an alias before proceeding!")
+    
+    all_group_aliases = [alias for alias in unit_aliases[unit_group]]
+    
+    if alias in all_group_aliases and action == "add":
+        raise ValueError(f"'{alias}' is already being used!")
+    
+    if alias in base_units:
+        raise ValueError("You can't use the name of an unit group as an alias!")
+    
+    if alias in units[unit_group]:
+        raise ValueError("You can't use the name of an unit type as an alias")
+
+    if action == "add":            
+        if alias in unit_aliases[unit_group]:
+            raise ValueError(f"{alias} is already an alias of {unit_type}")
+            
+        unit_aliases[unit_group][alias] = unit_type
+        print(f"Alias successfully added! New alias for '{unit_type}': {alias}")
+    elif action == "remove":
+        if alias not in unit_aliases[unit_group]:
+            raise ValueError(f"{alias} is not an alias of {unit_type}")
+            
+        unit_aliases[unit_group].pop(alias) 
+        print(f"{alias} successfully removed from '{unit_type}'!")       
+
+    try:
+        unit_aliases_backup = unit_aliases.copy()
+        with open("unit_aliases.json", "w") as file:
+            json.dump(unit_aliases, file, indent=4)
+    except PermissionError:
+        print("Error! You don't have permition to write to all_aliases.json")
+        unit_aliases = unit_aliases_backup
 
 if __name__ == "__main__":
     main()

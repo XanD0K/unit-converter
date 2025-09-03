@@ -124,5 +124,75 @@
         "to_time": "seconds",
         "factor_time": 1.0,
         "result": 60.0
+    },
+    {
+        "unit_group": "temperature",
+        "from_type": "celsius",
+        "to_type": "kelvin",
+        "amount": 1.0,
+        "result": 274.15
+    },
+    {
+        "unit_group": "temperature",
+        "from_type": "celsius",
+        "to_type": "kelvin",
+        "amount": 1.0,
+        "result": 274.15
+    },
+    {
+        "unit_group": "temperature",
+        "from_type": "celsius",
+        "to_type": "kelvin",
+        "amount": 1.0,
+        "result": 274.15
+    },
+    {
+        "unit_group": "temperature",
+        "from_type": "celsius",
+        "to_type": "fahrenheit",
+        "amount": 1.0,
+        "result": 33.8
+    },
+    {
+        "unit_group": "time",
+        "from_time": "seconds",
+        "to_time": "minutes",
+        "factor_time": 1.0,
+        "result": 0.016666666666666666
+    },
+    {
+        "unit_group": "time",
+        "from_time": "seconds",
+        "to_time": "minutes",
+        "factor_time": 1.0,
+        "result": 0.016666666666666666
+    },
+    {
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": "nov",
+        "factor_time": "seconds",
+        "result": 26265600.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": "nov",
+        "factor_time": "seconds",
+        "result": 26265600.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": "nov",
+        "factor_time": "seconds",
+        "result": 26265600.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": "jan",
+        "factor_time": "seconds",
+        "result": 31536000.0
     }
 ]
