@@ -212,9 +212,8 @@ def get_action() -> None:
             elif action in ["history", "h"]:
                 print_history()
                 continue
-            elif action.endswith(".types"):
-                unit_group, _ = action.split(".")
-                print_types(unit_group)
+            elif action in [".types", "t"]:                
+                print_types()
                 continue
             elif action in ["convert", "c"]:
                 conversion_logic()
@@ -256,8 +255,10 @@ def print_history(limit: int = 10) -> None:
             print(f"{format_value(entry['amount'])} {entry['from_type']} = {format_value(entry['result'])} {entry['to_type']} (Group: {entry['unit_group']})")
 
 
-def print_types(unit_group) -> None:
+def print_types(unit_group=None) -> None:
     """Prints all unit types for a specific unit group"""
+    if unit_group is None:
+        unit_group: str = get_unit_group()
     if unit_group not in units:
         raise KeyError(f"{unit_group} is not a valid group!")
     # Used to construct the sequence of unit_type with its respective aliases
@@ -372,8 +373,7 @@ def converter_temp(amount, unit_group, from_type, to_type) -> float:
 
 
 def converter_time(unit_group, from_time=None, to_time=None, factor_time=None) -> None:
-    """Handles conversion for time units"""
-    
+    """Handles conversion for time units"""    
     if from_time is None or to_time is None or factor_time is None:
         print_time_instructions()
         while True:
@@ -449,6 +449,7 @@ def converter_time(unit_group, from_time=None, to_time=None, factor_time=None) -
 
 
 def print_time_instructions():
+    """Prints instructions for converting date and time units"""
     print("For date-time conversion, you can choose from different approaches for conversion:")
     print(" - From a specific unit to another. Usage: <unit_type> <unit_type> quantity")
     print(" - From a more complex time to another. Usage: HH:MM:SS HH:MM:SS <unit_type>")
@@ -457,6 +458,7 @@ def print_time_instructions():
 
 
 def parse_time_input(time_str):
+    """Gets user's input of a time and outputs the hours, minutes and seconds"""
     if matches := re.search(r"^(?:(\d{1,2}):)?(?:(\d{1,2}):)?(\d{1,2})?$", time_str):
         hours, minutes, seconds = matches.group(1), matches.group(2), matches.group(3)
         hours = check_time_is_none(hours)
@@ -475,6 +477,7 @@ def check_time_is_none(time_str):
 
 
 def parse_date_input(time_str):
+    """Gets user's input of a date, and outputs the year, month and day"""
     if matches := re.search(r"^(\d{4})-(\d{1,2})-(\d{1,2})$", time_str):
         year, month, day = int(matches.group(1)), int(matches.group(2)), int(matches.group(3))
         return datetime(year, month, day)
@@ -589,6 +592,7 @@ def add_new_group(unit_group) -> None:
 
 
 def add_temp_logic(unit_group, unit_type, temp_factor=None, temp_offset=None) -> None:
+    """Handles all logic for adding temperature units"""
     if temp_factor == None:
         temp_factor: str = input(f"Enter conversion factor to base unit of 'temperature' group ({base_units[unit_group]}): ").strip().lower()
     if temp_offset == None:

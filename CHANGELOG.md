@@ -10,11 +10,17 @@
 ### Removed
 
 
+
+
+
 ## [0.8.1] - 2025-09-03
 ### Added
 - Created `manage_aliases` function to allow users adding and removing aliases to/from `unit_alises.json` file
 - Added logic to `handle_cli` function that allows users to manage aliases, by adding/removing them to/from an unit type
 - Added backup logic if modifying `.json` files failes
+
+### Changed
+- Changed `types` action to act like all other functions, keep consistency throughout codebase
 
 
 ## [0.8.0] - 2025-09-03

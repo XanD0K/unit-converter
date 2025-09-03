@@ -2,9 +2,10 @@
 
 
 ## New features
-- [ ] Add style to introductory messages and instruction messages and add separator (e.g. with `-`, `=` or `_`)
-- [ ] Use `inflect` library to output singular/plural unit group/type
-- [ ] Add `money` group to allow currency conversion through API requests
+- [] Add style to introductory messages and instruction messages and add separator (e.g. with `-`, `=` or `_`)
+- [] Use `inflect` library to output singular/plural unit group/type
+- [] Add `money` group to allow currency conversion through API requests
+
 
 ## Refactoring tasks
 - [ ] Reestructure the code by adding a class that encapsulates all programs logic
