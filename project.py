@@ -26,7 +26,7 @@ except json.JSONDecodeError:
     sys.exit("Error: file if corrupted!")
 
 
-def validate_dictionaries(units, base_units, conversion_log):
+def validate_dictionaries(units, base_units, conversion_log, days_to_month):
     """Validates dictionaries before entering the program"""
     # Ensures 'units.json' is a dictionary and it's not empty
     if not isinstance(units, dict) or not units:
@@ -49,7 +49,7 @@ def validate_dictionaries(units, base_units, conversion_log):
         if base_units[key] not in units[key]:
             raise ValueError(f"The base unit '{base_units[key]}' for {key} group is not present on 'units.json' dictionary!")
 
-validate_dictionaries(units, base_units, conversion_log)
+validate_dictionaries(units, base_units, conversion_log, days_to_month)
 
 
 def main() -> None:
@@ -102,14 +102,14 @@ def handle_cli(args):
     parsed_args = parser.parse_args(formatted_args[1:])  # Skips first argument (program's name)
     # Lowercases arguments
     if parsed_args.command in ["types", "t"]:
-        parsed_args.unit_group = parsed_args.unit_group.lower()
+        unit_group = parsed_args.unit_group.lower()
     elif parsed_args.command in ["convert", "c"]:
-        parsed_args.unit_group = parsed_args.unit_group.lower()
-        parsed_args.from_type = parsed_args.from_type.lower()
-        parsed_args.to_type = parsed_args.to_type.lower()
+        unit_group = parsed_args.unit_group.lower()
+        from_type = parsed_args.from_type.lower()
+        to_type = parsed_args.to_type.lower()        
     elif parsed_args.command in ["add", "a"]:
-        parsed_args.unit_group = parsed_args.unit_group.lower()
-        parsed_args.unit_type = parsed_args.unit_type.lower()
+        unit_group = parsed_args.unit_group.lower()
+        unit_type = parsed_args.unit_type.lower()
     
     # Calls argument respective function
     if parsed_args.command in ["groups", "g"]:
@@ -117,31 +117,37 @@ def handle_cli(args):
     elif parsed_args.command in ["history", "h"]:
         print_history(parsed_args.limit)
     elif parsed_args.command in ["types", "t"]:
-        print_types(parsed_args.unit_group)
+        print_types(unit_group)
     elif parsed_args.command in ["convert", "c"]:
-        if parsed_args.unit_group == "time":
+        if unit_group == "time":
             # Maps to time-specific name for clarity (keeps consistency throughout the code)
             from_time = parsed_args.from_type
             to_time = parsed_args.to_type
             factor_time = parsed_args.amount
             converter_time(parsed_args.unit_group, from_time, to_time, factor_time)
         else:
-            new_value = converter(parsed_args.amount, parsed_args.unit_group, parsed_args.from_type, parsed_args.to_type)
-            print(f"{parsed_args.amount} {parsed_args.from_type} = {format_value(new_value)} {parsed_args.to_type}")
+            if not parsed_args.amount:
+                raise ValueError("You need to enter an amount to convert!")
+            try:
+                amount = float(parsed_args.amount)
+            except (ValueError, TypeError):
+                raise ValueError("Invalid amount!")            
+            new_value = converter(amount, unit_group, from_type, to_type)
+            print(f"{parsed_args.amount} {from_type} = {format_value(new_value)} {to_type}")
     elif parsed_args.command in ["add", "a"]:
         # Adds temperature type
-        if parsed_args.unit_group == "temperature":
+        if unit_group == "temperature":
             if parsed_args.factor is None or parsed_args.offset is None:
                 raise ValueError("Adding temperature type requires --factor and --offset")
-            add_temp_logic(parsed_args.unit_group, parsed_args.unit_type, parsed_args.factor, parsed_args.offset)
+            add_temp_logic(unit_group, unit_type, parsed_args.factor, parsed_args.offset)
         # Adds unit type for existed group
-        elif parsed_args.unit_group in units:
+        elif unit_group in units:
             if parsed_args.value is None:
                 raise ValueError("Adding non-temperature type requires a value")
-            add_logic(parsed_args.unit_group, parsed_args.unit_type, parsed_args.value)
+            add_logic(unit_group, unit_type, parsed_args.value)
         # Creates new group and new type
         else:
-            add_new_group(parsed_args.unit_group)
+            add_new_group(unit_group)
 
 def print_introductory_messages() -> None:
     """Prints introductory messages and instructions"""
@@ -284,9 +290,9 @@ def converter(amount, unit_group, from_type, to_type) -> float:
         # Adds to log file
         add_to_log(unit_group=unit_group, from_type=from_type, to_type=to_type, amount=amount, new_value=new_temp, is_time_convertion=False)
         return new_temp   
+    
     if float(units[unit_group][to_type]) == 0:
         raise ZeroDivisionError("Can't divide by zero!")
-
     new_value = amount * (units[unit_group][from_type]/units[unit_group][to_type])
     # Adds to log file
     add_to_log(unit_group=unit_group, from_type=from_type, to_type=to_type, amount=amount, new_value=new_value, is_time_convertion=False)

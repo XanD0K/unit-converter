@@ -67,11 +67,11 @@
         "are": 100
     },
     "speed": {
-        "km/h": 1.0,
-        "m/s": 3.6,
-        "km/s": 3600,
-        "mph": 1.609344,
-        "ft/s": 1.09728,
+        "kilometer_per_hour": 1.0,
+        "meter_per_second": 3.6,
+        "kilometer_per_second": 3600,
+        "mile_per_hour": 1.609344,
+        "foot_per_second": 1.09728,
         "knot": 1.852001,
         "mach": 1234.8
     }

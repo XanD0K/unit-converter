@@ -5,5 +5,5 @@
     "temperature": "celsius",
     "volume": "liter",
     "area": "square_meter",
-    "speed": "km/h"
+    "speed": "kilometer_per_hour"
 }
