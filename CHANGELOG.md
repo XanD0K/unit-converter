@@ -10,7 +10,23 @@
 ### Removed
 
 
+## [0.8.3] - 2025-09-04
+### Added
+- Changed `add_logic` function to `manage_type`, which now allows user to remove unit types
+- Added `change_base_unit` which allow user to change base unit for an unit group
 
+### Changed
+- Changed `add_temp_logic` function name to `add_temp_type`
+
+
+## [0.8.2] - 2025-09-04
+### Added
+- Created `month_days` dictionary that relates a month with its respective number of days, to improve date and time conversions
+
+### Changed
+- Removed inner `while` loops that kept user inside action's logic
+- Improved `get_amount` function, making it cleaner
+- Improved `add_new_group` function, making it cleaner
 
 
 ## [0.8.1] - 2025-09-03

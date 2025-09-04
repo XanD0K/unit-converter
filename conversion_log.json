@@ -1,2 +1,9 @@
 [
+    {
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": "jan",
+        "factor_time": "days",
+        "result": 31.0
+    }
 ]
