@@ -5,7 +5,7 @@
 - [ ] Add style to introductory messages and instruction messages and add separator (e.g. with `-`, `=` or `_`)
 - [ ] Use `inflect` library to output singular/plural unit group/type
 - [ ] Add `money` group to allow currency conversion through API requests
-- [ ] Allow user to calculate more complex times
+- [ ] Allow user to calculate more complex date and time conversions
 
 
 ## Refactoring tasks

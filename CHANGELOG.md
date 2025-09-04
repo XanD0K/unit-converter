@@ -10,6 +10,11 @@
 ### Removed
 
 
+## [0.8.4] - 2025-09-04
+### Added
+- Improved `converter_time` function to allow more complex date and time conversions
+
+
 ## [0.8.3] - 2025-09-04
 ### Added
 - Changed `add_logic` function to `manage_type`, which now allows user to remove unit types

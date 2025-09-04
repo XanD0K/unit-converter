@@ -380,15 +380,22 @@ def converter_temp(amount, unit_group, from_type, to_type) -> float:
 
 
 def converter_time(unit_group, from_time=None, to_time=None, factor_time=None) -> None:
-    """Handles conversion for time units"""    
+    """Handles conversion for time units"""
     if from_time is None or to_time is None or factor_time is None:
         print_time_instructions()
         time_input = input("Enter time conversion: ").strip().lower()
-        try:            
-            from_time, to_time, factor_time = time_input.split(" ")            
-        except ValueError:
-            raise ValueError("Invalid format for date and time conversion!")            
-
+        if len(time_input) == 3:
+            try:
+                from_time, to_time, factor_time = time_input.split(" ")
+            except ValueError:
+                raise ValueError("Invalid format for date and time conversion!")
+        elif len(time_input) == 2:
+            try:
+                from_time, factor_time = time_input.split(" ")
+            except ValueError:
+                raise ValueError("Invalid format for date and time conversion!")
+        elif len(time_input) % 2 == 0 and len(time_input) > 2:
+            ...
     # E.g. seconds minutes 10
     if resolve_aliases(unit_group, from_time) in units[unit_group] and resolve_aliases(unit_group, to_time) in units[unit_group]:
         from_time = resolve_aliases(unit_group, from_time)
@@ -404,7 +411,7 @@ def converter_time(unit_group, from_time=None, to_time=None, factor_time=None) -
         new_time = total_seconds / units[unit_group][to_time]
         print(f"{format_value(factor_time)} {from_time} = {format_value(new_time)} {to_time}")
 
-    # E.g. 17:28:36 04:15:22 seconds
+    # E.g. 17h:28m:36s 04h:15m:22s seconds
     elif parse_time_input(from_time) is not None and parse_time_input(to_time) is not None:
         factor_time = resolve_aliases(unit_group, factor_time)
         if factor_time not in units[unit_group]:
@@ -474,7 +481,7 @@ def print_time_instructions():
 
 def parse_time_input(time_str):
     """Gets user's input of a time and outputs the hours, minutes and seconds"""
-    if matches := re.search(r"^(?:(\d{1,2}):)?(?:(\d{1,2}):)?(\d{1,2})?$", time_str):
+    if matches := re.search(r"^(?:(\d{1,2})h:)?(?:(\d{1,2})m:)?(?:(\d{1,2})s)?$", time_str):
         hours, minutes, seconds = matches.group(1), matches.group(2), matches.group(3)
         hours = check_time_is_none(hours)
         minutes = check_time_is_none(minutes)
