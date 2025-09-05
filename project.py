@@ -1,4 +1,5 @@
 import argparse
+import calendar
 import json
 import re
 import sys
@@ -26,13 +27,15 @@ try:
         unit_aliases = json.load(file)
     with open("month_days.json", "r") as file:
         month_days = json.load(file)
+    with open("month_index_days.json", "r") as file:
+        month_index_days = json.load(file)
 except FileNotFoundError:
     sys.exit("Error: file not found!")
 except json.JSONDecodeError:
     sys.exit("Error: file if corrupted!")
 
 
-def validate_dictionaries(units, base_units, conversion_log, month_indexes, unit_aliases, month_days):
+def validate_dictionaries(units, base_units, conversion_log, month_indexes, unit_aliases, month_days, month_index_days):
     """Validates dictionaries before entering the program"""
     # Ensures 'units.json' is a dictionary and it's not empty
     if not isinstance(units, dict) or not units:
@@ -58,6 +61,8 @@ def validate_dictionaries(units, base_units, conversion_log, month_indexes, unit
         raise ValueError("'month_indexes' structure is corrupted!")
     if not isinstance(month_days, dict) or not month_days:
         raise ValueError("'month_days' structure is corrupted!")
+    if not isinstance(month_index_days, dict) or not month_index_days:
+        raise ValueError("'month_index_days' structure is corrupted!")
     # Ensures 'unit_aliases' is a dictionary and it's not empty
     if not isinstance(unit_aliases, dict) or not unit_aliases:
         raise ValueError("'unit_aliases.json' structure is corrupted!")
@@ -75,7 +80,7 @@ def validate_dictionaries(units, base_units, conversion_log, month_indexes, unit
             seen_aliases.add(alias)
 
 
-validate_dictionaries(units, base_units, conversion_log, month_indexes, unit_aliases, month_days)
+validate_dictionaries(units, base_units, conversion_log, month_indexes, unit_aliases, month_days, month_index_days)
 
 
 def main() -> None:
@@ -384,22 +389,30 @@ def converter_time(unit_group, from_time=None, to_time=None, factor_time=None) -
     if from_time is None or to_time is None or factor_time is None:
         print_time_instructions()
         time_input = input("Enter time conversion: ").strip().lower()
-        if len(time_input.split()) == 3:
-            try:
-                from_time, to_time, factor_time = time_input.split(" ")
-            except ValueError:
-                raise ValueError("Invalid format for date and time conversion!")
-            converter_time_3args(unit_group, from_time, to_time, factor_time)
-            return
-        elif len(time_input.split()) == 2:
-            try:
-                from_time, factor_time = time_input.split(" ")
-            except ValueError:
-                raise ValueError("Invalid format for date and time conversion!")
-            converter_time_2args(unit_group, from_time, factor_time)
-            return
-        elif len(time_input.split()) % 2 == 0 and len(time_input.split()) > 2:
-            ...
+        if not time_input:
+            raise ValueError("Time conversion can't be empty! Enter an expression!")
+
+    if len(time_input.split()) == 2:
+        try:
+            from_time, factor_time = time_input.split(" ")
+        except ValueError:
+            raise ValueError("Invalid format for date and time conversion!")
+        converter_time_2args(unit_group, from_time, factor_time)
+        return
+    elif len(time_input.split()) == 3:
+        try:
+            from_time, to_time, factor_time = time_input.split(" ")
+        except ValueError:
+            raise ValueError("Invalid format for date and time conversion!")
+        converter_time_3args(unit_group, from_time, to_time, factor_time)
+        return
+
+    elif len(time_input.split()) % 2 == 0 and len(time_input.split()) > 2:
+        ...
+        
+    else:
+        raise ValueError("Invalid format for date and time conversion!")
+
 
 def converter_time_3args(unit_group, from_time, to_time, factor_time):
     # E.g. seconds minutes 10
@@ -409,106 +422,104 @@ def converter_time_3args(unit_group, from_time, to_time, factor_time):
         try:
             factor_time = float(factor_time)
         except ValueError:
-            print("Enter a valid value for conversion!")
-            return
-        total_seconds = timedelta(seconds=factor_time * units[unit_group][from_time]).total_seconds()
+            raise ValueError("Enter a valid value for conversion!")            
+        total_seconds = factor_time * units[unit_group][from_time]
         if units[unit_group][to_time] == 0:
             raise ZeroDivisionError("Can't divide by zero!")
         new_time = total_seconds / units[unit_group][to_time]
         print(f"{format_value(factor_time)} {from_time} = {format_value(new_time)} {to_time}")
 
-    # E.g. 17h:28m:36s 04h:15m:22s seconds
-    elif parse_time_input(from_time) is not None and parse_time_input(to_time) is not None:
-        factor_time = resolve_aliases(unit_group, factor_time)
-        if factor_time not in units[unit_group]:
-            raise KeyError(f"Unit type '{factor_time}' not found in '{unit_group}' group!")
-
-        new_from_time = parse_time_input(from_time)
-        new_to_time = parse_time_input(to_time)
-        if units[unit_group][factor_time] == 0:
-            raise ZeroDivisionError("Can't divide by zero!")
-        new_time = fabs((new_from_time - new_to_time) / units[unit_group][factor_time])
-        print(f"There are {format_value(new_time)} {factor_time} between {from_time} and {to_time}")
-    
-    # E.g. JAN NOV minutes
-    elif from_time in month_indexes and to_time in month_indexes:
-        factor_time = resolve_aliases(unit_group, factor_time)
-        if factor_time not in units[unit_group]:
-            raise KeyError(f"Unit type '{factor_time}' not found in '{unit_group}' group!")
-
-        from_datetime = datetime(2023, month_indexes[from_time], 1)
-        if month_indexes[to_time] > month_indexes[from_time]:
-            to_datetime = datetime(2023, month_indexes[to_time], month_days[to_time])
-        elif month_indexes[to_time] < month_indexes[from_time]:
-            to_datetime = datetime(2024, month_indexes[to_time], month_days[to_time])
-        else:
-            to_datetime = datetime(2023, month_indexes[to_time], month_days[to_time])
-
-        days = abs((from_datetime - to_datetime)).days + 1
-        if factor_time == "days":
-            new_time = days
-        else:
-            total_seconds = (timedelta(seconds=days * units[unit_group]["days"])).total_seconds()
-            if units[unit_group][factor_time] == 0:
-                raise ZeroDivisionError("Can't divide by zero!")
-            new_time = total_seconds / units[unit_group][factor_time]                
-        print(f"Between {from_time} and {to_time} there are {format_value(new_time)} {factor_time}")
-    
-    # E.g. 2019-11-04 2056-04-28 days
-    elif parse_date_input(from_time) is not None and parse_date_input(to_time) is not None:
-        factor_time = resolve_aliases(unit_group, factor_time)
-        if factor_time not in units[unit_group]:
-            raise KeyError(f"Unit type '{factor_time}' not found in '{unit_group}' group!")           
-        from_years, from_months, from_days = parse_date_input(from_time)
-        to_years, to_months, to_days = parse_date_input(to_time)
-        total_seconds = get_seconds(unit_group, from_years, from_months, from_days) - get_seconds(unit_group, to_years, to_months, to_days)
-        if units[unit_group][factor_time] == 0:
-            raise ZeroDivisionError("Can't divide by zero!")
-        new_time = total_seconds / units[unit_group][factor_time]        
-        print(f"Between {from_time} and {to_time} there are {format_value(new_time)} {factor_time}")        
-
-    # Any other format is invalid!
     else:
-        print("Invalid time conversion format!")
-        return
+        factor_time = resolve_aliases(unit_group, factor_time)
+        if factor_time not in units[unit_group]:
+            raise KeyError(f"Unit type '{factor_time}' not found in '{unit_group}' group!")
+        if units[unit_group][factor_time] == 0:
+            raise ZeroDivisionError("Can't divide by zero!")
+        
+        # E.g. 17h:28m:36s 04h:15m:22s seconds
+        if parse_time_input(from_time) is not None and parse_time_input(to_time) is not None:
+            new_from_time = parse_time_input(from_time)
+            new_to_time = parse_time_input(to_time)
+            new_time = fabs((new_from_time - new_to_time) / units[unit_group][factor_time])
+            print(f"There are {format_value(new_time)} {factor_time} between {from_time} and {to_time}")
+        
+        # E.g. JAN NOV minutes
+        elif from_time in month_indexes and to_time in month_indexes:
+            from_datetime = datetime(2023, month_indexes[from_time], 1)
+            if month_indexes[to_time] > month_indexes[from_time]:
+                to_datetime = datetime(2023, month_indexes[to_time], month_days[to_time])
+            elif month_indexes[to_time] < month_indexes[from_time]:
+                to_datetime = datetime(2024, month_indexes[to_time], month_days[to_time])
+            else:
+                to_datetime = datetime(2023, month_indexes[to_time], month_days[to_time])
+            days = abs((from_datetime - to_datetime)).days + 1
+            if factor_time == "days":
+                new_time = days
+            else:
+                total_seconds = (timedelta(seconds=days * units[unit_group]["days"])).total_seconds()
+                if units[unit_group][factor_time] == 0:
+                    raise ZeroDivisionError("Can't divide by zero!")
+                new_time = total_seconds / units[unit_group][factor_time]
+            print(f"Between {from_time} and {to_time} there are {format_value(new_time)} {factor_time}")
+        
+        # E.g. 2019-11-04 2056-04-28 days
+        elif parse_date_input(from_time) is not None and parse_date_input(to_time) is not None:
+            year_duration = 365
+            try:
+                from_years, from_months, from_days = parse_date_input(from_time)
+                validate_date(from_years, from_months, from_days)
+                to_years, to_months, to_days = parse_date_input(to_time)
+                validate_date(to_years, to_months, to_days)
+            except ValueError:
+                return
+            leap_years = calculate_leap_years(from_years, from_months, from_days, to_years, to_months, to_days)
+            if is_leap(from_years):
+                if from_months >= 2:
+                    month_index_days["2"] = 29
+            from_total_days = from_years * year_duration + sum(month_index_days[str(i)] for i in range(from_months, 13)) - from_days
+            month_index_days["2"] = 28
+            if is_leap(to_years):
+                if to_months >= 2:
+                    month_index_days["2"] = 29                
+            to_total_days = to_years * year_duration + sum(month_index_days[str(i)] for i in range(1, to_months)) + to_days
+            total_days = abs((from_total_days - to_total_days)) + 1 + leap_years
+            total_seconds = total_days * units[unit_group]["days"]
+            new_time = total_seconds / units[unit_group][factor_time]        
+            print(f"Between {from_time} and {to_time} there are {format_value(new_time)} {factor_time}")
+
+        # Any other format is invalid!
+        else:
+            print("Invalid time conversion format!")
+            return
 
     add_to_log(unit_group=unit_group, from_time=from_time, to_time=to_time, factor_time=factor_time, new_time=new_time, is_time_convertion=True)
 
 
 def converter_time_2args(unit_group, from_time, factor_time):
+    factor_time = resolve_aliases(unit_group, factor_time)
+    if factor_time not in units[unit_group]:
+        raise KeyError(f"Unit type '{factor_time}' not found in '{unit_group}' group!")      
+    if units[unit_group][factor_time] == 0:
+        raise ZeroDivisionError("Can't divide by zero!")
+
     # E.g. 17h:28m:36s seconds
     if parse_time_input(from_time) is not None:
-        factor_time = resolve_aliases(unit_group, factor_time)
-        if factor_time not in units[unit_group]:
-            raise KeyError(f"Unit type '{factor_time}' not found in '{unit_group}' group!")      
-        if units[unit_group][factor_time] == 0:
-            raise ZeroDivisionError("Can't divide by zero!")
-        total_seconds = parse_time_input(from_time) 
-        new_time = fabs(total_seconds / units[unit_group][factor_time])
+        total_seconds = parse_time_input(from_time)
+        new_time = (total_seconds / units[unit_group][factor_time])
         print(f"There are {format_value(new_time)} {factor_time} in {from_time}")
 
     # E.g. JAN minutes
     elif from_time in month_indexes:
-        factor_time = resolve_aliases(unit_group, factor_time)
-        if factor_time not in units[unit_group]:
-            raise KeyError(f"Unit type '{factor_time}' not found in '{unit_group}' group!")
         days = month_days[from_time]
         total_seconds = days * units[unit_group]["days"]
-        if units[unit_group][factor_time] == 0:
-            raise ZeroDivisionError("Can't divide by zero!")
         new_time = total_seconds / units[unit_group][factor_time]
         print(f"There are {format_value(new_time)} {factor_time} in {from_time}")
 
     # E.g. 2019-11-04 days
     elif parse_date_input(from_time) is not None:
-        factor_time = resolve_aliases(unit_group, factor_time)
-        if factor_time not in units[unit_group]:
-            raise KeyError(f"Unit type '{factor_time}' not found in '{unit_group}' group!")           
-        years, months, days = parse_date_input(from_time)        
+        years, months, days = parse_date_input(from_time)
         total_seconds = get_seconds(unit_group, years, months, days)
-        if units[unit_group][factor_time] == 0:
-            raise ZeroDivisionError("Can't divide by zero!")
-        new_time = total_seconds / units[unit_group][factor_time]        
+        new_time = total_seconds / units[unit_group][factor_time]
         print(f"There are {format_value(new_time)} {factor_time} in {years} years, {months} months, {days} days")
 
     # Any other format is invalid!
@@ -517,10 +528,6 @@ def converter_time_2args(unit_group, from_time, factor_time):
         return
 
     add_to_log(unit_group=unit_group, from_time=from_time, factor_time=factor_time, new_time=new_time, is_time_convertion=True)
-
-
-def get_seconds(unit_group, years, months, days):
-    return years * units[unit_group]["years"] + months * units[unit_group]["months"] + days * units[unit_group]["days"]
 
 
 def print_time_instructions():
@@ -533,7 +540,7 @@ def print_time_instructions():
 
 
 def parse_time_input(time_str):
-    """Gets user's input of a time and outputs the hours, minutes and seconds"""
+    """Gets user's input of a time and outputs that correspondent value in seconds"""
     if matches := re.search(r"^(?:(\d+)h:)?(?:(\d+)m:)?(?:(\d+)s)?$", time_str):
         hours, minutes, seconds = matches.group(1), matches.group(2), matches.group(3)
         hours = check_time_is_none(hours)
@@ -551,12 +558,49 @@ def check_time_is_none(time_str):
         return 0
 
 
+def get_seconds(unit_group, years, months, days):
+    approx_year_duration = 365.2425 * units[unit_group]["days"]
+    approx_month_duration = 30.436875 * units[unit_group]["days"]
+    return years * approx_year_duration + months * approx_month_duration + days * units[unit_group]["days"]
+
+
 def parse_date_input(time_str):
     """Gets user's input of a date, and outputs the year, month and day"""
     if matches := re.search(r"^(\d+)-(\d+)-(\d+)$", time_str):
         year, month, day = map(int, matches.groups())
         return year, month, day
     return None
+
+
+def calculate_leap_years(from_years, from_months, from_days, to_years, to_months, to_days):
+    """Calculates the number of leap years from a date range"""
+    years_divided_by_4 = (to_years // 4) - ((from_years-1) // 4)
+    years_divided_by_100 = (to_years // 100) - ((from_years-1) // 100)
+    years_divided_by_400  = (to_years // 400) - ((from_years-1) // 400)
+    leap_year_counter = years_divided_by_4 - years_divided_by_100 + years_divided_by_400
+    
+    if is_leap(from_years):
+        if from_months > 2:
+            leap_year_counter -= 1
+    if is_leap(to_years):
+        if to_months < 2 or (to_months == 2 and to_days < 29):
+            leap_year_counter -= 1
+    return leap_year_counter
+
+
+def is_leap(time_int):
+    if (time_int % 4 == 0 and time_int % 100 != 0) or (time_int % 400 == 0):
+        return True
+    return False
+
+
+def validate_date(year, month, day):
+    if not 1 <= month <= 12:
+        raise ValueError(f"Invalid date! '{month}' is not a valid month")
+    max_days = calendar.monthrange(year, month)[1]
+    if not 1 <= day <= max_days:
+         raise ValueError(f"Invalid date! '{day}' is not a valid day for '{month}'")
+    return True
 
 
 def add_to_log(unit_group, from_type=None, to_type=None, amount=None, new_value=None, from_time=None, to_time=None, factor_time=None, new_time=None, is_time_convertion=False) -> None:

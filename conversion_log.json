@@ -5,5 +5,117 @@
         "to_time": "jan",
         "factor_time": "days",
         "result": 31.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": "jan",
+        "factor_time": "days",
+        "result": 31.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": "feb",
+        "factor_time": "days",
+        "result": 59.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "dec",
+        "to_time": "jan",
+        "factor_time": "days",
+        "result": 62.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2019-11-04",
+        "to_time": "2056-04-28",
+        "factor_time": "days",
+        "result": 13328.25
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2025-09-03",
+        "to_time": "2025-09-04",
+        "factor_time": "days",
+        "result": 1.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2025-09-03",
+        "to_time": "2025-09-04",
+        "factor_time": "days",
+        "result": 2.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2025-09-03",
+        "to_time": "2025-09-04",
+        "factor_time": "days",
+        "result": 2.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2028-02-29",
+        "to_time": "2028-03-01",
+        "factor_time": "days",
+        "result": 4.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "seconds",
+        "to_time": "minutes",
+        "factor_time": 10.0,
+        "result": 0.16666666666666666
+    },
+    {
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": "04h:15m:22s",
+        "factor_time": "seconds",
+        "result": 47594.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": "nov",
+        "factor_time": "minutes",
+        "result": 480960.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": "04h:15m:22s",
+        "factor_time": "seconds",
+        "result": 47594.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2019-11-04",
+        "to_time": "2020-04-28",
+        "factor_time": "days",
+        "result": 177.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2019-11-04",
+        "to_time": "2019-11-05",
+        "factor_time": "days",
+        "result": 2.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2028-02-29",
+        "to_time": "2028-03-01",
+        "factor_time": "days",
+        "result": 2.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2028-02-28",
+        "to_time": "2029-02-28",
+        "factor_time": "days",
+        "result": 367.0
     }
 ]

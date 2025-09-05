@@ -5,7 +5,6 @@
 - [ ] Add style to introductory messages and instruction messages and add separator (e.g. with `-`, `=` or `_`)
 - [ ] Use `inflect` library to output singular/plural unit group/type
 - [ ] Add `money` group to allow currency conversion through API requests
-- [ ] Allow user to calculate more complex date and time conversions
 
 
 ## Refactoring tasks
@@ -15,6 +14,7 @@
 - [ ] Clean program by removing multiple repetitive logic throught the codebase and transforming it into a single function
 - [ ] Reestructure `project.py` file into multiple files to keep program cleaner (after adding Class)
 - [ ] Reestructure `final-project` directory
+
 
 ## Testing
 - [ ] Implement a test suite (`test_project.py`)
@@ -61,3 +61,4 @@
 - [x] Remove `while` loops from inner functions
 - [x] Allow user to remove unit type (except base unit)
 - [x] Allow user to change base unit
+- [x] Allow user to calculate more complex date and time conversions
