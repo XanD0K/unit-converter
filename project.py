@@ -384,18 +384,24 @@ def converter_time(unit_group, from_time=None, to_time=None, factor_time=None) -
     if from_time is None or to_time is None or factor_time is None:
         print_time_instructions()
         time_input = input("Enter time conversion: ").strip().lower()
-        if len(time_input) == 3:
+        if len(time_input.split()) == 3:
             try:
                 from_time, to_time, factor_time = time_input.split(" ")
             except ValueError:
                 raise ValueError("Invalid format for date and time conversion!")
-        elif len(time_input) == 2:
+            converter_time_3args(unit_group, from_time, to_time, factor_time)
+            return
+        elif len(time_input.split()) == 2:
             try:
                 from_time, factor_time = time_input.split(" ")
             except ValueError:
                 raise ValueError("Invalid format for date and time conversion!")
-        elif len(time_input) % 2 == 0 and len(time_input) > 2:
+            converter_time_2args(unit_group, from_time, factor_time)
+            return
+        elif len(time_input.split()) % 2 == 0 and len(time_input.split()) > 2:
             ...
+
+def converter_time_3args(unit_group, from_time, to_time, factor_time):
     # E.g. seconds minutes 10
     if resolve_aliases(unit_group, from_time) in units[unit_group] and resolve_aliases(unit_group, to_time) in units[unit_group]:
         from_time = resolve_aliases(unit_group, from_time)
@@ -451,12 +457,11 @@ def converter_time(unit_group, from_time=None, to_time=None, factor_time=None) -
     # E.g. 2019-11-04 2056-04-28 days
     elif parse_date_input(from_time) is not None and parse_date_input(to_time) is not None:
         factor_time = resolve_aliases(unit_group, factor_time)
-        if not factor_time in units[unit_group]:
+        if factor_time not in units[unit_group]:
             raise KeyError(f"Unit type '{factor_time}' not found in '{unit_group}' group!")           
-        new_from_time = parse_date_input(from_time)
-        new_to_time = parse_date_input(to_time)
-        delta = abs(new_from_time - new_to_time)
-        total_seconds = delta.total_seconds()
+        from_years, from_months, from_days = parse_date_input(from_time)
+        to_years, to_months, to_days = parse_date_input(to_time)
+        total_seconds = get_seconds(unit_group, from_years, from_months, from_days) - get_seconds(unit_group, to_years, to_months, to_days)
         if units[unit_group][factor_time] == 0:
             raise ZeroDivisionError("Can't divide by zero!")
         new_time = total_seconds / units[unit_group][factor_time]        
@@ -470,6 +475,54 @@ def converter_time(unit_group, from_time=None, to_time=None, factor_time=None) -
     add_to_log(unit_group=unit_group, from_time=from_time, to_time=to_time, factor_time=factor_time, new_time=new_time, is_time_convertion=True)
 
 
+def converter_time_2args(unit_group, from_time, factor_time):
+    # E.g. 17h:28m:36s seconds
+    if parse_time_input(from_time) is not None:
+        factor_time = resolve_aliases(unit_group, factor_time)
+        if factor_time not in units[unit_group]:
+            raise KeyError(f"Unit type '{factor_time}' not found in '{unit_group}' group!")      
+        if units[unit_group][factor_time] == 0:
+            raise ZeroDivisionError("Can't divide by zero!")
+        total_seconds = parse_time_input(from_time) 
+        new_time = fabs(total_seconds / units[unit_group][factor_time])
+        print(f"There are {format_value(new_time)} {factor_time} in {from_time}")
+
+    # E.g. JAN minutes
+    elif from_time in month_indexes:
+        factor_time = resolve_aliases(unit_group, factor_time)
+        if factor_time not in units[unit_group]:
+            raise KeyError(f"Unit type '{factor_time}' not found in '{unit_group}' group!")
+        days = month_days[from_time]
+        total_seconds = days * units[unit_group]["days"]
+        if units[unit_group][factor_time] == 0:
+            raise ZeroDivisionError("Can't divide by zero!")
+        new_time = total_seconds / units[unit_group][factor_time]
+        print(f"There are {format_value(new_time)} {factor_time} in {from_time}")
+
+    # E.g. 2019-11-04 days
+    elif parse_date_input(from_time) is not None:
+        factor_time = resolve_aliases(unit_group, factor_time)
+        if factor_time not in units[unit_group]:
+            raise KeyError(f"Unit type '{factor_time}' not found in '{unit_group}' group!")           
+        years, months, days = parse_date_input(from_time)        
+        total_seconds = get_seconds(unit_group, years, months, days)
+        if units[unit_group][factor_time] == 0:
+            raise ZeroDivisionError("Can't divide by zero!")
+        new_time = total_seconds / units[unit_group][factor_time]        
+        print(f"There are {format_value(new_time)} {factor_time} in {years} years, {months} months, {days} days")
+
+    # Any other format is invalid!
+    else:
+        print("Invalid time conversion format!")
+        return
+
+    add_to_log(unit_group=unit_group, from_time=from_time, factor_time=factor_time, new_time=new_time, is_time_convertion=True)
+
+
+def get_seconds(unit_group, years, months, days):
+    return years * units[unit_group]["years"] + months * units[unit_group]["months"] + days * units[unit_group]["days"]
+
+
 def print_time_instructions():
     """Prints instructions for converting date and time units"""
     print("For date-time conversion, you can choose from different approaches for conversion:")
@@ -481,7 +534,7 @@ def print_time_instructions():
 
 def parse_time_input(time_str):
     """Gets user's input of a time and outputs the hours, minutes and seconds"""
-    if matches := re.search(r"^(?:(\d{1,2})h:)?(?:(\d{1,2})m:)?(?:(\d{1,2})s)?$", time_str):
+    if matches := re.search(r"^(?:(\d+)h:)?(?:(\d+)m:)?(?:(\d+)s)?$", time_str):
         hours, minutes, seconds = matches.group(1), matches.group(2), matches.group(3)
         hours = check_time_is_none(hours)
         minutes = check_time_is_none(minutes)
@@ -500,9 +553,9 @@ def check_time_is_none(time_str):
 
 def parse_date_input(time_str):
     """Gets user's input of a date, and outputs the year, month and day"""
-    if matches := re.search(r"^(\d{4})-(\d{1,2})-(\d{1,2})$", time_str):
-        year, month, day = int(matches.group(1)), int(matches.group(2)), int(matches.group(3))
-        return datetime(year, month, day)
+    if matches := re.search(r"^(\d+)-(\d+)-(\d+)$", time_str):
+        year, month, day = map(int, matches.groups())
+        return year, month, day
     return None
 
 

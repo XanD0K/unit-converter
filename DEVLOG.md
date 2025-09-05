@@ -12,3 +12,10 @@
 aliases
 turn back to previous code because current approach was getting too verbose, with repetitive code, and helpers functions to solve new problems that just appeared with my solution.
 Thought that probably could have a better way
+
+
+09-04
+changed
+def parse_date_input(time_str):
+    """Gets user's input of a date, and outputs the year, month and day"""
+    if matches := re.search(r"^(\d{4})-(\d{1,2})-(\d{1,2})$", time_str):
