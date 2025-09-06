@@ -303,7 +303,11 @@ def conversion_logic() -> None:
     """Handles all logic of unit conversion"""
     unit_group: str = get_unit_group()
     if unit_group == "time":
-        converter_time(unit_group)
+        print_time_instructions()
+        time_input = input("Enter time conversion: ").strip().lower()
+        if not time_input:
+            raise ValueError("Time conversion can't be empty! Enter an expression!")
+        converter_time(unit_group, *time_input.split())
         return
     from_type, to_type = get_converter_units(unit_group)
     amount: float = get_amount(from_type)
@@ -384,32 +388,46 @@ def converter_temp(amount, unit_group, from_type, to_type) -> float:
     return (temp_in_celsius * factor_to) + offset_to
 
 
-def converter_time(unit_group, from_time=None, to_time=None, factor_time=None) -> None:
-    """Handles conversion for time units"""
-    if from_time is None or to_time is None or factor_time is None:
-        print_time_instructions()
-        time_input = input("Enter time conversion: ").strip().lower()
-        if not time_input:
-            raise ValueError("Time conversion can't be empty! Enter an expression!")
-
-    if len(time_input.split()) == 2:
+def converter_time(unit_group, *args) -> None:
+    """Handles conversion for time units"""    
+    if len(args) == 2:
         try:
-            from_time, factor_time = time_input.split(" ")
+            from_time, factor_time = args
         except ValueError:
             raise ValueError("Invalid format for date and time conversion!")
         converter_time_2args(unit_group, from_time, factor_time)
         return
-    elif len(time_input.split()) == 3:
+    elif len(args) == 3:
         try:
-            from_time, to_time, factor_time = time_input.split(" ")
+            from_time, to_time, factor_time = args
         except ValueError:
             raise ValueError("Invalid format for date and time conversion!")
         converter_time_3args(unit_group, from_time, to_time, factor_time)
         return
 
-    elif len(time_input.split()) % 2 == 0 and len(time_input.split()) > 2:
-        ...
+    elif len(args) % 2 == 0 and len(args) > 2:
+        target_type = args[-1]  # Unit type that all args will be converted to
+        if target_type not in units[unit_group]:
+            raise ValueError(f"'{target_type}' is not a type for '{unit_group}' group!")
+        if units[unit_group][target_type] == 0:
+            raise ZeroDivisionError("Can't divide by zero!")
         
+        total_seconds = 0
+        for number, unit_type in zip(args[0::2], args[1::2]):
+            try:
+                number = float(number)
+            except:
+                raise ValueError(f"'{number}' is an invalid amount!")            
+            if resolve_aliases(unit_type) not in units[unit_group]:
+                raise ValueError(f"'{unit_type}' is not a type for '{unit_group}' group!")
+            
+            total_seconds += number * units[unit_group][resolve_aliases(unit_type)]
+        
+        new_time = total_seconds / units[unit_group][target_type]
+
+        print(f"{format_value(args[:-1])} = {new_time}")
+        add_to_log(unit_group=unit_group, from_time=from_time, to_time=to_time, factor_time=factor_time, new_time=new_time, is_time_convertion=True)
+
     else:
         raise ValueError("Invalid format for date and time conversion!")
 

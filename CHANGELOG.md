@@ -10,15 +10,24 @@
 ### Removed
 
 
+## [0.8.5] - 2025-09-06
+### Changed
+- Changed `converter_time` function to receive `*args` as arguments, to handle even more complex conversions
+
+
+
+
+
+
+
+
+
 ## [0.8.4] - 2025-09-05
 ### Added
 - Implemented `get_seconds` function to calculate seconds from a given date
 - Implemented `calculate_leap_years` function to calculate the number of leap years from 2 given dates
 - Implemented `validate_date` function to validate a given date
 - Added `month_index_days.json` dictionary to be used in date-time conversions
-
-### Changed
-- Changed `converter_time` function to receive `*args` as arguments, to allow complex conversions
 
 
 ## [0.8.3] - 2025-09-04
