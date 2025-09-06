@@ -12,8 +12,11 @@
 - [ ] Add remmaining comments throughout the codebase
 - [ ] Add remmaining type hints throughout the codebase
 - [ ] Clean program by removing multiple repetitive logic throught the codebase and transforming it into a single function
+- [ ] Polish code, improving readability
 - [ ] Reestructure `project.py` file into multiple files to keep program cleaner (after adding Class)
 - [ ] Reestructure `final-project` directory
+- [ ] Change `month`'s dictionaries structure
+
 
 
 ## Testing

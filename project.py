@@ -117,9 +117,7 @@ def handle_cli(args):
     # 'convert' command 
     convert_parser = subparser.add_parser("convert", aliases=["c"], help="Convert values")
     convert_parser.add_argument("unit_group", help="Unit group")
-    convert_parser.add_argument("from_type", help="Source unit type")
-    convert_parser.add_argument("to_type", help="Target unit type")
-    convert_parser.add_argument("amount", nargs="?", help="Amount to convert")
+    convert_parser.add_argument("args", nargs="+", help="Source unit type")
     # 'add' command
     add_parser = subparser.add_parser("add", aliases=["a"], help="Add new unit group/type")
     add_parser.add_argument("unit_group", help="Unit group")
@@ -146,8 +144,6 @@ def handle_cli(args):
         unit_group = parsed_args.unit_group.lower()
     elif parsed_args.command in ["convert", "c"]:
         unit_group = parsed_args.unit_group.lower()
-        from_type = parsed_args.from_type.lower()
-        to_type = parsed_args.to_type.lower()
     elif parsed_args.command in ["add", "a"]:
         unit_group = parsed_args.unit_group.lower()
         unit_type = parsed_args.unit_type.lower()
@@ -170,18 +166,18 @@ def handle_cli(args):
         print_types(unit_group)
     elif parsed_args.command in ["convert", "c"]:
         if unit_group == "time":
-            converter_time(unit_group, from_type, to_type, parsed_args.amount)
+            converter_time(unit_group, *parsed_args.args)
         else:
-            from_type = resolve_aliases(unit_group, from_type)
-            to_type = resolve_aliases(unit_group, to_type)
-            if not parsed_args.amount:
-                raise ValueError("You need to enter an amount to convert!")
+            if len(parsed_args.args) not in [2, 3]:
+                raise ValueError("Invalid format for non-time conversion! Usage: <from_type> <to_type> <amount>")
+            from_type = resolve_aliases(unit_group, parsed_args.args[0].lower())
+            to_type = resolve_aliases(unit_group, parsed_args.args[1].lower())
             try:
-                amount = float(parsed_args.amount)
-            except (ValueError, TypeError):
-                raise ValueError(f"'{parsed_args.amount}' is an invalid amount!")
-            new_value = converter(amount, unit_group, from_type, to_type)
-            print(f"{format_value(amount)} {from_type} = {format_value(new_value)} {to_type}")
+                amount = float(parsed_args.args[2]) if len(parsed_args.args) == 3 else 1.0
+                new_value = converter(amount, unit_group, from_type, to_type)
+                print(f"{format_value(amount)} {from_type} = {format_value(new_value)} {to_type}")
+            except (ValueError, TypeError, KeyError) as e:
+                raise ValueError(f"Error: {str(e)}")
     elif parsed_args.command in ["add", "a"]:
         # Adds temperature type
         if unit_group == "temperature":
@@ -286,17 +282,17 @@ def print_types(unit_group=None) -> None:
     if unit_group is None:
         unit_group: str = get_unit_group()
     # Used to construct the sequence of unit_type with its respective aliases
-    formated_output = []
+    formatted_output = []
     # Iterates over the outter keys of 'units' dictionary
     for unit_type in units[unit_group]:
         # Gets all aliases for a specific unit type
         aliases = [alias for alias, unit in unit_aliases.get(unit_group, {}).items() if unit == unit_type]
         if aliases:
-            formated_output.append(f"{unit_type} ({', '.join(f'\'{alias}\'' for alias in aliases)})")
+            formatted_output.append(f"{unit_type} ({', '.join(f'\'{alias}\'' for alias in aliases)})")
         else:
-            formated_output.append(unit_type)
+            formatted_output.append(unit_type)
 
-    print("Units: " + ", ".join(formated_output))
+    print("Units: " + ", ".join(formatted_output))
 
 
 def conversion_logic() -> None:
@@ -405,28 +401,36 @@ def converter_time(unit_group, *args) -> None:
         converter_time_3args(unit_group, from_time, to_time, factor_time)
         return
 
-    elif len(args) % 2 == 0 and len(args) > 2:
+    # E.g. 5 years 10 months 10 days 8 hours 56 minutes seconds
+    elif len(args) % 2 != 0 and len(args) > 2:
         target_type = args[-1]  # Unit type that all args will be converted to
         if target_type not in units[unit_group]:
             raise ValueError(f"'{target_type}' is not a type for '{unit_group}' group!")
         if units[unit_group][target_type] == 0:
             raise ZeroDivisionError("Can't divide by zero!")
-        
+        formatted_value = []
         total_seconds = 0
         for number, unit_type in zip(args[0::2], args[1::2]):
             try:
                 number = float(number)
             except:
                 raise ValueError(f"'{number}' is an invalid amount!")            
-            if resolve_aliases(unit_type) not in units[unit_group]:
+            if resolve_aliases(unit_group, unit_type) not in units[unit_group]:
                 raise ValueError(f"'{unit_type}' is not a type for '{unit_group}' group!")
             
-            total_seconds += number * units[unit_group][resolve_aliases(unit_type)]
+            total_seconds += number * units[unit_group][resolve_aliases(unit_group, unit_type)]
+            formatted_value.append((format_value(number), unit_type))
         
         new_time = total_seconds / units[unit_group][target_type]
 
-        print(f"{format_value(args[:-1])} = {new_time}")
-        add_to_log(unit_group=unit_group, from_time=from_time, to_time=to_time, factor_time=factor_time, new_time=new_time, is_time_convertion=True)
+        print(f"{' '.join(f'{num} {unit}' for num, unit in formatted_value)} = {format_value(new_time)} {target_type}")
+        add_to_log(
+            unit_group=unit_group, 
+            from_time=" ".join(f"{num} {unit}" for num, unit in formatted_value), 
+            to_time=target_type, 
+            new_time=new_time, 
+            is_time_convertion=True
+        )
 
     else:
         raise ValueError("Invalid format for date and time conversion!")
@@ -490,16 +494,16 @@ def converter_time_3args(unit_group, from_time, to_time, factor_time):
                 validate_date(to_years, to_months, to_days)
             except ValueError:
                 return
+            from_total_days = from_years * year_duration
+            to_total_days = to_years * year_duration
+            for month in range(1, from_months):
+                from_total_days += month_index_days[str(month)]
+            for month in range(1, to_months):
+                to_total_days += month_index_days[str(month)]
+            from_total_days += to_days
+            to_total_days += to_days
+            
             leap_years = calculate_leap_years(from_years, from_months, from_days, to_years, to_months, to_days)
-            if is_leap(from_years):
-                if from_months >= 2:
-                    month_index_days["2"] = 29
-            from_total_days = from_years * year_duration + sum(month_index_days[str(i)] for i in range(from_months, 13)) - from_days
-            month_index_days["2"] = 28
-            if is_leap(to_years):
-                if to_months >= 2:
-                    month_index_days["2"] = 29                
-            to_total_days = to_years * year_duration + sum(month_index_days[str(i)] for i in range(1, to_months)) + to_days
             total_days = abs((from_total_days - to_total_days)) + 1 + leap_years
             total_seconds = total_days * units[unit_group]["days"]
             new_time = total_seconds / units[unit_group][factor_time]        
@@ -625,8 +629,6 @@ def add_to_log(unit_group, from_type=None, to_type=None, amount=None, new_value=
     """Adds successfully converted value to log file (conversion_log.json)"""
     global conversion_log
     if is_time_convertion:
-        if None in (from_time, to_time, factor_time, new_time):
-            raise ValueError("Missing required argument!")
         entry = {
         "unit_group": unit_group,
         "from_time": from_time,
@@ -634,9 +636,7 @@ def add_to_log(unit_group, from_type=None, to_type=None, amount=None, new_value=
         "factor_time": factor_time,
         "result": float(new_time)
     }
-    else:
-        if None in (from_type, to_type, amount, new_value):
-            raise ValueError("Missing required argument!")            
+    else:           
         entry = {
             "unit_group": unit_group,
             "from_type": from_type,

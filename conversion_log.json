@@ -117,5 +117,138 @@
         "to_time": "2029-02-28",
         "factor_time": "days",
         "result": 367.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "seconds",
+        "to_time": "minutes",
+        "factor_time": 10.0,
+        "result": 0.16666666666666666
+    },
+    {
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": "04h:15m:22s",
+        "factor_time": "seconds",
+        "result": 47594.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": "nov",
+        "factor_time": "days",
+        "result": 334.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2019-11-04",
+        "to_time": "2056-04-28",
+        "factor_time": "days",
+        "result": 13578.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2025-01-01",
+        "to_time": "2025-12-31",
+        "factor_time": "days",
+        "result": 1.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2025-01-01",
+        "to_time": "2025-01-31",
+        "factor_time": "days",
+        "result": 334.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2019-11-04",
+        "to_time": null,
+        "factor_time": "days",
+        "result": 737763.413125
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2019-11-04",
+        "to_time": null,
+        "factor_time": "seconds",
+        "result": 63742758894.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2025-01-01",
+        "to_time": "2025-01-31",
+        "factor_time": "days",
+        "result": 30.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2025-01-01",
+        "to_time": "2025-12-31",
+        "factor_time": "days",
+        "result": 364.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "seconds",
+        "to_time": "minutes",
+        "factor_time": 10.0,
+        "result": 0.16666666666666666
+    },
+    {
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": "04h:15m:22s",
+        "factor_time": "seconds",
+        "result": 47594.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": "nov",
+        "factor_time": "seconds",
+        "result": 28857600.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2019-11-04",
+        "to_time": "2056-04-28",
+        "factor_time": "days",
+        "result": 13302.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": null,
+        "factor_time": "seconds",
+        "result": 2678400.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": null,
+        "factor_time": "seconds",
+        "result": 62916.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2019-11-04",
+        "to_time": null,
+        "factor_time": "days",
+        "result": 737763.413125
+    },
+    {
+        "unit_group": "time",
+        "from_time": "5.0 years 10.0 months 10.0 days 8.0 hours 56.0 minutes",
+        "to_time": "seconds",
+        "factor_time": null,
+        "result": 184604160.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "5.0 years 10.0 months 10.0 days 8.0 hours 56.0 minutes",
+        "to_time": "seconds",
+        "factor_time": null,
+        "result": 184604160.0
     }
 ]
