@@ -9,11 +9,14 @@
 
 ### Removed
 
+## [0.8.6] - 2025-09-06
+
 
 ## [0.8.5] - 2025-09-06
 ### Changed
 - Changed `converter_time` function to receive `*args` as arguments, to handle even more complex conversions
 - Changed `handle_cli` function to also allow multiple arguments with `*args`
+- Changed `print_history` function to also print new conversion formats
 
 
 ## [0.8.4] - 2025-09-05

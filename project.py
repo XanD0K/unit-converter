@@ -266,13 +266,16 @@ def print_history(limit: int = 10) -> None:
     """Prints previous conversion request (default = last 10 entries)"""
     if not conversion_log:
         print("Conversion history is empty!")
-        return
+        return        
+    
     for entry in conversion_log[-limit:]:  # Gets the last 10 entries
         if entry["unit_group"] == "time":
             if entry["from_time"] in units["time"]:
                 print(f"{format_value(entry['factor_time'])} {entry['from_time']} = {format_value(entry['result'])} {entry['to_time']} (Group: {entry['unit_group']})")
             elif ":" in entry["from_time"] or entry["from_time"] in month_indexes or "-" in entry["from_time"]:
                 print(f"{format_value(entry['result'])} {entry['factor_time']} between {entry['from_time']} {entry['to_time']} (Group: {entry['unit_group']})")
+            elif len(entry["from_time"].split()) > 1:
+                print(f"{entry["from_time"]} = {format_value(entry["result"])} {entry["to_time"]}")
         else:
             print(f"{format_value(entry['amount'])} {entry['from_type']} = {format_value(entry['result'])} {entry['to_type']} (Group: {entry['unit_group']})")
 
@@ -497,10 +500,10 @@ def converter_time_3args(unit_group, from_time, to_time, factor_time):
             from_total_days = from_years * year_duration
             to_total_days = to_years * year_duration
             for month in range(1, from_months):
-                from_total_days += month_index_days[str(month)]
+                from_total_days += month_days[str(month)].keys()
             for month in range(1, to_months):
-                to_total_days += month_index_days[str(month)]
-            from_total_days += to_days
+                to_total_days += month_days[str(month)].keys()
+            from_total_days += from_days
             to_total_days += to_days
             
             leap_years = calculate_leap_years(from_years, from_months, from_days, to_years, to_months, to_days)
@@ -629,6 +632,8 @@ def add_to_log(unit_group, from_type=None, to_type=None, amount=None, new_value=
     """Adds successfully converted value to log file (conversion_log.json)"""
     global conversion_log
     if is_time_convertion:
+        if all(x is None for x in (from_time, to_time, factor_time, new_time)):
+            raise ValueError("Missing required arguments!")
         entry = {
         "unit_group": unit_group,
         "from_time": from_time,
@@ -636,7 +641,9 @@ def add_to_log(unit_group, from_type=None, to_type=None, amount=None, new_value=
         "factor_time": factor_time,
         "result": float(new_time)
     }
-    else:           
+    else:
+        if all(x is None for x in (from_type, to_type, amount, new_value)):
+            raise ValueError("Missing required arguments!")
         entry = {
             "unit_group": unit_group,
             "from_type": from_type,

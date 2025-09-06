@@ -250,5 +250,54 @@
         "to_time": "seconds",
         "factor_time": null,
         "result": 184604160.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2019-11-04",
+        "to_time": "2056-04-28",
+        "factor_time": "days",
+        "result": 13302.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2019-01-01",
+        "to_time": "2019-01-31",
+        "factor_time": "days",
+        "result": 1.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2019-01-01",
+        "to_time": "2019-01-31",
+        "factor_time": "days",
+        "result": 1.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2019-01-01",
+        "to_time": "2019-01-31",
+        "factor_time": "days",
+        "result": 1.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2019-01-01",
+        "to_time": "2019-01-31",
+        "factor_time": "days",
+        "result": 1.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2019-01-01",
+        "to_time": "2019-01-31",
+        "factor_time": "days",
+        "result": 31.0
+    },
+    {
+        "unit_group": "time",
+        "from_time": "2019-01-01",
+        "to_time": "2019-01-31",
+        "factor_time": "days",
+        "result": 31.0
     }
 ]
