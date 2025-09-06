@@ -500,9 +500,9 @@ def converter_time_3args(unit_group, from_time, to_time, factor_time):
             from_total_days = from_years * year_duration
             to_total_days = to_years * year_duration
             for month in range(1, from_months):
-                from_total_days += month_days[str(month)].keys()
+                from_total_days += month_index_days[str(month)]
             for month in range(1, to_months):
-                to_total_days += month_days[str(month)].keys()
+                to_total_days += month_index_days[str(month)]
             from_total_days += from_days
             to_total_days += to_days
             
