@@ -2,9 +2,6 @@
 
 
 ## New features
-- [ ] Add style to introductory messages and instruction messages and add separator (e.g. with `-`, `=` or `_`)
-- [ ] Use `inflect` library to output singular/plural unit group/type
-- [ ] Add `money` group to allow currency conversion through API requests
 
 
 ## Refactoring tasks
@@ -15,8 +12,6 @@
 - [ ] Polish code, improving readability
 - [ ] Reestructure `project.py` file into multiple files to keep program cleaner (after adding Class)
 - [ ] Reestructure `final-project` directory
-- [ ] Change `month`'s dictionaries structure
-
 
 
 ## Testing
@@ -65,3 +60,8 @@
 - [x] Allow user to remove unit type (except base unit)
 - [x] Allow user to change base unit
 - [x] Allow user to calculate more complex date and time conversions
+- [x] Change `month`'s dictionaries structure
+- [x] Automatically delete data in `change_log.json` file after some time
+- [-] Add style to introductory messages and instruction messages and add separator (e.g. with `-`, `=` or `_`)
+- [-] Use `inflect` library to output singular/plural unit group/type
+- [-] Add `money` group to allow currency conversion through API requests

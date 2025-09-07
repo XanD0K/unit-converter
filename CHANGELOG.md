@@ -9,7 +9,14 @@
 
 ### Removed
 
-## [0.8.6] - 2025-09-06
+## [0.8.6] - 2025-09-07
+### Added
+- Created `ALL_MONTHS` global variable containing all months's names in `month_days.json` file
+- Created `get_days_from_month`, `get_index_from_month` and `gets_days_from_index` helper functions to handle different queries in `month_days.json` file 
+- Created `clean_history` function that deletes all entries older than 3 days from `conversion_log.json` file, preventing dealing with a big file
+
+### Changed
+- Merged `month_index_days.json` and `month_indexes.json` files into `month_days.json` file, changin it's structure to suport multiple queries
 
 
 ## [0.8.5] - 2025-09-06

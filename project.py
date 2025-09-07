@@ -19,23 +19,20 @@ try:
     # Opens dictionary containing all conversions history
     with open("conversion_log.json", "r") as file:
         conversion_log = json.load(file)
-    # Opens dictionary that relates each month with an index
-    with open("month_indexes.json", "r") as file:
-        month_indexes = json.load(file)
     # Opens dictionary that contains all aliases for each unit type
     with open("unit_aliases.json", "r") as file:
         unit_aliases = json.load(file)
     with open("month_days.json", "r") as file:
         month_days = json.load(file)
-    with open("month_index_days.json", "r") as file:
-        month_index_days = json.load(file)
 except FileNotFoundError:
     sys.exit("Error: file not found!")
 except json.JSONDecodeError:
     sys.exit("Error: file if corrupted!")
 
 
-def validate_dictionaries(units, base_units, conversion_log, month_indexes, unit_aliases, month_days, month_index_days):
+
+
+def validate_dictionaries(units, base_units, conversion_log, unit_aliases, month_days):
     """Validates dictionaries before entering the program"""
     # Ensures 'units.json' is a dictionary and it's not empty
     if not isinstance(units, dict) or not units:
@@ -56,13 +53,8 @@ def validate_dictionaries(units, base_units, conversion_log, month_indexes, unit
     # Ensures 'convert_history' is a list
     if not isinstance(conversion_log, list):
         raise ValueError("'convert_history' structure is corrupted!")
-    # Ensures 'month_indexes' is a dictionary and it's not empty
-    if not isinstance(month_indexes, dict) or not month_indexes:
-        raise ValueError("'month_indexes' structure is corrupted!")
     if not isinstance(month_days, dict) or not month_days:
         raise ValueError("'month_days' structure is corrupted!")
-    if not isinstance(month_index_days, dict) or not month_index_days:
-        raise ValueError("'month_index_days' structure is corrupted!")
     # Ensures 'unit_aliases' is a dictionary and it's not empty
     if not isinstance(unit_aliases, dict) or not unit_aliases:
         raise ValueError("'unit_aliases.json' structure is corrupted!")
@@ -80,7 +72,11 @@ def validate_dictionaries(units, base_units, conversion_log, month_indexes, unit
             seen_aliases.add(alias)
 
 
-validate_dictionaries(units, base_units, conversion_log, month_indexes, unit_aliases, month_days, month_index_days)
+validate_dictionaries(units, base_units, conversion_log, unit_aliases, month_days)
+
+ALL_MONTHS = [next(iter(value)) for value in month_days.values()]
+
+
 
 
 def main() -> None:
@@ -272,7 +268,7 @@ def print_history(limit: int = 10) -> None:
         if entry["unit_group"] == "time":
             if entry["from_time"] in units["time"]:
                 print(f"{format_value(entry['factor_time'])} {entry['from_time']} = {format_value(entry['result'])} {entry['to_time']} (Group: {entry['unit_group']})")
-            elif ":" in entry["from_time"] or entry["from_time"] in month_indexes or "-" in entry["from_time"]:
+            elif ":" in entry["from_time"] or entry["from_time"] in ALL_MONTHS or "-" in entry["from_time"]:
                 print(f"{format_value(entry['result'])} {entry['factor_time']} between {entry['from_time']} {entry['to_time']} (Group: {entry['unit_group']})")
             elif len(entry["from_time"].split()) > 1:
                 print(f"{entry["from_time"]} = {format_value(entry["result"])} {entry["to_time"]}")
@@ -469,14 +465,14 @@ def converter_time_3args(unit_group, from_time, to_time, factor_time):
             print(f"There are {format_value(new_time)} {factor_time} between {from_time} and {to_time}")
         
         # E.g. JAN NOV minutes
-        elif from_time in month_indexes and to_time in month_indexes:
-            from_datetime = datetime(2023, month_indexes[from_time], 1)
-            if month_indexes[to_time] > month_indexes[from_time]:
-                to_datetime = datetime(2023, month_indexes[to_time], month_days[to_time])
-            elif month_indexes[to_time] < month_indexes[from_time]:
-                to_datetime = datetime(2024, month_indexes[to_time], month_days[to_time])
+        elif from_time in ALL_MONTHS and to_time in ALL_MONTHS:
+            from_datetime = datetime(2023, get_index_from_month(from_time), 1)
+            if get_index_from_month(to_time) > get_index_from_month(from_time):
+                to_datetime = datetime(2023, get_index_from_month(to_time), get_days_from_month(to_time))
+            elif get_index_from_month(to_time) < get_index_from_month(from_time):
+                to_datetime = datetime(2024, get_index_from_month(to_time), get_days_from_month(to_time))
             else:
-                to_datetime = datetime(2023, month_indexes[to_time], month_days[to_time])
+                to_datetime = datetime(2023, get_index_from_month(to_time), get_days_from_month(to_time))
             days = abs((from_datetime - to_datetime)).days + 1
             if factor_time == "days":
                 new_time = days
@@ -496,13 +492,13 @@ def converter_time_3args(unit_group, from_time, to_time, factor_time):
                 to_years, to_months, to_days = parse_date_input(to_time)
                 validate_date(to_years, to_months, to_days)
             except ValueError:
-                return
+                raise ValueError("Invalid date!")
             from_total_days = from_years * year_duration
             to_total_days = to_years * year_duration
             for month in range(1, from_months):
-                from_total_days += month_index_days[str(month)]
+                from_total_days += gets_days_from_index(str(month))
             for month in range(1, to_months):
-                to_total_days += month_index_days[str(month)]
+                to_total_days += gets_days_from_index(str(month))
             from_total_days += from_days
             to_total_days += to_days
             
@@ -534,8 +530,8 @@ def converter_time_2args(unit_group, from_time, factor_time):
         print(f"There are {format_value(new_time)} {factor_time} in {from_time}")
 
     # E.g. JAN minutes
-    elif from_time in month_indexes:
-        days = month_days[from_time]
+    elif from_time in ALL_MONTHS:
+        days = get_days_from_month(from_time)
         total_seconds = days * units[unit_group]["days"]
         new_time = total_seconds / units[unit_group][factor_time]
         print(f"There are {format_value(new_time)} {factor_time} in {from_time}")
@@ -628,6 +624,22 @@ def validate_date(year, month, day):
     return True
 
 
+def get_days_from_month(month):
+    """Gets days for a specificed month's name"""
+    return next((value[month] for value in month_days.values() if month in value), None)
+    # return next((days for value in month_days.values() for name, days in value.items() if name==month), None)
+
+
+def get_index_from_month(month):
+    """Gets month's index given its name"""
+    return next((int(index) for index, value in month_days.items() if month in value), None)
+
+
+def gets_days_from_index(month_index):
+    """Gets days for a specificed month's index"""
+    return next(iter(month_days[month_index].values()), None)
+
+
 def add_to_log(unit_group, from_type=None, to_type=None, amount=None, new_value=None, from_time=None, to_time=None, factor_time=None, new_time=None, is_time_convertion=False) -> None:
     """Adds successfully converted value to log file (conversion_log.json)"""
     global conversion_log
@@ -635,23 +647,30 @@ def add_to_log(unit_group, from_type=None, to_type=None, amount=None, new_value=
         if all(x is None for x in (from_time, to_time, factor_time, new_time)):
             raise ValueError("Missing required arguments!")
         entry = {
-        "unit_group": unit_group,
-        "from_time": from_time,
-        "to_time": to_time,
-        "factor_time": factor_time,
-        "result": float(new_time)
-    }
+            "date": datetime.now().isoformat(),
+            "unit_group": unit_group,
+            "from_time": from_time,
+            "to_time": to_time,
+            "factor_time": factor_time,
+            "result": float(new_time)
+        }
     else:
         if all(x is None for x in (from_type, to_type, amount, new_value)):
             raise ValueError("Missing required arguments!")
         entry = {
+            "date": datetime.now().isoformat(),
             "unit_group": unit_group,
             "from_type": from_type,
             "to_type": to_type,
             "amount": amount,
             "result": float(new_value)
         }
+
+    # Cleans 'conversion_log.json' file, preventing big files
+    conversion_log = clean_history()
+    # Appends new entry
     conversion_log.append(entry)
+
     try:
         conversion_log_backup = conversion_log.copy()
         with open("conversion_log.json", "w") as file:
@@ -659,6 +678,11 @@ def add_to_log(unit_group, from_type=None, to_type=None, amount=None, new_value=
     except PermissionError:
         print("Error! You don't have permition to write to conversion_log.json!")
         conversion_log = conversion_log_backup
+
+
+def clean_history():
+    """Cleans 'conversion_log.json' file keeping only entries not older than 3 days"""
+    return [entry for entry in conversion_log if "date" in entry and datetime.now() - datetime.fromisoformat(entry["date"]) <= timedelta(days=3)]
 
 
 def format_value(value: float) -> str:
