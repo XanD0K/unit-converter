@@ -77,8 +77,6 @@ validate_dictionaries(units, base_units, conversion_log, unit_aliases, month_day
 ALL_MONTHS = [next(iter(value)) for value in month_days.values()]
 
 
-
-
 def main() -> None:
     # Handles command-line arguments
     try:
@@ -133,36 +131,20 @@ def handle_cli(args):
     change_base_parser.add_argument("unit_group", help="Unit group")
     change_base_parser.add_argument("new_base_unit", help="New base unit")
 
-    # Parses arguments
+    # Parses arguments and calls its respective function
     parsed_args = parser.parse_args(formatted_args[1:])  # Skips first argument (program's name)
-    # Lowercases arguments
-    if parsed_args.command in ["types", "t"]:
-        unit_group = parsed_args.unit_group.lower()
-    elif parsed_args.command in ["convert", "c"]:
-        unit_group = parsed_args.unit_group.lower()
-    elif parsed_args.command in ["add", "a"]:
-        unit_group = parsed_args.unit_group.lower()
-        unit_type = parsed_args.unit_type.lower()
-        action = parsed_args.action.lower()
-    elif parsed_args.command in ["aliases", "al"]:
-        unit_group = parsed_args.unit_group.lower()
-        unit_type = parsed_args.unit_type.lower()
-        action = parsed_args.action.lower()
-        alias = parsed_args.alias.lower()
-    elif parsed_args.command in ["change-base", "cb"]:
-        unit_group = parsed_args.unit_group.lower()
-        new_base_unit = parsed_args.new_base_unit.lower()
-    
-    # Calls argument respective function
     if parsed_args.command in ["groups", "g"]:
         print_groups()
     elif parsed_args.command in ["history", "h"]:
         print_history(parsed_args.limit)
     elif parsed_args.command in ["types", "t"]:
+        unit_group = parsed_args.unit_group.lower()
         print_types(unit_group)
     elif parsed_args.command in ["convert", "c"]:
+        unit_group = parsed_args.unit_group.lower()
         if unit_group == "time":
-            converter_time(unit_group, *parsed_args.args)
+            lower_args = [arg.lower() for arg in parsed_args.args]
+            converter_time(unit_group, *lower_args)
         else:
             if len(parsed_args.args) not in [2, 3]:
                 raise ValueError("Invalid format for non-time conversion! Usage: <from_type> <to_type> <amount>")
@@ -175,6 +157,9 @@ def handle_cli(args):
             except (ValueError, TypeError, KeyError) as e:
                 raise ValueError(f"Error: {str(e)}")
     elif parsed_args.command in ["add", "a"]:
+        unit_group = parsed_args.unit_group.lower()
+        unit_type = parsed_args.unit_type.lower()
+        action = parsed_args.action.lower()
         # Adds temperature type
         if unit_group == "temperature":
             if parsed_args.factor is None or parsed_args.offset is None:
@@ -189,8 +174,14 @@ def handle_cli(args):
         else:
             add_new_group(unit_group)
     elif parsed_args.command in ["aliases", "al"]:
+        unit_group = parsed_args.unit_group.lower()
+        unit_type = parsed_args.unit_type.lower()
+        action = parsed_args.action.lower()
+        alias = parsed_args.alias.lower()
         manage_aliases(unit_group, unit_type, action, alias)
     elif parsed_args.command in ["change-base", "cb"]:
+        unit_group = parsed_args.unit_group.lower()
+        new_base_unit = parsed_args.new_base_unit.lower()
         change_base_unit(unit_group, new_base_unit)
 
 
@@ -359,8 +350,7 @@ def converter(amount, unit_group, from_type, to_type) -> float:
         add_to_log(unit_group=unit_group, from_type=from_type, to_type=to_type, amount=amount, new_value=new_temp)
         return new_temp   
     
-    if float(units[unit_group][to_type]) == 0:
-        raise ZeroDivisionError("Can't divide by zero!")
+    zero_division_checker(float(units[unit_group][to_type]))
     new_value = amount * (units[unit_group][from_type]/units[unit_group][to_type])
     # Adds to log file
     add_to_log(unit_group=unit_group, from_type=from_type, to_type=to_type, amount=amount, new_value=new_value)
@@ -375,8 +365,7 @@ def converter_temp(amount, unit_group, from_type, to_type) -> float:
     factor_to, offset_to = units[unit_group][to_type]
     if from_type == "celsius":
         return (amount * factor_to) + offset_to
-    if factor_from == 0:
-        raise ZeroDivisionError("Can't divide by zero!")
+    zero_division_checker(factor_from)
     temp_in_celsius = (amount - offset_from) / factor_from
     if to_type == "celsius":
         return temp_in_celsius
@@ -392,6 +381,7 @@ def converter_time(unit_group, *args) -> None:
             raise ValueError("Invalid format for date and time conversion!")
         converter_time_2args(unit_group, from_time, factor_time)
         return
+    
     elif len(args) == 3:
         try:
             from_time, to_time, factor_time = args
@@ -405,8 +395,7 @@ def converter_time(unit_group, *args) -> None:
         target_type = args[-1]  # Unit type that all args will be converted to
         if target_type not in units[unit_group]:
             raise ValueError(f"'{target_type}' is not a type for '{unit_group}' group!")
-        if units[unit_group][target_type] == 0:
-            raise ZeroDivisionError("Can't divide by zero!")
+        zero_division_checker(units[unit_group][target_type])
         formatted_value = []
         total_seconds = 0
         for number, unit_type in zip(args[0::2], args[1::2]):
@@ -445,8 +434,7 @@ def converter_time_3args(unit_group, from_time, to_time, factor_time):
         except ValueError:
             raise ValueError("Enter a valid value for conversion!")            
         total_seconds = factor_time * units[unit_group][from_time]
-        if units[unit_group][to_time] == 0:
-            raise ZeroDivisionError("Can't divide by zero!")
+        zero_division_checker(units[unit_group][to_time])
         new_time = total_seconds / units[unit_group][to_time]
         print(f"{format_value(factor_time)} {from_time} = {format_value(new_time)} {to_time}")
 
@@ -454,8 +442,7 @@ def converter_time_3args(unit_group, from_time, to_time, factor_time):
         factor_time = resolve_aliases(unit_group, factor_time)
         if factor_time not in units[unit_group]:
             raise KeyError(f"Unit type '{factor_time}' not found in '{unit_group}' group!")
-        if units[unit_group][factor_time] == 0:
-            raise ZeroDivisionError("Can't divide by zero!")
+        zero_division_checker(units[unit_group][factor_time])
         
         # E.g. 17h:28m:36s 04h:15m:22s seconds
         if parse_time_input(from_time) is not None and parse_time_input(to_time) is not None:
@@ -478,8 +465,7 @@ def converter_time_3args(unit_group, from_time, to_time, factor_time):
                 new_time = days
             else:
                 total_seconds = (timedelta(seconds=days * units[unit_group]["days"])).total_seconds()
-                if units[unit_group][factor_time] == 0:
-                    raise ZeroDivisionError("Can't divide by zero!")
+                zero_division_checker(units[unit_group][factor_time])
                 new_time = total_seconds / units[unit_group][factor_time]
             print(f"Between {from_time} and {to_time} there are {format_value(new_time)} {factor_time}")
         
@@ -520,8 +506,7 @@ def converter_time_2args(unit_group, from_time, factor_time):
     factor_time = resolve_aliases(unit_group, factor_time)
     if factor_time not in units[unit_group]:
         raise KeyError(f"Unit type '{factor_time}' not found in '{unit_group}' group!")      
-    if units[unit_group][factor_time] == 0:
-        raise ZeroDivisionError("Can't divide by zero!")
+    zero_division_checker(units[unit_group][factor_time])
 
     # E.g. 17h:28m:36s seconds
     if parse_time_input(from_time) is not None:
@@ -903,23 +888,25 @@ def change_base_unit(unit_group=None, new_base_unit=None):
 
 
 def refactor_value(unit_group, new_base_unit):
-    """Helper function that allows"""
+    """Change value """
     if unit_group == "temperature":
         new_base_factor, new_base_offset = units[unit_group][new_base_unit]
-        if new_base_factor == 0:
-            raise ZeroDivisionError("Can't dive by zero!")
+        zero_division_checker(new_base_factor)            
         for unit_type in units[unit_group]:
             factor, offset = units[unit_group][unit_type]
             factor /= new_base_factor
             offset -= new_base_offset
             units[unit_group][unit_type] = [factor, offset]
     else:
-        if units[unit_group][new_base_unit] == 0:
-            raise ZeroDivisionError("Can't dive by zero!")
+        zero_division_checker(units[unit_group][new_base_unit])
         for unit_type in units[unit_group]:
             units[unit_group][unit_type] /= units[unit_group][new_base_unit]
     return
 
+
+def zero_division_checker(num):
+    if num == 0:
+        raise ZeroDivisionError("Can't Divide by zero")
 
 if __name__ == "__main__":
     main()

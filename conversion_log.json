@@ -14,5 +14,149 @@
         "to_time": "dec",
         "factor_time": "days",
         "result": 365.0
+    },
+    {
+        "date": "2025-09-08T09:08:17.789717",
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": "nov",
+        "factor_time": "days",
+        "result": 334.0
+    },
+    {
+        "date": "2025-09-08T09:34:21.360206",
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": "nov",
+        "factor_time": "days",
+        "result": 334.0
+    },
+    {
+        "date": "2025-09-08T09:40:01.799022",
+        "unit_group": "time",
+        "from_time": "minutes",
+        "to_time": "seconds",
+        "factor_time": 1.0,
+        "result": 60.0
+    },
+    {
+        "date": "2025-09-08T09:51:21.385374",
+        "unit_group": "time",
+        "from_time": "minutes",
+        "to_time": "seconds",
+        "factor_time": 1.0,
+        "result": 60.0
+    },
+    {
+        "date": "2025-09-08T09:51:47.481646",
+        "unit_group": "time",
+        "from_time": "minutes",
+        "to_time": "seconds",
+        "factor_time": 1.0,
+        "result": 60.0
+    },
+    {
+        "date": "2025-09-08T09:53:03.691473",
+        "unit_group": "time",
+        "from_time": "minutes",
+        "to_time": "seconds",
+        "factor_time": 1.0,
+        "result": 60.0
+    },
+    {
+        "date": "2025-09-08T10:01:12.878441",
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": "nov",
+        "factor_time": "days",
+        "result": 334.0
+    },
+    {
+        "date": "2025-09-08T10:02:51.815124",
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": "nov",
+        "factor_time": "days",
+        "result": 334.0
+    },
+    {
+        "date": "2025-09-08T10:21:36.263139",
+        "unit_group": "length",
+        "from_type": "meters",
+        "to_type": "yards",
+        "amount": 5.0,
+        "result": 5.468066491688539
+    },
+    {
+        "date": "2025-09-08T10:21:39.824240",
+        "unit_group": "length",
+        "from_type": "meters",
+        "to_type": "yards",
+        "amount": 5.0,
+        "result": 5.468066491688539
+    },
+    {
+        "date": "2025-09-08T10:21:49.430378",
+        "unit_group": "length",
+        "from_type": "meters",
+        "to_type": "yards",
+        "amount": 5.0,
+        "result": 5.468066491688539
+    },
+    {
+        "date": "2025-09-08T10:21:59.403276",
+        "unit_group": "length",
+        "from_type": "meters",
+        "to_type": "yards",
+        "amount": 5.0,
+        "result": 5.468066491688539
+    },
+    {
+        "date": "2025-09-08T10:30:23.059762",
+        "unit_group": "time",
+        "from_time": "5.0 days 2.0 hours 5.0 minutes",
+        "to_time": "seconds",
+        "factor_time": null,
+        "result": 439500.0
+    },
+    {
+        "date": "2025-09-08T10:32:46.696311",
+        "unit_group": "time",
+        "from_time": "5.0 days 5.0 hours 5.0 minutes",
+        "to_time": "seconds",
+        "factor_time": null,
+        "result": 450300.0
+    },
+    {
+        "date": "2025-09-08T10:32:53.960260",
+        "unit_group": "time",
+        "from_time": "5.0 days 5.0 hours 5.0 minutes",
+        "to_time": "seconds",
+        "factor_time": null,
+        "result": 450300.0
+    },
+    {
+        "date": "2025-09-08T10:37:55.188931",
+        "unit_group": "time",
+        "from_time": "minutes",
+        "to_time": "seconds",
+        "factor_time": 1.0,
+        "result": 60.0
+    },
+    {
+        "date": "2025-09-08T10:51:52.168594",
+        "unit_group": "time",
+        "from_time": "minutes",
+        "to_time": "seconds",
+        "factor_time": 1.0,
+        "result": 60.0
+    },
+    {
+        "date": "2025-09-08T10:52:19.132897",
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": "dec",
+        "factor_time": "days",
+        "result": 365.0
     }
 ]

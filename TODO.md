@@ -5,7 +5,7 @@
 
 
 ## Refactoring tasks
-- [ ] Reestructure the code by adding a class that encapsulates all programs logic
+- [ ] Add a class that encapsulates all program's logic, allowing users to also access it's features throughout an Class's object
 - [ ] Add remmaining comments throughout the codebase
 - [ ] Add remmaining type hints throughout the codebase
 - [ ] Clean program by removing multiple repetitive logic throught the codebase and transforming it into a single function
@@ -20,14 +20,14 @@
 
 
 ## BACKLOG
-- [ ]
+- [ ] Add `money` group to allow currency conversion through API requests (https://data.ecb.europa.eu/help/api/data)
 
 
 ## DONE
 - [x] Implement a functional `converter` function
 - [x] Improve Errors checking
 - [x] Centralize try-except block in `main`, making functions to just raise the exception
-- [x] Keep user inside program with `while` loop, until he decides to quit
+- [x] Keep users inside program with `while` loop, until he decides to quit
 - [x] Allow users to modify the unit's dictionary by adding new groups/types (modifies `units.json` and `base_units.json`)
 - [x] Move `units` dictionary to another file to keep `project.py` cleaner
 - [x] Use `json` library to open/save/close that new dictionary file, so that changes won't be lost
@@ -36,7 +36,7 @@
 - [x] Fix message that outputs dictionary's keys
 - [x] Create separate functions for each action
 - [x] Modify "add" action by adding more logic and validation checks to new groups (e.g. base unit, valid number)
-- [x] When adding new group/type, display base unit of that type so that user knows in ehich unit he should calculate the conversion factor
+- [x] When adding new group/type, display base unit of that type so that users know in ehich unit he should calculate the conversion factor
 - [x] Add separate logic for temperature (for converting units and for adding new types)
 - [x] Fix converted value that always has 5 decimal values, even if all zeroes
 - [x] Improve inputs validation based on unit group
@@ -57,11 +57,10 @@
 - [x] Add new date and time conversion logic to be handled through command-line commands
 - [x] Add aliases to unit types (e.g. "km" for "kilometer", "ft" for "feet", "min" for "minute")
 - [x] Remove `while` loops from inner functions
-- [x] Allow user to remove unit type (except base unit)
-- [x] Allow user to change base unit
-- [x] Allow user to calculate more complex date and time conversions
+- [x] Allow users to remove unit type (except base unit)
+- [x] Allow users to change base unit
+- [x] Allow users to calculate more complex date and time conversions
 - [x] Change `month`'s dictionaries structure
 - [x] Automatically delete data in `change_log.json` file after some time
 - [-] Add style to introductory messages and instruction messages and add separator (e.g. with `-`, `=` or `_`)
 - [-] Use `inflect` library to output singular/plural unit group/type
-- [-] Add `money` group to allow currency conversion through API requests
