@@ -14,6 +14,7 @@
 ### Changed
 - Created `zero_division_checker` function that checks if a number is zero, preventing divisions by zero, which removes repetitive code throught codespace
 - Changed `handle_cli` function to be case insensitive for "convert" action
+- Moved "import dictionaries" logic into `import_json` function
 
 
 ## [0.8.4] - 2025-09-07

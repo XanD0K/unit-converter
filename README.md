@@ -21,10 +21,11 @@ It was created to test and apply all knowledge acquired in cs50p course, from Ha
 
 
 ## Files Overview
-- `project.py` 
-- `test_project.py` is a file used to test the main function of the program
-- `units.json` is a file to keep track of all units available in the program. It contains the dictionary with all groups and types of units, and their respective values.
-- `base_units.json`
+- [base_units.json](base_units.json)
+- [project.py](project.py)
+- [test_project.py](test_project.py) is a file used to test the main function of the program
+- [units.json](units.json) is a file to keep track of all units available in the program. It contains the dictionary with all groups and types of units, and their respective values.
+
 
 
 ## Installation
@@ -35,7 +36,7 @@ It was created to test and apply all knowledge acquired in cs50p course, from Ha
 
 ## Development Docs
 - [CHANGELOG.md](CHANGELOG.md): versions and updates
-- [DEVLOG.md]{DEVLOG.md}: Development  process
+- [DEVLOG.md](DEVLOG.md): Development  process
 
 
 

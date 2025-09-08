@@ -9,27 +9,31 @@ from math import fabs
 
 
 # Imports dictionaries
-try:
-    # Opens dictionary with all units available
-    with open("units.json", "r") as file:
-        units = json.load(file)
-    # Opens dictionary of base units for each group
-    with open("base_units.json", "r") as file:
-        base_units = json.load(file)
-    # Opens dictionary containing all conversions history
-    with open("conversion_log.json", "r") as file:
-        conversion_log = json.load(file)
-    # Opens dictionary that contains all aliases for each unit type
-    with open("unit_aliases.json", "r") as file:
-        unit_aliases = json.load(file)
-    with open("month_days.json", "r") as file:
-        month_days = json.load(file)
-except FileNotFoundError:
-    sys.exit("Error: file not found!")
-except json.JSONDecodeError:
-    sys.exit("Error: file if corrupted!")
+def import_json():
+    """Imports all '.json' files which handles data management"""
+    try:
+        # Opens dictionary with all units available
+        with open("units.json", "r") as file:
+            units = json.load(file)
+        # Opens dictionary of base units for each group
+        with open("base_units.json", "r") as file:
+            base_units = json.load(file)
+        # Opens dictionary containing all conversions history
+        with open("conversion_log.json", "r") as file:
+            conversion_log = json.load(file)
+        # Opens dictionary that contains all aliases for each unit type
+        with open("unit_aliases.json", "r") as file:
+            unit_aliases = json.load(file)
+        with open("month_days.json", "r") as file:
+            month_days = json.load(file)
+        return units, base_units, conversion_log, unit_aliases, month_days
+    except FileNotFoundError:
+        sys.exit("Error: file not found!")
+    except json.JSONDecodeError:
+        sys.exit("Error: file if corrupted!")
 
 
+units, base_units, conversion_log, unit_aliases, month_days = import_json()
 
 
 def validate_dictionaries(units, base_units, conversion_log, unit_aliases, month_days):

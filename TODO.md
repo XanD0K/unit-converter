@@ -2,7 +2,8 @@
 
 
 ## New features
-
+- [ ] Add style to introductory messages and instruction messages and add separator (e.g. with `-`, `=` or `_`)
+- [ ] Use `inflect` library to output singular/plural unit group/type
 
 ## Refactoring tasks
 - [ ] Add a class that encapsulates all program's logic, allowing users to also access it's features throughout an Class's object
@@ -10,7 +11,7 @@
 - [ ] Add remmaining type hints throughout the codebase
 - [ ] Clean program by removing multiple repetitive logic throught the codebase and transforming it into a single function
 - [ ] Polish code, improving readability
-- [ ] Reestructure `project.py` file into multiple files to keep program cleaner (after adding Class)
+- [ ] Reestructure `project.py` file into multiple files to keep program cleaner
 - [ ] Reestructure `final-project` directory
 
 
@@ -62,5 +63,3 @@
 - [x] Allow users to calculate more complex date and time conversions
 - [x] Change `month`'s dictionaries structure
 - [x] Automatically delete data in `change_log.json` file after some time
-- [-] Add style to introductory messages and instruction messages and add separator (e.g. with `-`, `=` or `_`)
-- [-] Use `inflect` library to output singular/plural unit group/type
