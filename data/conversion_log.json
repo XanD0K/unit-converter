@@ -160,7 +160,31 @@
         "result": 365.0
     },
     {
-        "date": "2025-09-08T18:00:22.439379",
+        "date": "2025-09-08T20:48:15.075114",
+        "unit_group": "time",
+        "from_time": "months",
+        "to_time": "seconds",
+        "factor_time": 1.0,
+        "result": 2592000.0
+    },
+    {
+        "date": "2025-09-08T20:48:21.563787",
+        "unit_group": "time",
+        "from_time": "minutes",
+        "to_time": "seconds",
+        "factor_time": 1.0,
+        "result": 60.0
+    },
+    {
+        "date": "2025-09-08T21:40:47.513217",
+        "unit_group": "time",
+        "from_time": "minutes",
+        "to_time": "seconds",
+        "factor_time": 1.0,
+        "result": 60.0
+    },
+    {
+        "date": "2025-09-08T21:41:02.446057",
         "unit_group": "time",
         "from_time": "minutes",
         "to_time": "seconds",

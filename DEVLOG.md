@@ -1,5 +1,16 @@
 # Development Log
 
+## [DATE]
+**Plans**
+
+**Decisions**
+
+**Challenges**
+
+**Progress**
+
+
+
 ## [2025-08-28] - Version 0.0.1
 
 **Goals**
@@ -7,6 +18,8 @@
 
 **What Was Done**
 - Defined a `units` dictionary
+
+
 
 09-02
 aliases

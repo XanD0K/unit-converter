@@ -2,22 +2,27 @@
 
 ## [Unreleased]
 ### Added
+- Created `unit_converter` directory which will contain all new files generated from `project.py` segmentation
+- Created `data_manager.py` file to hold all functions that open/modify/save `.json` files
+- Created `utils.py` file to hold all helper functions
 
 ### Changed
+- Changed structure of `project.py`, segregating that 1000 lines file into multiple files
+- Moved all `.json` files to `data` directory
 
 ### Fixed
 
 ### Removed
 
 
-## [0.8.5] - 2025-09-08
+## [0.8.3] - 2025-09-08
 ### Changed
 - Created `zero_division_checker` function that checks if a number is zero, preventing divisions by zero, which removes repetitive code throught codespace
 - Changed `handle_cli` function to be case insensitive for "convert" action
 - Moved "import dictionaries" logic into `import_json` function
 
 
-## [0.8.4] - 2025-09-07
+## [0.8.2] - 2025-09-07
 ### Added
 - Created `ALL_MONTHS` global variable containing all months's names in `month_days.json` file
 - Created `get_days_from_month`, `get_index_from_month` and `gets_days_from_index` helper functions to handle different queries in `month_days.json` file 
@@ -27,14 +32,14 @@
 - Merged `month_index_days.json` and `month_indexes.json` files into `month_days.json` file, changing it's structure to suport multiple queries
 
 
-## [0.8.3] - 2025-09-06
+## [0.8.1] - 2025-09-06
 ### Changed
 - Changed `converter_time` function to receive `*args` as arguments, allowing even more complex conversions
 - Changed `handle_cli` function to also allow multiple arguments with `*args`
 - Changed `print_history` function to also print new conversion formats for `time` unit group
 
 
-## [0.8.2] - 2025-09-05
+## [0.8.0] - 2025-09-05
 ### Added
 - Implemented `get_seconds` function to calculate seconds from a given date
 - Implemented `calculate_leap_years` function to calculate the number of leap years from 2 given dates
@@ -42,20 +47,20 @@
 - Added `month_index_days.json` dictionary to be used in date-time conversions
 
 
-## [0.8.1] - 2025-09-04
+## [0.7.1] - 2025-09-04
 ### Added
 - Created `month_days` dictionary that relates a month with its respective number of days, to improve date and time conversions
-- Changed `add_logic` function to `manage_type`, which now allows user to remove unit types
-- Added `change_base_unit` which allow user to change base unit for an unit group
+- Changed `add_logic` function to `manage_type`, improving it to allow users to remove unit types
+- Added `change_base_unit` which allow users to change base unit for an unit group
 
 ### Changed
-- Removed inner `while` loops that kept user inside action's logic
+- Removed inner `while` loops that kept users inside action's logic
 - Improved `get_amount` function, making it cleaner
 - Improved `add_new_group` function, making it cleaner
 - Changed `add_temp_logic` function name to `add_temp_type`
 
 
-## [0.8.0] - 2025-09-03
+## [0.7.0] - 2025-09-03
 ### Added
 - Created the `unit_alises.json` file that contains all aliases for each unit type
 - Created `resolve_aliases` function to handle unit types and unit's aliases throughout codebase
@@ -70,7 +75,7 @@
 - Removed alerts for negative numbers inputed by users
 
 
-## [0.7.1] - 2025-09-02
+## [0.6.1] - 2025-09-02
 ### Added
 - Modified `handle_cli` function to add conversion log to `conversion_log.json` file
 
@@ -78,7 +83,7 @@
 - Changed `handle_cli` function to accept that new logic for date and time unit conversions through command lines
 
 
-## [0.7.0] - 2025-09-01
+## [0.6.0] - 2025-09-01
 ### Added
 - Created `converter_time` function to handle all date and time unit conversions
 - Created `days_to_month.json` file to be used on date and time conversions
@@ -92,7 +97,7 @@
 - Modified `print_history` function to handle time conversions on log history
 
 
-## [0.6.0] - 2025-08-31
+## [0.5.0] - 2025-08-31
 ### Added
 - Created `conversion_log.json` file to keep track of user's previous conversions
 - Added `history` command and logic to fill the new `.json` file and to print 
@@ -101,15 +106,15 @@
 - Changed argument's name `group` to `unit_group`, to keep consistency throughout codebase
 
 ### Fixed
-- Fixed command-line aliases to accept aliases
+- Fixed command-line logic to accept aliases
 - Created `add_to_log` function to also be used with temperature conversions
 
 
-## [0.5.0] - 2025-08-30
+## [0.4.1] - 2025-08-30
 ### Added
 - Added comman-line logic for "add" action
 - Added aliases to each command, improving UX
-- Created a copy of all arguments, lowering some of them, improving UX
+- Created a copy of all arguments, malipulating them instead of dealing with original list
 
 ### Fixed
 - Fixed convertion logic for "temperature" units (was missing a `return` statement)
@@ -157,7 +162,7 @@
 - Removed multiple try-except blocks throughout the codebase, centralizing all in `main`
 - Improved error checking for user's input
 - Moved `units` dictionary to `units.json` file, modifying it with `json` library
-- Moved "actions" logic from `main`
+- Moved "actions" logic out of `main` function 
 
 ### Removed
 - Removed `sys.exit` to prevent abrupt exits from the program
