@@ -7,8 +7,8 @@
 - Created `utils.py` file to hold all helper functions
 
 ### Changed
-- Changed structure of `project.py`, segregating that 1000 lines file into multiple files
 - Moved all `.json` files to `data` directory
+- Changed `validate_dictionaries` function's name to `validate_data`
 
 ### Fixed
 

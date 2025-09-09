@@ -63,3 +63,4 @@
 - [x] Allow users to calculate more complex date and time conversions
 - [x] Change `month`'s dictionaries structure
 - [x] Automatically delete data in `change_log.json` file after some time
+- [x] Moved data manager functions and helper function into their own files

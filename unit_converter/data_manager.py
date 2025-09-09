@@ -4,13 +4,15 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from unit_converter.utils import zero_division_checker
 
 # Creates path to "final-project" directory
 BASE_DIR = Path(__file__).parent.parent
 
+units, base_units, conversion_log, unit_aliases, month_days = None, None, None, None, None
+
 def load_data():
     """Imports all '.json' files which handles data management"""
+    global units, base_units, conversion_log, unit_aliases, month_days
     try:
         # Opens dictionary with all units available
         with open(BASE_DIR / "data" / "units.json", "r") as file:
@@ -26,16 +28,15 @@ def load_data():
             unit_aliases = json.load(file)
         with open(BASE_DIR / "data" / "month_days.json", "r") as file:
             month_days = json.load(file)
+            validate_data(units, base_units, conversion_log, unit_aliases, month_days)
         return units, base_units, conversion_log, unit_aliases, month_days
     except FileNotFoundError:
-        sys.exit("Error: file not found!")
+        raise FileNotFoundError("Error: file not found!")
     except json.JSONDecodeError:
-        sys.exit("Error: file if corrupted!")
-
-units, base_units, conversion_log, unit_aliases, month_days = load_data()
+        raise json.JSONDecodeError("Error: file if corrupted!")
 
 
-def validate_dicts(units, base_units, conversion_log, unit_aliases, month_days):
+def validate_data(units, base_units, conversion_log, unit_aliases, month_days):
     """Validates dictionaries before entering the program"""
     # Ensures 'units.json' is a dictionary and it's not empty
     if not isinstance(units, dict) or not units:
@@ -73,6 +74,8 @@ def validate_dicts(units, base_units, conversion_log, unit_aliases, month_days):
             if alias in seen_aliases:
                 raise ValueError(f"'unit_aliases.json' is corrupted! There are duplicate aliases in '{unit_aliases[unit_group]}' group !")
             seen_aliases.add(alias)
+
+load_data()
 
 
 def add_to_log(unit_group, from_type=None, to_type=None, amount=None, new_value=None, from_time=None, to_time=None, factor_time=None, new_time=None, is_time_convertion=False) -> None:
@@ -141,3 +144,8 @@ def save_data(data, file_name):
         print(f"Error! You don't have permition to write to {file_name}!")        
         return backup
     return data
+
+
+def zero_division_checker(num):
+    if num == 0:
+        raise ZeroDivisionError("Can't Divide by zero")

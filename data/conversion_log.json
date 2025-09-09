@@ -190,5 +190,21 @@
         "to_time": "seconds",
         "factor_time": 1.0,
         "result": 60.0
+    },
+    {
+        "date": "2025-09-09T10:39:08.583396",
+        "unit_group": "time",
+        "from_time": "minutes",
+        "to_time": "seconds",
+        "factor_time": 1.0,
+        "result": 60.0
+    },
+    {
+        "date": "2025-09-09T10:39:34.319537",
+        "unit_group": "time",
+        "from_time": "minutes",
+        "to_time": "seconds",
+        "factor_time": 1.0,
+        "result": 60.0
     }
 ]
