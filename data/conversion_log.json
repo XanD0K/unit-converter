@@ -206,5 +206,21 @@
         "to_time": "seconds",
         "factor_time": 1.0,
         "result": 60.0
+    },
+    {
+        "date": "2025-09-09T15:46:12.707857",
+        "unit_group": "length",
+        "from_type": "meters",
+        "to_type": "yards",
+        "amount": 100.0,
+        "result": 109.36132983377078
+    },
+    {
+        "date": "2025-09-10T09:54:49.282807",
+        "unit_group": "length",
+        "from_type": "meters",
+        "to_type": "yards",
+        "amount": 1.0,
+        "result": 1.0936132983377078
     }
 ]

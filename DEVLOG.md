@@ -32,3 +32,8 @@ changed
 def parse_date_input(time_str):
     """Gets user's input of a date, and outputs the year, month and day"""
     if matches := re.search(r"^(\d{4})-(\d{1,2})-(\d{1,2})$", time_str):
+
+
+    09-09
+    segregating project.py into multiple files, raising error about variables, specially global variables realated to ".json" files
+    Decided do go with a "data class", for easy access and passing around multiple functions and files

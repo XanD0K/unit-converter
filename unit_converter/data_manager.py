@@ -8,32 +8,36 @@ from pathlib import Path
 # Creates path to "final-project" directory
 BASE_DIR = Path(__file__).parent.parent
 
-units, base_units, conversion_log, unit_aliases, month_days = None, None, None, None, None
+class ConversionData:
+    def __init__(self, units, base_units, conversion_log, unit_aliases, month_days):
+        self.units = units
+        self.base_units = base_units
+        self.conversion_log = conversion_log
+        self.unit_aliases = unit_aliases
+        self.month_days = month_days
+        # Generates a global list containing all month's names
+        self.all_months = [next(iter(value)) for value in month_days.values()]
+
 
 def load_data():
     """Imports all '.json' files which handles data management"""
-    global units, base_units, conversion_log, unit_aliases, month_days
-    try:
-        # Opens dictionary with all units available
-        with open(BASE_DIR / "data" / "units.json", "r") as file:
-            units = json.load(file)
-        # Opens dictionary of base units for each group
-        with open(BASE_DIR / "data" / "base_units.json", "r") as file:
-            base_units = json.load(file)
-        # Opens dictionary containing all conversions history
-        with open(BASE_DIR / "data" / "conversion_log.json", "r") as file:
-            conversion_log = json.load(file)
-        # Opens dictionary that contains all aliases for each unit type
-        with open(BASE_DIR / "data" / "unit_aliases.json", "r") as file:
-            unit_aliases = json.load(file)
-        with open(BASE_DIR / "data" / "month_days.json", "r") as file:
-            month_days = json.load(file)
-            validate_data(units, base_units, conversion_log, unit_aliases, month_days)
-        return units, base_units, conversion_log, unit_aliases, month_days
-    except FileNotFoundError:
-        raise FileNotFoundError("Error: file not found!")
-    except json.JSONDecodeError:
-        raise json.JSONDecodeError("Error: file if corrupted!")
+    # Opens dictionary with all units available
+    with open(BASE_DIR / "data" / "units.json", "r") as file:
+        units = json.load(file)
+    # Opens dictionary of base units for each group
+    with open(BASE_DIR / "data" / "base_units.json", "r") as file:
+        base_units = json.load(file)
+    # Opens dictionary containing all conversions history
+    with open(BASE_DIR / "data" / "conversion_log.json", "r") as file:
+        conversion_log = json.load(file)
+    # Opens dictionary that contains all aliases for each unit type
+    with open(BASE_DIR / "data" / "unit_aliases.json", "r") as file:
+        unit_aliases = json.load(file)
+    with open(BASE_DIR / "data" / "month_days.json", "r") as file:
+        month_days = json.load(file)
+    
+    validate_data(units, base_units, conversion_log, unit_aliases, month_days)
+    return ConversionData(units, base_units, conversion_log, unit_aliases, month_days)
 
 
 def validate_data(units, base_units, conversion_log, unit_aliases, month_days):
@@ -75,12 +79,9 @@ def validate_data(units, base_units, conversion_log, unit_aliases, month_days):
                 raise ValueError(f"'unit_aliases.json' is corrupted! There are duplicate aliases in '{unit_aliases[unit_group]}' group !")
             seen_aliases.add(alias)
 
-load_data()
 
-
-def add_to_log(unit_group, from_type=None, to_type=None, amount=None, new_value=None, from_time=None, to_time=None, factor_time=None, new_time=None, is_time_convertion=False) -> None:
+def add_to_log(data, unit_group, from_type=None, to_type=None, amount=None, new_value=None, from_time=None, to_time=None, factor_time=None, new_time=None, is_time_convertion=False) -> None:
     """Adds successfully converted value to log file (conversion_log.json)"""
-    global conversion_log
     if is_time_convertion:
         if all(x is None for x in (from_time, to_time, factor_time, new_time)):
             raise ValueError("Missing required arguments!")
@@ -105,32 +106,32 @@ def add_to_log(unit_group, from_type=None, to_type=None, amount=None, new_value=
         }
 
     # Cleans 'conversion_log.json' file, preventing big files
-    conversion_log = clean_history()
+    data.conversion_log = clean_history(data)
     # Appends new entry
-    conversion_log.append(entry)
+    data.conversion_log.append(entry)
 
-    save_data(conversion_log, "conversion_log")
+    save_data(data.conversion_log, "conversion_log")
 
 
-def clean_history():
+def clean_history(data):
     """Cleans 'conversion_log.json' file keeping only entries not older than 3 days"""
-    return [entry for entry in conversion_log if "date" in entry and datetime.now() - datetime.fromisoformat(entry["date"]) <= timedelta(days=3)]
+    return [entry for entry in data.conversion_log if "date" in entry and datetime.now() - datetime.fromisoformat(entry["date"]) <= timedelta(days=3)]
 
 
-def refactor_value(unit_group, new_base_unit):
+def refactor_value(data, unit_group, new_base_unit):
     """Change value """
     if unit_group == "temperature":
-        new_base_factor, new_base_offset = units[unit_group][new_base_unit]
+        new_base_factor, new_base_offset = data.units[unit_group][new_base_unit]
         zero_division_checker(new_base_factor)            
-        for unit_type in units[unit_group]:
-            factor, offset = units[unit_group][unit_type]
+        for unit_type in data.units[unit_group]:
+            factor, offset = data.units[unit_group][unit_type]
             factor /= new_base_factor
             offset -= new_base_offset
-            units[unit_group][unit_type] = [factor, offset]
+            data.units[unit_group][unit_type] = [factor, offset]
     else:
-        zero_division_checker(units[unit_group][new_base_unit])
-        for unit_type in units[unit_group]:
-            units[unit_group][unit_type] /= units[unit_group][new_base_unit]
+        zero_division_checker(data.units[unit_group][new_base_unit])
+        for unit_type in data.units[unit_group]:
+            data.units[unit_group][unit_type] /= data.units[unit_group][new_base_unit]
     return
 
 
@@ -147,5 +148,6 @@ def save_data(data, file_name):
 
 
 def zero_division_checker(num):
+    """Prevents division by zero"""
     if num == 0:
         raise ZeroDivisionError("Can't Divide by zero")

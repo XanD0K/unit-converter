@@ -1,6 +1,26 @@
 # Changelog
 
+
 ## [Unreleased]
+### Added
+- Created `api.py` file with an `UnitConverter` class, which allow users to access the program by declaring class objects
+
+### Changed
+
+### Fixed
+
+### Removed
+
+
+## [0.9.1] - 2025-09-10
+### Added
+- Created `ConversionData` data class to hold all data from `.json` files, as well as `ALL_MONTHS` variable, keeping code cleaner
+
+### Changed
+- Restructured all code, removing `units`, `base_units`, `conversion_log`, `unit_aliases` and `month_days` variables, changing them to be just a call to that new `ConversionData` object
+
+
+## [0.9.0] - 2025-09-09
 ### Added
 - Created `unit_converter` directory which will contain all new files generated from `project.py` segmentation
 - Created `data_manager.py` file to hold all functions that open/modify/save `.json` files
@@ -9,10 +29,6 @@
 ### Changed
 - Moved all `.json` files to `data` directory
 - Changed `validate_dictionaries` function's name to `validate_data`
-
-### Fixed
-
-### Removed
 
 
 ## [0.8.3] - 2025-09-08

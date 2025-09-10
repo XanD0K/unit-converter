@@ -1,17 +1,15 @@
 import calendar
 import re
 
-from .data_manager import month_days, units, unit_aliases
 
-
-def resolve_aliases(unit_group, unit_type):
+def resolve_aliases(data, unit_group, unit_type):
     """Checks user's input for any match with unit type or unit's aliases"""
     # Checks for literal name
-    if unit_type in units[unit_group]:
+    if unit_type in data.units[unit_group]:
         return unit_type
     # Checks for aliases
-    elif unit_type in unit_aliases[unit_group]:
-        return unit_aliases[unit_group][unit_type]
+    elif unit_type in data.unit_aliases[unit_group]:
+        return data.unit_aliases[unit_group][unit_type]
     else:
         return False
 
@@ -29,16 +27,18 @@ def parse_time_input(time_str):
 
 
 def check_time_is_none(time_str):
+    """Helper function for 'parse_time_input' function"""
     if time_str is not None:
         return int(time_str)
     else:
         return 0
 
 
-def get_seconds(unit_group, years, months, days):
-    approx_year_duration = 365.2425 * units[unit_group]["days"]
-    approx_month_duration = 30.436875 * units[unit_group]["days"]
-    return years * approx_year_duration + months * approx_month_duration + days * units[unit_group]["days"]
+def get_seconds(data, unit_group, years, months, days):
+    """Returns the approximated duration of a data in seconds"""
+    approx_year_duration = 365.2425 * data.units[unit_group]["days"]
+    approx_month_duration = 30.436875 * data.units[unit_group]["days"]
+    return years * approx_year_duration + months * approx_month_duration + days * data.units[unit_group]["days"]
 
 
 def parse_date_input(time_str):
@@ -58,7 +58,7 @@ def format_value(value: float) -> str:
     return formatted_value
 
 
-def calculate_leap_years(from_years, from_months, from_days, to_years, to_months, to_days):
+def calculate_leap_years(from_years, from_months, to_years, to_months, to_days):
     """Calculates the number of leap years from a date range"""
     years_divided_by_4 = (to_years // 4) - ((from_years-1) // 4)
     years_divided_by_100 = (to_years // 100) - ((from_years-1) // 100)
@@ -75,12 +75,14 @@ def calculate_leap_years(from_years, from_months, from_days, to_years, to_months
 
 
 def is_leap(time_int):
+    """Checks if a years is a leap year"""
     if (time_int % 4 == 0 and time_int % 100 != 0) or (time_int % 400 == 0):
         return True
     return False
 
 
 def validate_date(year, month, day):
+    """Prevents invalid date"""
     if not 1 <= month <= 12:
         raise ValueError(f"Invalid date! '{month}' is not a valid month")
     max_days = calendar.monthrange(year, month)[1]
@@ -89,17 +91,17 @@ def validate_date(year, month, day):
     return True
 
 
-def get_days_from_month(month):
+def get_days_from_month(data, month):
     """Gets days for a specificed month's name"""
-    return next((value[month] for value in month_days.values() if month in value), None)
+    return next((value[month] for value in data.month_days.values() if month in value), None)
     # return next((days for value in month_days.values() for name, days in value.items() if name==month), None)
 
 
-def get_index_from_month(month):
+def get_index_from_month(data, month):
     """Gets month's index given its name"""
-    return next((int(index) for index, value in month_days.items() if month in value), None)
+    return next((int(index) for index, value in data.month_days.items() if month in value), None)
 
 
-def gets_days_from_index(month_index):
+def gets_days_from_index(data, month_index):
     """Gets days for a specificed month's index"""
-    return next(iter(month_days[month_index].values()), None)
+    return next(iter(data.month_days[month_index].values()), None)
