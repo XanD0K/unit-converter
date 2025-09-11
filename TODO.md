@@ -15,7 +15,7 @@
 - [ ] Polish code, improving readability
 - [ ] Reestructure `project.py` file into multiple files to keep program cleaner
 - [ ] Reestructure `final-project` directory
-- [ ] Refactore all functions' arguments, reduncing their numbers, making code cleaner and easier to read
+- [ ] Move variables validations from multiple functions, centralizing them on `UnitData` class
 
 
 ## Testing
@@ -69,3 +69,4 @@
 - [x] Automatically delete data in `change_log.json` file after some time
 - [x] Moved all `.json` files into `data` directory 
 - [x] Moved data manager functions and helper function into their own files
+- [x] Refactore all functions' arguments, reducing their numbers, making code cleaner and easier to read

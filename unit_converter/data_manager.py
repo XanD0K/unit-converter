@@ -4,19 +4,11 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from unit_converter.data_models import ConversionData, UnitData
+
 
 # Creates path to "final-project" directory
 BASE_DIR = Path(__file__).parent.parent
-
-class ConversionData:
-    def __init__(self, units, base_units, conversion_log, unit_aliases, month_days):
-        self.units = units
-        self.base_units = base_units
-        self.conversion_log = conversion_log
-        self.unit_aliases = unit_aliases
-        self.month_days = month_days
-        # Generates a global list containing all month's names
-        self.all_months = [next(iter(value)) for value in month_days.values()]
 
 
 def load_data():
@@ -80,9 +72,15 @@ def validate_data(units, base_units, conversion_log, unit_aliases, month_days):
             seen_aliases.add(alias)
 
 
-def add_to_log(data, unit_group, from_type=None, to_type=None, amount=None, new_value=None, from_time=None, to_time=None, factor_time=None, new_time=None, is_time_convertion=False) -> None:
+def add_to_log(data, unit_data, is_time_convertion=False) -> None:
     """Adds successfully converted value to log file (conversion_log.json)"""
+    unit_group = unit_data.unit_group
+
     if is_time_convertion:
+        from_time = unit_data.from_time
+        to_time = unit_data.to_time
+        factor_time = unit_data.factor_time
+        new_time = unit_data.new_time
         if all(x is None for x in (from_time, to_time, factor_time, new_time)):
             raise ValueError("Missing required arguments!")
         entry = {
@@ -94,6 +92,10 @@ def add_to_log(data, unit_group, from_type=None, to_type=None, amount=None, new_
             "result": float(new_time)
         }
     else:
+        from_type = unit_data.from_type
+        to_type = unit_data.to_type
+        amount = unit_data.amount
+        new_value = unit_data.new_value
         if all(x is None for x in (from_type, to_type, amount, new_value)):
             raise ValueError("Missing required arguments!")
         entry = {

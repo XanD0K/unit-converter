@@ -12,6 +12,15 @@
 ### Removed
 
 
+## [0.9.2] - 2025-09-11
+### Added
+- Created `UnitData` class to hold all data related to units, keeping code cleaner
+
+### Changed
+- Restructured all code, removing `unit_group`, `from_type`, `to_type`, `amount`, `new_value`, `time_input`, `from_time`, `to_time`, `factor_time`, `new_time`, `action, value`, `alias`, `factor` and `offset` variables, which are all unit related variables, incorporating all into `UnitData` class to reduce number of functions' arguments
+- Changed `handle_cli` function to accept `UnitData` class, improving readability and reducing number of arguments
+
+
 ## [0.9.1] - 2025-09-10
 ### Added
 - Created `ConversionData` data class to hold all data from `.json` files, as well as `ALL_MONTHS` variable, keeping code cleaner

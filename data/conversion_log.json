@@ -1,21 +1,5 @@
 [
     {
-        "date": "2025-09-07T11:37:33.452881",
-        "unit_group": "time",
-        "from_time": "jan",
-        "to_time": "dec",
-        "factor_time": "days",
-        "result": 365.0
-    },
-    {
-        "date": "2025-09-07T11:37:37.833334",
-        "unit_group": "time",
-        "from_time": "jan",
-        "to_time": "dec",
-        "factor_time": "days",
-        "result": 365.0
-    },
-    {
         "date": "2025-09-08T09:08:17.789717",
         "unit_group": "time",
         "from_time": "jan",
@@ -222,5 +206,29 @@
         "to_type": "yards",
         "amount": 1.0,
         "result": 1.0936132983377078
+    },
+    {
+        "date": "2025-09-10T13:26:24.857871",
+        "unit_group": "length",
+        "from_type": "meters",
+        "to_type": "yards",
+        "amount": 1.0,
+        "result": 1.0936132983377078
+    },
+    {
+        "date": "2025-09-10T15:10:09.937811",
+        "unit_group": "length",
+        "from_type": "meters",
+        "to_type": "yards",
+        "amount": 1.0,
+        "result": 1.0936132983377078
+    },
+    {
+        "date": "2025-09-10T18:54:20.252414",
+        "unit_group": "length",
+        "from_type": "meters",
+        "to_type": "yards",
+        "amount": 5.0,
+        "result": 5.468066491688539
     }
 ]
