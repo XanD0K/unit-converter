@@ -15,7 +15,7 @@
 - [ ] Polish code, improving readability
 - [ ] Reestructure `project.py` file into multiple files to keep program cleaner
 - [ ] Reestructure `final-project` directory
-- [ ] Move variables validations from multiple functions, centralizing them on `UnitData` class
+- [ ] Move variables' validation from multiple functions, centralizing them on `UnitData` class
 
 
 ## Testing

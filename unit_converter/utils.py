@@ -3,15 +3,29 @@ import re
 
 from unit_converter.data_models import UnitData
 
-def get_unit_group(data, name=None) -> str:
+def get_unit_group(data) -> str:
     """Gets unit group"""
     unit_group: str = input("Unit group: ").strip().lower()
-    if not unit_group:
-        raise ValueError("Unit group cannot be empty!")
-    if name != "manage_type":
-        if unit_group not in data.units:
-            raise KeyError(f"{unit_group} is not a valid group!")
+    UnitData.validate_unit_group(unit_group, data)
     return unit_group
+
+
+def get_converter_units(data, unit_data) -> tuple[str, str]:
+    """Gets types of units"""
+    unit_data.from_type = resolve_aliases(data, unit_data.unit_group, input("From: ").strip().lower())
+    unit_data.validate_from_type(data)
+    unit_data.to_type = resolve_aliases(data, unit_data.unit_group, input("To: ").strip().lower())
+    unit_data.validate_to_type(data)
+    return unit_data.from_type, unit_data.to_type
+
+
+def get_amount(unit_data) -> float:
+    """Gets unit amount"""
+    unit_data.amount = input("Amount: ").strip()
+    if not re.search(r"^-?\d+(\.\d+)?$", unit_data.amount):
+        raise ValueError("Invalid amount! Please, insert integer or decimals! (e.g. 10 or 10.0)")        
+    unit_data.validate_amount()
+    return float(unit_data.amount)
 
 
 def resolve_aliases(data, unit_group, unit_type):

@@ -9,7 +9,7 @@ from math import fabs
 
 from unit_converter.data_manager import load_data, add_to_log, refactor_value, save_data, zero_division_checker
 from unit_converter.data_models import UnitData
-from unit_converter.utils import get_unit_group, resolve_aliases, parse_time_input, parse_date_input, get_seconds, format_value, calculate_leap_years, validate_date, get_days_from_month, get_index_from_month, gets_days_from_index
+from unit_converter.utils import get_unit_group, get_converter_units, get_amount, resolve_aliases, parse_time_input, parse_date_input, get_seconds, format_value, calculate_leap_years, validate_date, get_days_from_month, get_index_from_month, gets_days_from_index
 
 
 def main() -> None:
@@ -214,10 +214,8 @@ def print_history(data, limit: int = 10) -> None:
 def print_types(data, unit_data=None) -> None:
     """Prints all unit types for a specific unit group"""
     if unit_data is None:
-        unit_data = UnitData(unit_group = get_unit_group(data))
+        unit_data = UnitData(unit_group = get_unit_group(data))    
     unit_group = unit_data.unit_group
-    if unit_group not in data.units:
-        raise KeyError(f"{unit_group} is not a valid group!")
     # Used to construct the sequence of unit_type with its respective aliases
     formatted_output = []
     # Iterates over the outter keys of 'units' dictionary
@@ -239,48 +237,20 @@ def conversion_logic(data) -> None:
     if unit_data.unit_group == "time":
         print_time_instructions()
         unit_data.time_input = input("Enter time conversion: ").strip().lower()
-        if not unit_data.time_input:
-            raise ValueError("Time conversion can't be empty! Enter an expression!")
+        unit_data.validate_time_input(data)
         converter_time(data, unit_data)
         return
     unit_data.from_type, unit_data.to_type = get_converter_units(data, unit_data)
     unit_data.amount = get_amount(unit_data)
+    unit_data.validate_for_conversion(data)
     unit_data.new_value = converter(data, unit_data)
 
     print(f"{format_value(unit_data.amount)} {unit_data.from_type} = {format_value(unit_data.new_value)} {unit_data.to_type}")   
 
 
-def get_converter_units(data, unit_data) -> tuple[str, str]:
-    """Gets types of units"""
-    from_type: str = resolve_aliases(data, unit_data.unit_group, input("From: ").strip().lower())
-    to_type: str = resolve_aliases(data, unit_data.unit_group, input("To: ").strip().lower())
-    if not from_type or not to_type:
-        raise ValueError("Unit type cannot be empty!")
-    if from_type not in data.units[unit_data.unit_group] or to_type not in data.units[unit_data.unit_group]:
-        raise KeyError("Invalid unit type!")
-    return from_type, to_type
-
-
-def get_amount(unit_data) -> float:
-    """Gets unit amount"""
-    unit_data.amount = input("Amount: ").strip()
-    if not unit_data.amount:
-        raise ValueError("Amount cannot be empty")        
-    # Ensures amount is a number
-    elif not re.search(r"^-?\d+(\.\d+)?$", unit_data.amount):
-        raise ValueError("Invalid amount! Please, insert integer or decimals! (e.g. 10 or 10.0)")        
-    try:
-        unit_data.amount = float(unit_data.amount)
-    except:
-        raise ValueError("Invalid amount!")   
-    # Prevents negative value for "Kelvin"  
-    if unit_data.amount < 0 and unit_data.from_type == "kelvin":
-        raise ValueError("Kelvin temperature cannot be negative!")
-    return float(unit_data.amount)
-
-
 def converter(data, unit_data) -> float:
     """Convert one value to another"""
+    unit_data.validate_for_conversion(data)
     # Separates conversion logic when dealing with temperature
     if unit_data.unit_group == "temperature":
         unit_data.new_value = converter_temp(data, unit_data)
@@ -288,7 +258,7 @@ def converter(data, unit_data) -> float:
     else:
         zero_division_checker(float(data.units[unit_data.unit_group][unit_data.to_type]))
         unit_data.new_value = unit_data.amount * (data.units[unit_data.unit_group][unit_data.from_type]/data.units[unit_data.unit_group][unit_data.to_type])
-    
+
     # Adds to log file
     add_to_log(data, unit_data)
     return unit_data.new_value
@@ -309,45 +279,29 @@ def converter_temp(data, unit_data) -> float:
 
 
 def converter_time(data, unit_data) -> None:
-    """Handles conversion for time units"""   
+    """Handles conversion for time units"""
+    unit_data.validate_time_args(data)
     args = unit_data.time_input.split()
     if len(args) == 2:
-        unit_data.from_time, unit_data.factor_time = args
-        converter_time_2args(data, unit_data)
-        return
-    
+        converter_time_2args(data, unit_data)    
     elif len(args) == 3:
-        unit_data.from_time, unit_data.to_time, unit_data.factor_time = args
         converter_time_3args(data, unit_data)
-        return
-
     # E.g. 5 years 10 months 10 days 8 hours 56 minutes seconds
     elif len(args) % 2 != 0 and len(args) > 2:
-        unit_data.to_time = args[-1]  # Unit type that all args will be converted to
-        if unit_data.to_time not in data.units[unit_data.unit_group]:
-            raise ValueError(f"'{unit_data.to_time}' is not a type for '{unit_data.unit_group}' group!")
         zero_division_checker(data.units[unit_data.unit_group][unit_data.to_time])
         formatted_value = []
         total_seconds = 0
         for number, unit in zip(args[0::2], args[1::2]):
-            try:
-                number = float(number)
-            except:
-                raise ValueError(f"'{number}' is an invalid amount!") 
-            unit = resolve_aliases(data, unit_data.unit_group, unit)           
-            if unit not in data.units[unit_data.unit_group]:
-                raise ValueError(f"'{unit}' is not a type for '{unit_data.unit_group}' group!")
+            number = float(number)
+            unit = resolve_aliases(data, unit_data.unit_group, unit)
             total_seconds += number * data.units[unit_data.unit_group][unit]
             formatted_value.append((format_value(number), unit))
-        
+
         unit_data.from_time = " ".join(f"{num} {unit}" for num, unit in formatted_value)
         unit_data.new_time = total_seconds / data.units[unit_data.unit_group][unit_data.to_time]
 
         print(f"{' '.join(f'{num} {unit}' for num, unit in formatted_value)} = {format_value(unit_data.new_time)} {unit_data.to_time}")
         add_to_log(data, unit_data, is_time_convertion=True)
-
-    else:
-        raise ValueError("Invalid format for date and time conversion!")
 
 
 def converter_time_3args(data, unit_data):
@@ -357,22 +311,14 @@ def converter_time_3args(data, unit_data):
     factor_time = unit_data.factor_time
 
     # E.g. seconds minutes 10
-    if resolve_aliases(data, unit_group, from_time) in data.units[unit_group] and resolve_aliases(data, unit_group, to_time) in data.units[unit_group]:
-        from_time = resolve_aliases(data, unit_group, from_time)
-        to_time = resolve_aliases(data, unit_group, to_time)
-        try:
-            factor_time = float(factor_time)
-        except ValueError:
-            raise ValueError("Enter a valid value for conversion!")            
+    if from_time in data.units[unit_group] and to_time in data.units[unit_group]:           
         total_seconds = factor_time * data.units[unit_group][from_time]
         zero_division_checker(data.units[unit_group][to_time])
         unit_data.new_time = total_seconds / data.units[unit_group][to_time]
         print(f"{format_value(factor_time)} {from_time} = {format_value(unit_data.new_time)} {to_time}")
 
     else:
-        factor_time = resolve_aliases(data, unit_group, factor_time)
-        if factor_time not in data.units[unit_group]:
-            raise KeyError(f"Unit type '{factor_time}' not found in '{unit_group}' group!")
+        unit_data.validate_factor_time(factor_time, data)
         zero_division_checker(data.units[unit_group][factor_time])
         
         # E.g. 17h:28m:36s 04h:15m:22s seconds
@@ -440,10 +386,7 @@ def converter_time_3args(data, unit_data):
 def converter_time_2args(data, unit_data):
     unit_group = unit_data.unit_group
     from_time = unit_data.from_time
-    factor_time = unit_data.factor_time
-    factor_time = resolve_aliases(data, unit_group, factor_time)
-    if factor_time not in data.units[unit_group]:
-        raise KeyError(f"Unit type '{factor_time}' not found in '{unit_group}' group!")      
+    factor_time = unit_data.factor_time   
     zero_division_checker(data.units[unit_group][factor_time])
 
     # E.g. 17h:28m:36s seconds
@@ -465,11 +408,6 @@ def converter_time_2args(data, unit_data):
         total_seconds = get_seconds(data, unit_group, years, months, days)
         unit_data.new_time = total_seconds / data.units[unit_group][factor_time]
         print(f"There are {format_value(unit_data.new_time)} {factor_time} in {years} years, {months} months, {days} days")
-
-    # Any other format is invalid!
-    else:
-        print("Invalid time conversion format!")
-        return
 
     unit_data.unit_group = unit_group
     unit_data.from_time=from_time

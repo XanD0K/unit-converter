@@ -12,6 +12,11 @@
 ### Removed
 
 
+## [0.9.3] - 2025-09-12
+### Changed
+- Centralized variables' validation in `UnitData` class, which were priviously segregated throught codebase
+
+
 ## [0.9.2] - 2025-09-11
 ### Added
 - Created `UnitData` class to hold all data related to units, keeping code cleaner
@@ -42,7 +47,7 @@
 
 ## [0.8.3] - 2025-09-08
 ### Changed
-- Created `zero_division_checker` function that checks if a number is zero, preventing divisions by zero, which removes repetitive code throught codespace
+- Created `zero_division_checker` function that checks if a number is zero, preventing divisions by zero, which removes repetitive code throught codebase
 - Changed `handle_cli` function to be case insensitive for "convert" action
 - Moved "import dictionaries" logic into `import_json` function
 
