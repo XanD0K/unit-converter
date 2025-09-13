@@ -177,6 +177,9 @@ def get_action(data) -> None:
             elif action in ["manage-type", "mt"]:
                 manage_type(data)
                 continue
+            elif action in ["manage-group", "mg"]:
+                manage_group(data)
+                continue
             elif action in ["aliases", "al"]:
                 manage_aliases(data)
                 continue
@@ -480,7 +483,7 @@ def add_temp_type(data, unit_data) -> None:
     save_data(data.units, "units")
 
 
-def manage_group(data, unit_data) -> None:
+def manage_group(data, unit_data=None) -> None:
     """Handles all logic of adding and removing unit groups"""    
     if unit_data is None:
         unit_data = UnitData(unit_group = None)
