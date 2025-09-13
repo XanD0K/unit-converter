@@ -6,6 +6,7 @@
 - [ ] Use `inflect` library to output singular/plural unit group/type
 - [ ] Add a class that encapsulates all program's logic, allowing users to also access it's features throughout an Class's object
 - [ ] In `api.py` file, allow users to load a different data file
+- [ ] Allow users to remove unit_group
 
 
 ## Refactoring tasks
@@ -15,7 +16,7 @@
 - [ ] Polish code, improving readability
 - [ ] Reestructure `project.py` file into multiple files to keep program cleaner
 - [ ] Reestructure `final-project` directory
-- [ ] Move variables' validation from multiple functions, centralizing them on `UnitData` class
+- [ ] Segregate `UnitData` class into multiple classes
 
 
 ## Testing
@@ -70,3 +71,4 @@
 - [x] Moved all `.json` files into `data` directory 
 - [x] Moved data manager functions and helper function into their own files
 - [x] Refactore all functions' arguments, reducing their numbers, making code cleaner and easier to read
+- [x] Move variables' validation from multiple functions, centralizing them on `UnitData` class

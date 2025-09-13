@@ -1,4 +1,4 @@
-from utils import resolve_aliases, parse_time_input, parse_date_input, validate_date
+from .utils import validate_unit_group, resolve_aliases, parse_time_input, parse_date_input, validate_date
 
 
 class ConversionData:
@@ -15,8 +15,9 @@ class ConversionData:
 
 class UnitData:
     """Holds unit related data"""
-    def __init__(self, unit_group, from_type=None, to_type=None, amount=None, new_value=None, time_input=None, from_time=None, to_time=None, factor_time=None, new_time=None, action=None, value=None, alias=None, factor=None, offset=None):
+    def __init__(self, unit_group, unit_type=None, from_type=None, to_type=None, amount=None, new_value=None, time_input=None, from_time=None, to_time=None, factor_time=None, new_time=None, action=None, value=None, alias=None, factor=None, offset=None, new_base_unit=None):
         self.unit_group = unit_group
+        self.unit_type = unit_type
         self.from_type = from_type
         self.to_type = to_type
         self.amount = amount
@@ -29,17 +30,9 @@ class UnitData:
         self.action = action
         self.value = value
         self.alias = alias
-        self.temp_factor = factor
-        self.temp_offset = offset
-
-
-    @staticmethod
-    def validate_unit_group(unit_group, data, name=None):
-        if not unit_group:
-            raise ValueError("Unit group cannot be empty!")
-        if name != "manage_type":
-            if unit_group not in data.units:
-                raise KeyError(f"{unit_group} is not a valid group!")
+        self.factor = factor
+        self.offset = offset
+        self.new_base_unit = new_base_unit
 
     def validate_from_type(self, data):
         if not self.from_type:
@@ -54,7 +47,7 @@ class UnitData:
             raise KeyError("Invalid unit type!")
 
     def validate_amount(self):
-        if not self.amount:
+        if self.amount is None:
             raise ValueError("Amount cannot be empty")
         # Ensures amount is a number
         try:
@@ -111,7 +104,7 @@ class UnitData:
             self.factor_time = factor_time
 
     def validate_time_args(self, data):
-        args = self.time_input.split()
+        args = self.time_input
         if len(args) == 2:
             self.from_time, self.factor_time = args
             self.validate_from_time(data)
@@ -130,13 +123,93 @@ class UnitData:
                 except:
                     raise ValueError(f"'{number}' is an invalid amount!") 
                 unit = resolve_aliases(data, self.unit_group, unit)           
-                if unit not in data.units[self.unit_group]:
+                if unit is False or unit not in data.units[self.unit_group]:
                     raise ValueError(f"'{unit}' is not a type for '{self.unit_group}' group!")
         else:
             raise ValueError("Invalid format for date and time conversion!")
+        
+    def validate_action(self):
+        if not self.action:
+            raise ValueError("'action' cannot be empty!")
+        if self.action not in ["add", "remove"]:
+            raise ValueError(f"Invalid action: '{self.action}'")
+
+    def validate_add_action(self, data):
+        if not self.unit_type:
+            raise ValueError("You can't leave that field empty!")
+        if self.unit_type in data.units:
+            raise KeyError(f"'{self.unit_type}' is already an unit group name!")
+        elif self.unit_type in data.units[self.unit_group]:
+            raise ValueError(f"'{self.unit_type}' is already an unit type!")
+        elif self.unit_type in data.unit_aliases[self.unit_group]: 
+            raise ValueError(f"'{self.unit_type}' is already being used as an alias in '{self.unit_group}' group")
+
+    def validate_remove_action(self, data):
+        if not self.unit_type:
+            raise ValueError("You can't leave that field empty!")
+        elif self.unit_type not in data.units[self.unit_group]:
+            raise ValueError(f"'{self.unit_type}' is not an unit type in '{self.unit_group}' group!")
+        elif self.unit_type == data.base_units[self.unit_group]:
+            raise ValueError("Cannot remove base unit!")
+
+
+    def validate_value(self):
+        if self.value is None:
+            raise ValueError("'value' cannot be empty!")
+        try:
+            self.value = float(self.value)
+        except:
+            raise ValueError("Invalid conversion factor!")
+        
+    def validate_unit_type(self, data):
+        if self.unit_type not in data.units[self.unit_group]:
+            raise KeyError(f"'{self.unit_type}' is not a valid unit type for '{self.unit_group}' group!")
+        
+    def validate_alias(self, data):
+        if not self.alias:
+            raise ValueError("Alias cannot be empty!")
+        all_group_aliases = [alias for alias in data.unit_aliases[self.unit_group]]
+        if self.action == "add":
+            if self.alias in all_group_aliases:
+                raise ValueError(f"'{self.alias}' is already being used in {validate_unit_group}!")
+            if self.alias in data.base_units:
+                raise KeyError(f"'{self.alias}' is already been used to name an unit group!")
+            if self.alias in data.units[self.unit_group]:
+                raise KeyError(f"'{self.alias}' is already been used as an unit type in '{self.unit_group}'!")
+               
+        elif self.action == "remove":
+            if self.alias not in all_group_aliases:
+                raise ValueError(f"'{self.alias}' is not an alias of '{self.unit_type}'")
+            if data.unit_aliases[validate_unit_group][self.alias] != self.unit_type:
+                raise ValueError(f"'{self.alias}' is not an alias for '{self.unit_type}'")
+
+    def validate_factor(self):
+        if self.factor is None:
+            raise ValueError("You can't leave a field empty!")
+        try:
+            self.factor = float(self.factor)
+        except:
+            raise ValueError("Invalid conversion factor or offset!")
+        if self.factor <= 0:
+            raise ValueError("Conversion factor must be positive!")
+        
+    def validate_offset(self):
+        if self.offset is None:
+            raise ValueError("You can't leave a field empty!")
+        try:
+            self.offset = float(self.offset)
+        except:
+            raise ValueError("Invalid conversion factor or offset!")
+        
+    def validate_new_base_unit(self, data):
+        if not self.new_base_unit:
+            raise ValueError("Unit type cannot be empty!")    
+        elif self.new_base_unit not in data.units[self.unit_group]:
+            raise KeyError(f"'{self.new_base_unit}' is not an unit type for '{self.unit_group}' group")
+        elif self.new_base_unit == data.base_units[self.unit_group]:
+            raise ValueError(f"'{self.new_base_unit}' is already the current base unit for '{self.unit_group}' group")
 
     def validate_for_conversion(self, data):
-        self.validate_unit_group(self.unit_group, data)
         if self.unit_group == "time":
             self.validate_time_input()
             self.validate_time_args(data)
@@ -146,3 +219,22 @@ class UnitData:
             self.validate_from_type(data)
             self.validate_to_type(data)
             self.validate_amount()
+
+    def validate_for_manage_type(self, data):
+        validate_unit_group(self.unit_group, data)
+        self.validate_action()
+        if self.action == "add":
+            self.validate_add_action(data)
+            self.validate_value()
+            if self.unit_group == "temperature":
+                self.validate_factor()
+                self.validate_offset()
+        elif self.action == "remove":
+            self.validate_remove_action(data)
+
+    def validate_for_aliases(self, data):
+        self.validate_unit_type(data)
+        self.validate_alias(data)
+
+    def validate_for_change_base(self, data):
+        self.validate_new_base_unit(data)

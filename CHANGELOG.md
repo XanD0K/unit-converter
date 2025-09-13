@@ -11,10 +11,15 @@
 
 ### Removed
 
+## [0.9.4] - 2025-09-13
+### Changed
+- Segregated `UnitData` class into `ConversionData`, `ManageTypeData`, `AliasesData` and `ChangeBaseData` classes
+
 
 ## [0.9.3] - 2025-09-12
 ### Changed
 - Centralized variables' validation in `UnitData` class, which were priviously segregated throught codebase
+- Modified `handle_cli` to accept all validations from `UnitData`
 
 
 ## [0.9.2] - 2025-09-11

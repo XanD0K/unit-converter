@@ -9,7 +9,7 @@ from math import fabs
 
 from unit_converter.data_manager import load_data, add_to_log, refactor_value, save_data, zero_division_checker
 from unit_converter.data_models import UnitData
-from unit_converter.utils import get_unit_group, get_converter_units, get_amount, resolve_aliases, parse_time_input, parse_date_input, get_seconds, format_value, calculate_leap_years, validate_date, get_days_from_month, get_index_from_month, gets_days_from_index
+from unit_converter.utils import validate_unit_group, get_converter_units, get_amount, resolve_aliases, parse_time_input, parse_date_input, get_seconds, format_value, calculate_leap_years, validate_date, get_days_from_month, get_index_from_month, gets_days_from_index
 
 
 def main() -> None:
@@ -83,42 +83,42 @@ def handle_cli(args, data):
         print_history(data, parsed_args.limit)
     elif parsed_args.command in ["types", "t"]:
         unit_data = UnitData(unit_group=parsed_args.unit_group.lower())
+        validate_unit_group(unit_data.unit_group, data)
         print_types(data, unit_data)
     elif parsed_args.command in ["convert", "c"]:
         unit_data = UnitData(unit_group=parsed_args.unit_group.lower())
+        validate_unit_group(unit_data.unit_group, data)
         if unit_data.unit_group == "time":
             unit_data.time_input = [arg.lower() for arg in parsed_args.args]
+            unit_data.validate_for_conversion(data)
             converter_time(data, unit_data)
         else:
             if len(parsed_args.args) not in [2, 3]:
                 raise ValueError("Invalid format for non-time conversion! Usage: <from_type> <to_type> [amount]")
             unit_data.from_type = resolve_aliases(data, unit_data.unit_group, parsed_args.args[0].lower())
             unit_data.to_type = resolve_aliases(data, unit_data.unit_group, parsed_args.args[1].lower())
-            try:
-                unit_data.amount = float(parsed_args.args[2]) if len(parsed_args.args) == 3 else 1.0
-                unit_data.new_value = converter(data, unit_data)
-                print(f"{format_value(unit_data.amount)} {unit_data.from_type} = {format_value(unit_data.new_value)} {unit_data.to_type}")
-            except (ValueError, TypeError, KeyError) as e:
-                raise ValueError(f"Error: {str(e)}")
+            unit_data.amount = float(parsed_args.args[2]) if len(parsed_args.args) == 3 else 1.0
+            unit_data.validate_for_conversion(data)
+            unit_data.new_value = converter(data, unit_data)
+            print(f"{format_value(unit_data.amount)} {unit_data.from_type} = {format_value(unit_data.new_value)} {unit_data.to_type}")
+
     elif parsed_args.command in ["add", "a"]:
+        validate_unit_group(parsed_args.unit_group.lower(), data, name="manage_type")
         unit_data = UnitData(
             unit_group = parsed_args.unit_group.lower(),
             unit_type = parsed_args.unit_type.lower(),
-            action = parsed_args.action.lower()
+            action = parsed_args.action.lower(),
+            value = parsed_args.value,
+            factor = parsed_args.factor,
+            offset = parsed_args.offset
         )
+        unit_data.validate_for_manage_type(data)
         if unit_data.action == "add":
             # Adds temperature type
             if unit_data.unit_group == "temperature":
-                if parsed_args.factor is None or parsed_args.offset is None:
-                    raise ValueError("Adding temperature type requires --factor and --offset")
-                unit_data.factor = parsed_args.factor
-                unit_data.offset = parsed_args.offset
                 add_temp_type(data, unit_data)
             # Adds unit type for existed group
-            elif unit_data.unit_group in data.units:
-                if parsed_args.value is None:
-                    raise ValueError("Adding non-temperature type requires a value")
-                unit_data.value = parsed_args.value
+            elif unit_data.unit_group in data.units:                
                 manage_type(data, unit_data)
             # Creates new group and new type
             else:
@@ -126,18 +126,22 @@ def handle_cli(args, data):
         else:
             manage_type(data, unit_data)
 
-
     elif parsed_args.command in ["aliases", "al"]:
+        validate_unit_group(parsed_args.unit_group.lower(), data)
         unit_data = UnitData(
             unit_group = parsed_args.unit_group.lower(),
             unit_type = parsed_args.unit_type.lower(),
             action = parsed_args.action.lower(),
             alias = parsed_args.alias.lower()
         )
+        unit_data.validate_for_aliases(data)
         manage_aliases(data, unit_data)
+
     elif parsed_args.command in ["change-base", "cb"]:
+        validate_unit_group(parsed_args.unit_group.lower(), data)
         unit_data = UnitData(unit_group=parsed_args.unit_group.lower())
         new_base_unit = parsed_args.new_base_unit.lower()
+        unit_data.validate_new_base_unit(data)
         change_base_unit(data, unit_data, new_base_unit)
 
 
@@ -188,6 +192,12 @@ def get_action(data) -> None:
             continue
 
 
+def get_unit_group(data, name=None) -> str:
+    """Gets unit group"""
+    unit_group: str = input("Unit group: ").strip().lower()
+    validate_unit_group(unit_group, data, name)
+    return unit_group
+
 def print_groups(data) -> None:
     """Prints all available group of units"""
     print("Groups: " + ", ".join(data.units.keys()))
@@ -237,7 +247,7 @@ def conversion_logic(data) -> None:
     if unit_data.unit_group == "time":
         print_time_instructions()
         unit_data.time_input = input("Enter time conversion: ").strip().lower()
-        unit_data.validate_time_input(data)
+        unit_data.validate_time_input()
         converter_time(data, unit_data)
         return
     unit_data.from_type, unit_data.to_type = get_converter_units(data, unit_data)
@@ -281,7 +291,7 @@ def converter_temp(data, unit_data) -> float:
 def converter_time(data, unit_data) -> None:
     """Handles conversion for time units"""
     unit_data.validate_time_args(data)
-    args = unit_data.time_input.split()
+    args = unit_data.time_input
     if len(args) == 2:
         converter_time_2args(data, unit_data)    
     elif len(args) == 3:
@@ -318,7 +328,7 @@ def converter_time_3args(data, unit_data):
         print(f"{format_value(factor_time)} {from_time} = {format_value(unit_data.new_time)} {to_time}")
 
     else:
-        unit_data.validate_factor_time(factor_time, data)
+        unit_data.validate_factor_time(data)
         zero_division_checker(data.units[unit_group][factor_time])
         
         # E.g. 17h:28m:36s 04h:15m:22s seconds
@@ -365,7 +375,7 @@ def converter_time_3args(data, unit_data):
             from_total_days += from_days
             to_total_days += to_days
             
-            leap_years = calculate_leap_years(from_years, from_months, from_days, to_years, to_months, to_days)
+            leap_years = calculate_leap_years(from_years, from_months, to_years, to_months, to_days)
             total_days = abs((from_total_days - to_total_days)) + 1 + leap_years
             total_seconds = total_days * data.units[unit_group]["days"]
             unit_data.new_time = total_seconds / data.units[unit_group][factor_time]        
@@ -426,70 +436,46 @@ def print_time_instructions():
 def manage_type(data, unit_data=None) -> None:
     """Handles all logic of adding new unit type"""
     if unit_data is None:
-        unit_data = UnitData(unit_group = get_unit_group(data))
+        unit_data = UnitData(unit_group = get_unit_group(data, name="manage_type"))
     if unit_data.unit_group not in data.units:
         add_new_group(data, unit_data)
         return
     if unit_data.action is None:
-        unit_data.action = input(f"Existed types for '{unit_data.unit_group}' group: {data.units[unit_data.unit_group]}. What do you want to do? (enter 'add' or 'remove') ").strip().lower()    
-    if unit_data.action not in ["add", "remove"]:
-        raise ValueError(f"Invalid action: '{unit_data.action}'")
+        unit_data.action = input(f"Existed types for '{unit_data.unit_group}' group: {data.units[unit_data.unit_group]}. What do you want to do? (enter 'add' or 'remove') ").strip().lower()
+    unit_data.validate_action()
     if unit_data.action == "add":
         if unit_data.unit_type is None:
             unit_data.unit_type = input(f"Enter new type for '{unit_data.unit_group}' group: ").strip().lower()
-        if not unit_data.unit_type:
-            raise ValueError("You can't leave that field empty!")
-        if unit_data.unit_type in data.units:
-            raise KeyError(f"'{unit_data.unit_type}' is already an unit group name!")
-        elif unit_data.unit_type in data.units[unit_data.unit_group]:
-            raise ValueError(f"'{unit_data.unit_type}' is already an unit type!")
-        elif unit_data.unit_type in data.unit_aliases[unit_data.unit_group]: 
-            raise ValueError(f"'{unit_data.unit_type}' is already being used as an alias in '{unit_data.unit_group}' group")
+        unit_data.validate_add_action(data)
         if unit_data.unit_group == "temperature":
             add_temp_type(data, unit_data)
             return
         if unit_data.value is None:
             unit_data.value = input(f"Enter conversion factor to base unit '{data.base_units[unit_data.unit_group]}' of '{unit_data.unit_group}' group: ").strip().lower()
-        if not unit_data.value:
-            raise ValueError("You can't leave that field empty!")
-        try:
-            unit_data.value = float(unit_data.value)
-        except:
-            raise ValueError("Invalid conversion factor!")
+        unit_data.validate_value()
         data.units[unit_data.unit_group][unit_data.unit_type] = unit_data.value
         print(f"A new unit type was added on '{unit_data.unit_group}' group: {unit_data.unit_type} = {unit_data.value}")
     elif unit_data.action == "remove":
         if unit_data.unit_type is None:
             unit_data.unit_type = input(f"Enter type to remove from '{unit_data.unit_group}' group: ").strip().lower()
-        if not unit_data.unit_type:
-            raise ValueError("You can't leave that field empty!")
-        elif unit_data.unit_type not in data.units[unit_data.unit_group]:
-            raise ValueError(f"'{unit_data.unit_type}' is not an unit type in '{unit_data.unit_group}' group!")
-        elif unit_data.unit_type == data.base_units[unit_data.unit_group]:
-            raise ValueError("Cannot remove base unit!")
+        unit_data.validate_remove_action(data)
         data.units[unit_data.unit_group].pop(unit_data.unit_type)
-        aliases_to_remove = [alias for alias, unit in data.unit_aliases[unit_data.unit_group] if unit == unit_data.unit_type]
+        aliases_to_remove = [alias for alias, unit in data.unit_aliases[unit_data.unit_group].items() if unit == unit_data.unit_type]
         for alias in aliases_to_remove:
             data.unit_aliases[unit_data.unit_group].pop(alias)
         print(f"'{unit_data.unit_type}' was removed from '{unit_data.unit_group}'")
     save_data(data.units, "units")
+    save_data(data.unit_aliases, "unit_aliases")
 
 
 def add_temp_type(data, unit_data) -> None:
     """Handles all logic for adding temperature units"""
     if unit_data.factor == None:
         unit_data.factor = input(f"Enter conversion factor to base unit '{data.base_units[unit_data.unit_group]}' of 'temperature' group: ").strip().lower()
+    unit_data.validate_factor()
     if unit_data.offset == None:
         unit_data.offset = input(f"Enter offset value to base unit '{data.base_units[unit_data.unit_group]}' of 'temperature' group: ").strip().lower()
-    if not unit_data.factor or not unit_data.offset:
-        raise ValueError("You can't leave a field empty!")
-    try:
-        unit_data.factor = float(unit_data.factor)
-        unit_data.offset = float(unit_data.offset)
-    except:
-        raise ValueError("Invalid conversion factor or offset!")
-    if unit_data.factor <= 0:
-        raise ValueError("Conversion factor must be positive!")
+    unit_data.validate_offset()
     data.units[unit_data.unit_group][unit_data.unit_type] = [unit_data.factor, unit_data.offset]
     print(f"A new unit type was added on temperature group: {unit_data.unit_type} = [{unit_data.factor}, {unit_data.offset}]")
     save_data(data.units, "units")
@@ -507,9 +493,11 @@ def add_new_group(data, unit_data) -> None:
     data.units[unit_group] = {}
     data.units[unit_group][new_base_unit] = 1.0
     data.base_units[unit_group] = new_base_unit
+    data.unit_aliases[unit_group] = {}
     
     save_data(data.units, "units")
-    save_data(data.base_units, "base_units")    
+    save_data(data.base_units, "base_units")
+    save_data(data.unit_aliases, "unit_aliases")
 
     print(f"You've just created a '{unit_group}' group, with '{new_base_unit}' as its base unit!")
     return 
@@ -523,8 +511,6 @@ def manage_aliases(data, unit_data=None):
     if unit_data.unit_type is None:
         unit_data.unit_type = resolve_aliases(data, unit_group, input(f"Enter unit type for '{unit_group}' group: ").strip().lower())
     unit_type = unit_data.unit_type
-    if unit_type not in data.units[unit_group]:
-        raise KeyError(f"'{unit_type}' is not a valid unit type for '{unit_group}' group!")
     all_aliases = [alias for alias in data.unit_aliases[unit_group] if unit_type == data.unit_aliases[unit_group].get(alias)]
     if unit_data.action is None:
         unit_data.action = input(f"Existed aliases for '{unit_type}': {all_aliases}. What do you want to do? (enter 'add' or 'remove') ").strip().lower()
@@ -532,25 +518,11 @@ def manage_aliases(data, unit_data=None):
     if unit_data.alias is None:
         unit_data.alias = input(f"Which alias do you want to {action} {"to" if action == "add" else "from"} '{unit_type}'? ").strip().lower()
     alias = unit_data.alias
-    if not action or action not in ["add", "remove"]:
-        raise ValueError(f"Invalid action. Decide if you want to 'add' or 'remove' an alias for '{unit_type}'")
-    if not alias:
-        raise ValueError("Alias cannot be empty!")
-    all_group_aliases = [alias for alias in data.unit_aliases[unit_group]]
-    if alias in all_group_aliases and action == "add":
-        raise ValueError(f"'{alias}' is already being used!")
-    if alias in data.base_units:
-        raise KeyError("You can't use the name of an unit group as an alias!")
-    if alias in data.units[unit_group]:
-        raise KeyError("You can't use the name of an unit type as an alias")
+    unit_data.validate_for_aliases(data)
     if action == "add":
-        if alias in data.unit_aliases[unit_group]:
-            raise ValueError(f"{alias} is already an alias of {unit_type}")
         data.unit_aliases[unit_group][alias] = unit_type
         print(f"Alias successfully added! New alias for '{unit_type}': {alias}")
     elif action == "remove":
-        if alias not in data.unit_aliases[unit_group]:
-            raise ValueError(f"{alias} is not an alias of {unit_type}")
         data.unit_aliases[unit_group].pop(alias) 
         print(f"{alias} successfully removed from '{unit_type}'!")
 
@@ -562,18 +534,13 @@ def change_base_unit(data, unit_data=None, new_base_unit=None):
     if unit_data is None:
         unit_data = UnitData(unit_group = get_unit_group(data))
     unit_group = unit_data.unit_group
-    if new_base_unit is None:
+    if unit_data.new_base_unit is None:
         print(f"All unit types for '{unit_group}' group: " + ", ".join(data.units[unit_group].keys()))
-        new_base_unit: str = resolve_aliases(data, unit_group, input(f"Enter unit type for '{unit_group}' group: ").strip().lower())
-    if not new_base_unit:
-        raise ValueError("Unit type cannot be empty!")    
-    elif new_base_unit not in data.units[unit_group]:
-        raise KeyError(f"'{new_base_unit}' is not an unit type for '{unit_group}' group")
-    elif new_base_unit == data.base_units[unit_group]:
-        raise ValueError(f"'{new_base_unit}' is already the current base unit for '{unit_group}' group")
+        unit_data.new_base_unit = resolve_aliases(data, unit_group, input(f"Enter unit type for '{unit_group}' group: ").strip().lower())
+    unit_data.validate_new_base_unit(data)
 
-    refactor_value(data, unit_group, new_base_unit)
-    data.base_units[unit_group] = new_base_unit
+    refactor_value(data, unit_group, unit_data.new_base_unit)
+    data.base_units[unit_group] = unit_data.new_base_unit
 
     save_data(data.units, "units")
     save_data(data.base_units, "base_units")
