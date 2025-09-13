@@ -55,6 +55,10 @@ def handle_cli(args, data):
     convert_parser = subparser.add_parser("convert", aliases=["c"], help="Convert values")
     convert_parser.add_argument("unit_group", help="Unit group")
     convert_parser.add_argument("args", nargs="+", help="Source unit type")
+    # 'manage-group' command
+    manage_group_parser = subparser.add_parser("manage-group", aliases=["mg"], help="Add new unit group")
+    manage_group_parser.add_argument("unit_group", help="Unit group")
+    manage_group_parser.add_argument("action", choices=["add", "remove"], help="Action to perform")
     # 'manage-type' command
     manage_type_parser = subparser.add_parser("manage-type", aliases=["mt"], help="Add new unit type")
     manage_type_parser.add_argument("unit_group", help="Unit group")
@@ -101,6 +105,9 @@ def handle_cli(args, data):
             unit_data.validate_for_conversion(data)
             unit_data.new_value = converter(data, unit_data)
             print(f"{format_value(unit_data.amount)} {unit_data.from_type} = {format_value(unit_data.new_value)} {unit_data.to_type}")
+
+    elif parsed_args.command in ["manage-group", "mg"]:
+        
 
     elif parsed_args.command in ["manage-type", "mt"]:
         validate_unit_group(parsed_args.unit_group.lower(), data, name="manage_type")
