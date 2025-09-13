@@ -222,6 +222,8 @@ class UnitData:
 
     def validate_for_manage_type(self, data):
         validate_unit_group(self.unit_group, data)
+        if self.unit_group not in data.units:
+            raise KeyError(f"'{self.unit_group}' is not a valid group!")
         self.validate_action()
         if self.action == "add":
             self.validate_add_action(data)
