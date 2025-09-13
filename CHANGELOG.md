@@ -12,8 +12,13 @@
 ### Removed
 
 ## [0.9.4] - 2025-09-13
+### Added
+- Created `manage_group` function, which allows user to add and remove unit groups
+
 ### Changed
 - Segregated `UnitData` class into `ConversionData`, `ManageTypeData`, `AliasesData` and `ChangeBaseData` classes
+- Changes `manage_type` to be unit_type specific. Now it only handles adding/removing unit_type
+- Renamed `add_new_group` to `manage_group`
 
 
 ## [0.9.3] - 2025-09-12

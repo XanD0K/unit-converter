@@ -495,13 +495,15 @@ def manage_group(data, unit_data) -> None:
         if not new_base_unit:
             raise ValueError("You need to specify the base unit to create a new group")
         print(f"You've just created a '{unit_group}' group, with '{new_base_unit}' as its base unit!")
-        data.units[unit_group] = {}
         data.units[unit_group][new_base_unit] = 1.0
         data.base_units[unit_group] = new_base_unit
         data.unit_aliases[unit_group] = {}
     elif unit_data.action == "remove":
         unit_data.unit_group = get_unit_group(data)
         data.units.pop(unit_data.unit_group)
+        data.base_units.pop(unit_data.unit_group)
+        data.unit_aliases.pop(unit_data.unit_group)
+        print(f"Group '{unit_data.unit_group}' successfullu removed!")
     save_data(data.units, "units")
     save_data(data.base_units, "base_units")
     save_data(data.unit_aliases, "unit_aliases")
