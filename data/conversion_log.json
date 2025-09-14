@@ -102,5 +102,13 @@
         "to_time": null,
         "factor_time": "days",
         "result": 737763.413125
+    },
+    {
+        "date": "2025-09-14T18:14:01.151237",
+        "unit_group": "time",
+        "from_time": "minutes",
+        "to_time": "seconds",
+        "factor_time": 1.0,
+        "result": 60.0
     }
 ]

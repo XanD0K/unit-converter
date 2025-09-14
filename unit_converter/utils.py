@@ -1,6 +1,38 @@
 import calendar
 import re
+import sys
 
+
+def print_introductory_messages() -> None:
+    """Prints introductory messages and instructions"""
+    print("Welcome to unit converter!")
+    print("To check all group of units available, enter 'groups'")
+    print("To check all types for a specific group, enter 'types'")
+    print("To convert an unit, enter 'convert'")
+    print("To manage unit groups, enter 'manage-group'")
+    print("To manage unit types, enter 'manage-types'")
+    print("To manage aliases, enter 'aliases'")
+    print("To change base unit for a group, enter 'change-base'")
+    print("To print conversion history, enter 'history'")
+    print("Quit anytime by entering 'quit' or by pressing ctrl+d or ctrl+c", end="\n\n")
+    
+    
+def print_time_instructions():
+    """Prints instructions for converting date and time units"""
+    print("For date-time conversion, you can choose from different formats for conversion:")
+    print(" - From a specific unit to another. Usage: <unit_type> <unit_type> [amount]")
+    print(" - From a more complex time to another. Usage: HH:MM:SS HH:MM:SS <unit_type>")
+    print(" - From one month to another. Usage: <month_name> <month_name> <unit_type>")
+    print(" - From a date to another. Usage: YYYY-MM-DD YYYY-MM-DD <unit_type>")
+
+
+def get_users_input(prompt):
+    """Allows users to exit the program anytime by entering 'quit'"""
+    value = input(prompt).strip().lower()
+    if value == "quit":
+        print("Bye!")
+        sys.exit(0)
+    return value
 
 def validate_unit_group(unit_group, data):
     if not unit_group:
@@ -11,16 +43,16 @@ def validate_unit_group(unit_group, data):
 
 def get_converter_units(data, unit_data) -> tuple[str, str]:
     """Gets types of units"""
-    unit_data.from_type = resolve_aliases(data, unit_data.unit_group, input("From: ").strip().lower())
+    unit_data.from_type = resolve_aliases(data, unit_data.unit_group, get_users_input("From: ").strip().lower())
     unit_data.validate_from_type(data)
-    unit_data.to_type = resolve_aliases(data, unit_data.unit_group, input("To: ").strip().lower())
+    unit_data.to_type = resolve_aliases(data, unit_data.unit_group, get_users_input("To: ").strip().lower())
     unit_data.validate_to_type(data)
     return unit_data.from_type, unit_data.to_type
 
 
 def get_amount(unit_data) -> float:
     """Gets unit amount"""
-    unit_data.amount = input("Amount: ").strip()
+    unit_data.amount = get_users_input("Amount: ").strip()
     if not re.search(r"^-?\d+(\.\d+)?$", unit_data.amount):
         raise ValueError("Invalid amount! Please, insert integer or decimals! (e.g. 10 or 10.0)")        
     unit_data.validate_amount()

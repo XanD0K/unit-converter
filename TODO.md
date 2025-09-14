@@ -8,7 +8,6 @@
 - [ ] In `api.py` file, allow users to load a different data file
 
 
-
 ## Refactoring tasks
 - [ ] Add remmaining comments throughout the codebase
 - [ ] Add remmaining type hints throughout the codebase
@@ -16,7 +15,6 @@
 - [ ] Polish code, improving readability
 - [ ] Reestructure `project.py` file into multiple files to keep program cleaner
 - [ ] Reestructure `final-project` directory
-- [ ] Segregate `UnitData` class into multiple classes
 
 
 ## Testing
@@ -72,3 +70,4 @@
 - [x] Refactore all functions' arguments, reducing their numbers, making code cleaner and easier to read
 - [x] Move variables' validation from multiple functions, centralizing them on `UnitData` class
 - [x] Allow users to remove unit_group
+- [ ] Segregate `UnitData` class into multiple classes

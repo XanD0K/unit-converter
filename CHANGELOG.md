@@ -15,10 +15,10 @@
 ## [0.9.5] - 2025-09-14
 ### Added
 - Added `manage_group` logic into `handle_cli` function, allowing users to add and remove `unit_groups` through command-line arguments
-
+- Created `get_users_input` function to allow users exit the program by entering 'quit' anytime they want
 ### Changed
 - Segregated `UnitData` class into `ConversionData`, `ManageTypeData`, `AliasesData` and `ChangeBaseData` classes
-
+- Changed all `input` functions to recently created `get_users_input` function
 ### Fixed
 - Fixed `converter_time` function that wasn't properly handling all time formats
 - Fixed `validate_alias` function output, in `UnitData` class
