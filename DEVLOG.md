@@ -10,14 +10,22 @@
 **Progress**
 
 
+## [2025-08-27] - Version 0.2.0
 
-## [2025-08-28] - Version 0.0.1
 
-**Goals**
+## [2025-08-26] - Version 0.1.0
+**Plans**
 - Implement the first functional structure for a converter program
 
-**What Was Done**
-- Defined a `units` dictionary
+**Decisions**
+- Implement a basic initial implementation of a converter program
+
+**Challenges**
+- 
+
+**Progress**
+- Defined a `units` dictionary, containing all units groups, units types and its respective values
+- Implemented the core logic for convert multiple values
 
 
 

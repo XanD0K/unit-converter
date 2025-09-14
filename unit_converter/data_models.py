@@ -1,7 +1,7 @@
 from .utils import validate_unit_group, resolve_aliases, parse_time_input, parse_date_input, validate_date
 
 
-class ConversionData:
+class DataStore:
     """Holds data from all '.json' files"""
     def __init__(self, units, base_units, conversion_log, unit_aliases, month_days):
         self.units = units
@@ -104,7 +104,7 @@ class UnitData:
             self.factor_time = factor_time
 
     def validate_time_args(self, data):
-        args = self.time_input
+        args = self.time_input.split()
         if len(args) == 2:
             self.from_time, self.factor_time = args
             self.validate_from_time(data)
@@ -114,7 +114,7 @@ class UnitData:
             self.validate_from_time(data)
             self.validate_to_time(data)
             self.validate_factor_time(data)
-        elif len(args) % 2 != 0 and len(args) > 2:
+        elif len(args) % 2 != 0 and len(args) > 3:
             self.to_time = args[-1]
             self.validate_to_time(data)
             for number, unit in zip(args[0::2], args[1::2]):
@@ -171,7 +171,7 @@ class UnitData:
         all_group_aliases = [alias for alias in data.unit_aliases[self.unit_group]]
         if self.action == "add":
             if self.alias in all_group_aliases:
-                raise ValueError(f"'{self.alias}' is already being used in {validate_unit_group}!")
+                raise ValueError(f"'{self.alias}' is already being used as an aliases in '{self.unit_group}' group!")
             if self.alias in data.base_units:
                 raise KeyError(f"'{self.alias}' is already been used to name an unit group!")
             if self.alias in data.units[self.unit_group]:
@@ -180,7 +180,7 @@ class UnitData:
         elif self.action == "remove":
             if self.alias not in all_group_aliases:
                 raise ValueError(f"'{self.alias}' is not an alias of '{self.unit_type}'")
-            if data.unit_aliases[validate_unit_group][self.alias] != self.unit_type:
+            if data.unit_aliases[self.unit_group][self.alias] != self.unit_type:
                 raise ValueError(f"'{self.alias}' is not an alias for '{self.unit_type}'")
 
     def validate_factor(self):
@@ -240,6 +240,16 @@ class UnitData:
 
     def validate_for_change_base(self, data):
         self.validate_new_base_unit(data)
+
+    def validate_for_manage_group(self, data):
+        validate_unit_group(self.unit_group, data)
+        self.validate_action(data)
+        if self.action == "add":
+            if self.unit_group in data.units:
+                raise KeyError(f"'{self.unit_group}' is already an existed group!") 
+        elif self.action == "remove":
+            if self.unit_group not in data.units:
+                raise KeyError(f"'{self.unit_group}' is not a valid group!") 
 
 
 class ConversionData:
@@ -351,19 +361,50 @@ class ConversionData:
             raise ValueError("Invalid format for date and time conversion!")
 
     def validate_for_conversion(self, data):
-    if self.unit_group == "time":
-        self.validate_time_input()
-        self.validate_time_args(data)
-    else:
-        if not(self.from_type and self.to_type and self.amount is not None):
-            raise ValueError("Invalid conversion format!")
-        self.validate_from_type(data)
-        self.validate_to_type(data)
-        self.validate_amount()
+        if self.unit_group == "time":
+            self.validate_time_input()
+            self.validate_time_args(data)
+        else:
+            if not(self.from_type and self.to_type and self.amount is not None):
+                raise ValueError("Invalid conversion format!")
+            self.validate_from_type(data)
+            self.validate_to_type(data)
+            self.validate_amount()
+
+
+class ManageGroupData:
+    """Holds unit data related to creation/deletion of unit groups"""
+    def __init__(self, unit_group, action=None, new_base_unit=None):
+        self.unit_group = unit_group,
+        self.action = action,
+        self.new_base_unit = new_base_unit
+
+    def validate_action(self):
+        if not self.action:
+            raise ValueError("'action' cannot be empty!")
+        if self.action not in ["add", "remove"]:
+            raise ValueError(f"Invalid action: '{self.action}'")
+    
+    def validate_add_action(self, data):
+        if self.unit_group in data.units:
+            raise KeyError(f"'{self.unit_group}' is already an existed group!") 
+           
+    def validate_remove_action(self,data):
+        if self.unit_group not in data.units:
+            raise KeyError(f"'{self.unit_group}' is not a valid group!") 
+        
+    def validate_for_manage_group(self, data):
+        validate_unit_group(self.unit_group, data)
+        self.validate_action(data)
+        if self.action == "add":
+            self.validate_add_action(data)
+            # Validates new_base_unit
+        elif self.action == "remove":
+            self.validate_remove_action(data)
 
 
 class ManageTypeData:
-    """Holds unit related data"""
+    """Holds unit data related to creation/deletion of unit types"""
     def __init__(self, unit_group, unit_type=None, action=None, value=None, factor=None, offset=None):
         self.unit_group = unit_group
         self.unit_type = unit_type

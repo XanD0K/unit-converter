@@ -11,14 +11,27 @@
 
 ### Removed
 
+
+## [0.9.5] - 2025-09-14
+### Added
+- Added `manage_group` logic into `handle_cli` function, allowing users to add and remove `unit_groups` through command-line arguments
+
+### Changed
+- Segregated `UnitData` class into `ConversionData`, `ManageTypeData`, `AliasesData` and `ChangeBaseData` classes
+
+### Fixed
+- Fixed `converter_time` function that wasn't properly handling all time formats
+- Fixed `validate_alias` function output, in `UnitData` class
+- Fixed `refactor_value` function to properly calculate new unit values
+
+
 ## [0.9.4] - 2025-09-13
 ### Added
 - Added option to remove unit groups in `manage_group` function
 
 ### Changed
-- Changes `manage_type` to be unit_type specific. Now it only handles adding/removing unit_type
-- Renamed `add_new_group` to `manage_group`, which now als allows to remove unit groups
-- Segregated `UnitData` class into `ConversionData`, `ManageTypeData`, `AliasesData` and `ChangeBaseData` classes
+- Changes `manage_type` to be `unit_type` specific, only handling additions and removals of `unit_type`
+- Renamed `add_new_group` to `manage_group`, which now also allows to remove `unit_groups`
 
 
 ## [0.9.3] - 2025-09-12

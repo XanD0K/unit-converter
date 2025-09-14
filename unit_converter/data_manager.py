@@ -4,7 +4,7 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from unit_converter.data_models import ConversionData, UnitData
+from unit_converter.data_models import DataStore
 
 
 # Creates path to "final-project" directory
@@ -29,7 +29,7 @@ def load_data():
         month_days = json.load(file)
     
     validate_data(units, base_units, conversion_log, unit_aliases, month_days)
-    return ConversionData(units, base_units, conversion_log, unit_aliases, month_days)
+    return DataStore(units, base_units, conversion_log, unit_aliases, month_days)
 
 
 def validate_data(units, base_units, conversion_log, unit_aliases, month_days):
@@ -121,7 +121,7 @@ def clean_history(data):
 
 
 def refactor_value(data, unit_group, new_base_unit):
-    """Change value """
+    """Refactor all values for 'chage-base' action"""
     if unit_group == "temperature":
         new_base_factor, new_base_offset = data.units[unit_group][new_base_unit]
         zero_division_checker(new_base_factor)            
@@ -132,8 +132,9 @@ def refactor_value(data, unit_group, new_base_unit):
             data.units[unit_group][unit_type] = [factor, offset]
     else:
         zero_division_checker(data.units[unit_group][new_base_unit])
+        new_base_factor = data.units[unit_group][new_base_unit]
         for unit_type in data.units[unit_group]:
-            data.units[unit_group][unit_type] /= data.units[unit_group][new_base_unit]
+            data.units[unit_group][unit_type] /= new_base_factor
     return
 
 

@@ -15,7 +15,7 @@ from unit_converter.utils import validate_unit_group, get_converter_units, get_a
 def main() -> None:
     # Handles data loading and validation
     try:
-        # Initiates a 'ConversionData' object
+        # Initiates a 'DataStore' object
         data = load_data()
     except (ValueError, FileNotFoundError, json.JSONDecodeError, KeyError) as e:
         print(f"Error: {e}")
@@ -59,6 +59,7 @@ def handle_cli(args, data):
     manage_group_parser = subparser.add_parser("manage-group", aliases=["mg"], help="Add new unit group")
     manage_group_parser.add_argument("unit_group", help="Unit group")
     manage_group_parser.add_argument("action", choices=["add", "remove"], help="Action to perform")
+    manage_group_parser.add_argument("new_base_unit", help="New base unit")
     # 'manage-type' command
     manage_type_parser = subparser.add_parser("manage-type", aliases=["mt"], help="Add new unit type")
     manage_type_parser.add_argument("unit_group", help="Unit group")
@@ -68,7 +69,7 @@ def handle_cli(args, data):
     manage_type_parser.add_argument("--factor", type=float, help="Conversion factor to temperature's base unit")
     manage_type_parser.add_argument("--offset", type=float, help="Offset to temperature")
     # 'aliases' command
-    aliases_parser = subparser.add_parser("aliases", aliases=["al"], help="Manage unit's aliases")
+    aliases_parser = subparser.add_parser("aliases", aliases=["a"], help="Manage unit's aliases")
     aliases_parser.add_argument("unit_group", help="Unit group")
     aliases_parser.add_argument("unit_type", help="Unit type")
     aliases_parser.add_argument("action", choices=["add", "remove"], help="Action to perform")
@@ -107,7 +108,14 @@ def handle_cli(args, data):
             print(f"{format_value(unit_data.amount)} {unit_data.from_type} = {format_value(unit_data.new_value)} {unit_data.to_type}")
 
     elif parsed_args.command in ["manage-group", "mg"]:
-        
+        validate_unit_group(parsed_args.unit_group.lower(), data, name="manage_type")
+        unit_data = UnitData(
+            unit_group = parsed_args.unit_group.lower(),
+            action = parsed_args.action.lower(),
+            new_base_unit = parsed_args.new_base_unit.lower(),
+        )
+        unit_data.validate_for_change_base(data)
+        manage_group(data, unit_data)
 
     elif parsed_args.command in ["manage-type", "mt"]:
         validate_unit_group(parsed_args.unit_group.lower(), data, name="manage_type")
@@ -120,20 +128,13 @@ def handle_cli(args, data):
             offset = parsed_args.offset
         )
         unit_data.validate_for_manage_type(data)
-        if unit_data.action == "add":
-            # Adds temperature type
-            if unit_data.unit_group == "temperature":
-                add_temp_type(data, unit_data)
-            # Adds unit type for existed group
-            elif unit_data.unit_group in data.units:                
-                manage_type(data, unit_data)
-            # Creates new group and new type
-            else:
-                add_new_group(data, unit_data)
+        # Adds temperature type
+        if unit_data.action == "add" and unit_data.unit_group == "temperature":
+            add_temp_type(data, unit_data)
         else:
             manage_type(data, unit_data)
 
-    elif parsed_args.command in ["aliases", "al"]:
+    elif parsed_args.command in ["aliases", "a"]:
         validate_unit_group(parsed_args.unit_group.lower(), data)
         unit_data = UnitData(
             unit_group = parsed_args.unit_group.lower(),
@@ -187,7 +188,7 @@ def get_action(data) -> None:
             elif action in ["manage-group", "mg"]:
                 manage_group(data)
                 continue
-            elif action in ["aliases", "al"]:
+            elif action in ["aliases", "a"]:
                 manage_aliases(data)
                 continue
             elif action in ["change-base", "cb"]:
@@ -207,7 +208,7 @@ def get_action(data) -> None:
 def get_unit_group(data) -> str:
     """Gets unit group"""
     unit_group: str = input("Unit group: ").strip().lower()
-    validate_unit_group(unit_group, data)
+    validate_unit_group(data, unit_group)
     return unit_group
 
 def print_groups(data) -> None:
@@ -303,13 +304,14 @@ def converter_temp(data, unit_data) -> float:
 def converter_time(data, unit_data) -> None:
     """Handles conversion for time units"""
     unit_data.validate_time_args(data)
-    args = unit_data.time_input
+    args = unit_data.time_input.split()
     if len(args) == 2:
         converter_time_2args(data, unit_data)    
     elif len(args) == 3:
         converter_time_3args(data, unit_data)
     # E.g. 5 years 10 months 10 days 8 hours 56 minutes seconds
-    elif len(args) % 2 != 0 and len(args) > 2:
+    elif len(args) % 2 != 0 and len(args) > 3:
+        unit_data.to_time = args[-1]
         zero_division_checker(data.units[unit_data.unit_group][unit_data.to_time])
         formatted_value = []
         total_seconds = 0
@@ -350,7 +352,7 @@ def converter_time_3args(data, unit_data):
             unit_data.new_time = fabs((new_from_time - new_to_time) / data.units[unit_group][factor_time])
             print(f"There are {format_value(unit_data.new_time)} {factor_time} between {from_time} and {to_time}")
         
-        # E.g. JAN NOV minutes
+        # E.g. JAN DEC days
         elif from_time in data.all_months and to_time in data.all_months:
             from_datetime = datetime(2023, get_index_from_month(data, from_time), 1)
             if get_index_from_month(data, to_time) > get_index_from_month(data, from_time):
@@ -445,6 +447,38 @@ def print_time_instructions():
     print(" - From a date to another. Usage: YYYY-MM-DD YYYY-MM-DD <unit_type>")
 
 
+def manage_group(data, unit_data=None) -> None:
+    """Handles all logic of adding and removing unit groups"""    
+    if unit_data is None:
+        unit_data = UnitData(unit_group = None)
+    if unit_data.action is None:
+        unit_data.action = input(f"Existed groups: {", ".join(data.units.keys())}. What do you want to do? (enter 'add' or 'remove') ").strip().lower()
+    unit_data.validate_action()
+    if unit_data.action == "add": 
+        unit_data.unit_group = input(f"Unit group: ").strip().lower()
+        unit_group = unit_data.unit_group
+        if unit_group in data.units:
+            raise ValueError(f"'{unit_group}' is already an existed group!")
+        unit_data.new_base_unit = input(f"You are creating '{unit_group}' group. Enter the base unit for that group: ").strip().lower()
+        new_base_unit = unit_data.new_base_unit
+        if not new_base_unit:
+            raise ValueError("You need to specify the base unit to create a new group")
+        print(f"You've just created a '{unit_group}' group, with '{new_base_unit}' as its base unit!")
+        data.units[unit_group] = {}
+        data.units[unit_group][new_base_unit] = 1.0
+        data.base_units[unit_group] = new_base_unit
+        data.unit_aliases[unit_group] = {}
+    elif unit_data.action == "remove":
+        unit_data.unit_group = get_unit_group(data)
+        data.units.pop(unit_data.unit_group)
+        data.base_units.pop(unit_data.unit_group)
+        data.unit_aliases.pop(unit_data.unit_group)
+        print(f"Group '{unit_data.unit_group}' successfullu removed!")
+    save_data(data.units, "units")
+    save_data(data.base_units, "base_units")
+    save_data(data.unit_aliases, "unit_aliases")
+    
+    
 def manage_type(data, unit_data=None) -> None:
     """Handles all logic of adding and removing unit types"""
     if unit_data is None:
@@ -490,35 +524,6 @@ def add_temp_type(data, unit_data) -> None:
     save_data(data.units, "units")
 
 
-def manage_group(data, unit_data=None) -> None:
-    """Handles all logic of adding and removing unit groups"""    
-    if unit_data is None:
-        unit_data = UnitData(unit_group = None)
-    if unit_data.action is None:
-        unit_data.action = input(f"Existed groups: {", ".join(data.units.keys())}. What do you want to do? (enter 'add' or 'remove') ").strip().lower()
-    unit_data.validate_action()
-    if unit_data.action == "add": 
-        unit_data.unit_group = input(f"Unit group: ").strip().lower()
-        unit_group = unit_data.unit_group
-        unit_data.new_base_unit = input(f"You are creating '{unit_group}' group. Enter the base unit for that group: ").strip().lower()
-        new_base_unit = unit_data.new_base_unit
-        if not new_base_unit:
-            raise ValueError("You need to specify the base unit to create a new group")
-        print(f"You've just created a '{unit_group}' group, with '{new_base_unit}' as its base unit!")
-        data.units[unit_group][new_base_unit] = 1.0
-        data.base_units[unit_group] = new_base_unit
-        data.unit_aliases[unit_group] = {}
-    elif unit_data.action == "remove":
-        unit_data.unit_group = get_unit_group(data)
-        data.units.pop(unit_data.unit_group)
-        data.base_units.pop(unit_data.unit_group)
-        data.unit_aliases.pop(unit_data.unit_group)
-        print(f"Group '{unit_data.unit_group}' successfullu removed!")
-    save_data(data.units, "units")
-    save_data(data.base_units, "base_units")
-    save_data(data.unit_aliases, "unit_aliases")
-
-
 def manage_aliases(data, unit_data=None):
     """Handles aliases, allowing users to add or remove aliases to/from an unit type"""
     if unit_data is None:
@@ -537,10 +542,10 @@ def manage_aliases(data, unit_data=None):
     unit_data.validate_for_aliases(data)
     if action == "add":
         data.unit_aliases[unit_group][alias] = unit_type
-        print(f"Alias successfully added! New alias for '{unit_type}': {alias}")
+        print(f"Alias successfully added! New alias for '{unit_type}': '{alias}'")
     elif action == "remove":
         data.unit_aliases[unit_group].pop(alias) 
-        print(f"{alias} successfully removed from '{unit_type}'!")
+        print(f"'{alias}' successfully removed from '{unit_type}'!")
 
     save_data(data.unit_aliases, "unit_aliases")
 
@@ -552,7 +557,7 @@ def change_base_unit(data, unit_data=None):
     unit_group = unit_data.unit_group
     if unit_data.new_base_unit is None:
         print(f"All unit types for '{unit_group}' group: " + ", ".join(data.units[unit_group].keys()))
-        unit_data.new_base_unit = resolve_aliases(data, unit_group, input(f"Enter unit type for '{unit_group}' group: ").strip().lower())
+        unit_data.new_base_unit = resolve_aliases(data, unit_group, input(f"Enter new base unit for '{unit_group}' group: ").strip().lower())
     unit_data.validate_new_base_unit(data)
 
     refactor_value(data, unit_group, unit_data.new_base_unit)

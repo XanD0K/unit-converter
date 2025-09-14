@@ -1,11 +1,13 @@
 import calendar
 import re
 
+
 def validate_unit_group(unit_group, data):
     if not unit_group:
         raise ValueError("Unit group cannot be empty!")
     if unit_group not in data.units:
         raise KeyError(f"'{unit_group}' is not a valid group!")
+
 
 def get_converter_units(data, unit_data) -> tuple[str, str]:
     """Gets types of units"""
