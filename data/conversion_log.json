@@ -1,6 +1,6 @@
 [
     {
-        "date": "2025-09-14T09:49:40.931640",
+        "date": "2025-09-15T11:08:30.214056",
         "unit_group": "length",
         "from_type": "meters",
         "to_type": "yards",
@@ -8,39 +8,15 @@
         "result": 5.468066491688539
     },
     {
-        "date": "2025-09-14T10:38:01.966116",
-        "unit_group": "time",
-        "from_time": "minutes",
-        "to_time": "seconds",
-        "factor_time": 2.0,
-        "result": 120.0
-    },
-    {
-        "date": "2025-09-14T10:48:42.519080",
-        "unit_group": "time",
-        "from_time": "minutes",
-        "to_time": "seconds",
-        "factor_time": 1.0,
-        "result": 60.0
-    },
-    {
-        "date": "2025-09-14T10:49:09.391074",
+        "date": "2025-09-15T11:08:35.817669",
         "unit_group": "length",
         "from_type": "meters",
-        "to_type": "yards",
-        "amount": 17.0,
-        "result": 18.591426071741033
-    },
-    {
-        "date": "2025-09-14T11:01:11.839731",
-        "unit_group": "metroo",
-        "from_type": "metrooo",
-        "to_type": "metra",
+        "to_type": "miles",
         "amount": 1.0,
-        "result": 0.2
+        "result": 0.0006213711922373339
     },
     {
-        "date": "2025-09-14T11:10:52.208493",
+        "date": "2025-09-15T11:15:16.622017",
         "unit_group": "time",
         "from_time": "5.0 years 10.0 months 10.0 days 8.0 hours 56.0 minutes",
         "to_time": "seconds",
@@ -48,7 +24,7 @@
         "result": 184604160.0
     },
     {
-        "date": "2025-09-14T11:11:02.768129",
+        "date": "2025-09-15T11:15:48.972038",
         "unit_group": "time",
         "from_time": "minutes",
         "to_time": "seconds",
@@ -56,7 +32,7 @@
         "result": 60.0
     },
     {
-        "date": "2025-09-14T11:11:09.368547",
+        "date": "2025-09-15T11:15:55.510668",
         "unit_group": "time",
         "from_time": "17h:28m:36s",
         "to_time": "04h:15m:22s",
@@ -64,7 +40,7 @@
         "result": 47594.0
     },
     {
-        "date": "2025-09-14T11:11:22.037120",
+        "date": "2025-09-15T11:16:02.145490",
         "unit_group": "time",
         "from_time": "jan",
         "to_time": "dec",
@@ -72,7 +48,7 @@
         "result": 365.0
     },
     {
-        "date": "2025-09-14T11:11:35.528137",
+        "date": "2025-09-15T11:16:07.760780",
         "unit_group": "time",
         "from_time": "2019-11-04",
         "to_time": "2056-04-28",
@@ -80,7 +56,7 @@
         "result": 13326.0
     },
     {
-        "date": "2025-09-14T11:11:49.976283",
+        "date": "2025-09-15T11:16:15.380140",
         "unit_group": "time",
         "from_time": "17h:28m:36s",
         "to_time": null,
@@ -88,27 +64,19 @@
         "result": 62916.0
     },
     {
-        "date": "2025-09-14T11:11:57.944233",
+        "date": "2025-09-15T11:16:21.503510",
         "unit_group": "time",
         "from_time": "jan",
         "to_time": null,
-        "factor_time": "days",
-        "result": 31.0
+        "factor_time": "minutes",
+        "result": 44640.0
     },
     {
-        "date": "2025-09-14T11:12:06.040142",
+        "date": "2025-09-15T11:16:33.331405",
         "unit_group": "time",
         "from_time": "2019-11-04",
         "to_time": null,
         "factor_time": "days",
         "result": 737763.413125
-    },
-    {
-        "date": "2025-09-14T18:14:01.151237",
-        "unit_group": "time",
-        "from_time": "minutes",
-        "to_time": "seconds",
-        "factor_time": 1.0,
-        "result": 60.0
     }
 ]

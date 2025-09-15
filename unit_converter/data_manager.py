@@ -2,6 +2,7 @@ import json
 import sys
 
 from datetime import datetime, timedelta
+from fractions import Fraction
 from pathlib import Path
 
 from unit_converter.data_models import DataStore
@@ -120,6 +121,18 @@ def clean_history(data):
     return [entry for entry in data.conversion_log if "date" in entry and datetime.now() - datetime.fromisoformat(entry["date"]) <= timedelta(days=3)]
 
 
+def save_data(data, file_name):
+    """Tries saving the modifications in the '.json' file, or return its backup"""
+    try:
+        backup = data.copy()
+        with open(BASE_DIR / "data" / f"{file_name}.json", "w") as file:
+            json.dump(data, file, indent=4)
+    except PermissionError:
+        print(f"Error! You don't have permition to write to {file_name}!")        
+        return backup
+    return data
+
+
 def refactor_value(data, unit_group, new_base_unit):
     """Refactor all values for 'chage-base' action"""
     if unit_group == "temperature":
@@ -134,20 +147,18 @@ def refactor_value(data, unit_group, new_base_unit):
         zero_division_checker(data.units[unit_group][new_base_unit])
         new_base_factor = data.units[unit_group][new_base_unit]
         for unit_type in data.units[unit_group]:
-            data.units[unit_group][unit_type] /= new_base_factor
+            data.units[unit_group][unit_type] = round_if_repeting(data.units[unit_group][unit_type] / new_base_factor)
     return
 
 
-def save_data(data, file_name):
-    """Tries saving the modifications in the '.json' file, or return its backup"""
+def round_if_repeting(value, decimals=10):
+    """Rounds repeating decimals when refactoring"""
     try:
-        backup = data.copy()
-        with open(BASE_DIR / "data" / f"{file_name}.json", "w") as file:
-            json.dump(data, file, indent=4)
-    except PermissionError:
-        print(f"Error! You don't have permition to write to {file_name}!")        
-        return backup
-    return data
+        fraction = Fraction(value).limit_denominator(100)
+        if fraction.denominator <= 100:
+            return round(float(fraction), decimals)
+    except (ValueError, OverflowError):        
+        return value
 
 
 def zero_division_checker(num):

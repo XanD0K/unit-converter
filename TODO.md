@@ -70,4 +70,4 @@
 - [x] Refactore all functions' arguments, reducing their numbers, making code cleaner and easier to read
 - [x] Move variables' validation from multiple functions, centralizing them on `UnitData` class
 - [x] Allow users to remove unit_group
-- [ ] Segregate `UnitData` class into multiple classes
+- [x] Segregate `UnitData` class into multiple classes

@@ -11,6 +11,13 @@
 
 ### Removed
 
+## [0.9.6] - 2025-09-15
+### Added
+- Created `round_if_repeting` function that uses `fractions` module to round repeating decimals when refactoring. Allows to consistency and precision when changing base unit
+
+### Fixed
+- Fixed `manage-group` logic in `handle_cli` function
+
 
 ## [0.9.5] - 2025-09-14
 ### Added
