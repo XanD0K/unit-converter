@@ -4,7 +4,6 @@
 ## New features
 - [ ] Add style to introductory messages and instruction messages and add separator (e.g. with `-`, `=` or `_`)
 - [ ] Use `inflect` library to output singular/plural unit group/type
-- [ ] Add a class that encapsulates all program's logic, allowing users to also access it's features throughout an Class's object
 - [ ] In `api.py` file, allow users to load a different data file
 
 
@@ -71,3 +70,4 @@
 - [x] Move variables' validation from multiple functions, centralizing them on `UnitData` class
 - [x] Allow users to remove unit_group
 - [x] Segregate `UnitData` class into multiple classes
+- [x] Add a class that encapsulates all program's logic, allowing users to also access it's features throughout an Class's object

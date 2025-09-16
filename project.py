@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from math import fabs
 
 from unit_converter.data_manager import load_data, add_to_log, refactor_value, save_data, zero_division_checker
-from unit_converter.data_models import ConversionData, ManageGroupData, ManageTypeData, AliasesData, ChangeBaseData
+from unit_converter.data_models import DataStore, ConversionData, ManageGroupData, ManageTypeData, AliasesData, ChangeBaseData
 from unit_converter.utils import print_introductory_messages, print_time_instructions, get_users_input, validate_unit_group, get_converter_units, get_amount, resolve_aliases, parse_time_input, parse_date_input, get_seconds, format_value, calculate_leap_years, validate_date, get_days_from_month, get_index_from_month, gets_days_from_index
 
 
@@ -14,7 +14,7 @@ def main() -> None:
     # Handles data loading and validation
     try:
         # Initiates a 'DataStore' object
-        data = load_data()
+        data = DataStore(*load_data())
     except (ValueError, FileNotFoundError, json.JSONDecodeError, KeyError) as e:
         print(f"Error: {e}")
         sys.exit(1)
@@ -93,17 +93,13 @@ def handle_cli(args, data):
         unit_data = ConversionData(unit_group=parsed_args.unit_group.lower())
         if unit_data.unit_group == "time":
             unit_data.time_input = " ".join(arg.lower() for arg in parsed_args.args)
-            unit_data.validate_for_conversion(data)
-            converter_time(data, unit_data)
         else:
             if len(parsed_args.args) not in [2, 3]:
                 raise ValueError("Invalid format for non-time conversion! Usage: <from_type> <to_type> [amount]")
             unit_data.from_type = resolve_aliases(data, unit_data.unit_group, parsed_args.args[0].lower())
             unit_data.to_type = resolve_aliases(data, unit_data.unit_group, parsed_args.args[1].lower())
             unit_data.amount = float(parsed_args.args[2]) if len(parsed_args.args) == 3 else 1.0
-            unit_data.validate_for_conversion(data)
-            unit_data.new_value = converter(data, unit_data)
-            print(f"{format_value(unit_data.amount)} {unit_data.from_type} = {format_value(unit_data.new_value)} {unit_data.to_type}")
+        conversion_logic(data, unit_data)
 
     elif parsed_args.command in ["manage-group", "mg"]:
         unit_data = ManageGroupData(
@@ -114,10 +110,10 @@ def handle_cli(args, data):
             unit_data.new_base_unit = parsed_args.new_base_unit.lower()
         unit_data.validate_action()
         if unit_data.action == "add":
-            unit_data.validate_add_action(data)            
+            unit_data.validate_add_action(data)
         elif unit_data.action == "remove":
             validate_unit_group(unit_data.unit_group, data)
-            unit_data.validate_remove_action(data)            
+            unit_data.validate_remove_action(data)
         manage_group(data, unit_data)
 
     elif parsed_args.command in ["manage-type", "mt"]:
@@ -169,17 +165,17 @@ def get_action(data) -> None:
             elif action in ["history", "h"]:
                 print_history(data)
                 continue
-            elif action in ["types", "t"]:                
+            elif action in ["types", "t"]:
                 print_types(data)
                 continue
             elif action in ["convert", "c"]:
                 conversion_logic(data)
                 continue
-            elif action in ["manage-type", "mt"]:
-                manage_type(data)
-                continue
             elif action in ["manage-group", "mg"]:
                 manage_group(data)
+                continue
+            elif action in ["manage-type", "mt"]:
+                manage_type(data)
                 continue
             elif action in ["aliases", "a"]:
                 manage_aliases(data)
@@ -202,6 +198,7 @@ def get_unit_group(data) -> str:
     validate_unit_group(unit_group, data)
     return unit_group
 
+
 def print_groups(data) -> None:
     """Prints all available group of units"""
     print("Groups: " + ", ".join(data.units.keys()))
@@ -211,7 +208,7 @@ def print_history(data, limit: int = 10) -> None:
     """Prints previous conversion request (default = last 10 entries)"""
     if not data.conversion_log:
         print("Conversion history is empty!")
-        return        
+        return
     
     for entry in data.conversion_log[-limit:]:  # Gets the last 10 entries
         if entry["unit_group"] == "time":
@@ -243,27 +240,29 @@ def print_types(data, unit_group=None) -> None:
     print(f"'{unit_group}' units: " + ", ".join(formatted_output))
 
 
-def conversion_logic(data) -> None:
+def conversion_logic(data, unit_data=None) -> None:
     """Handles all logic of unit conversion"""
-    unit_group: str = get_unit_group(data)
-    unit_data = ConversionData(unit_group)
+    if unit_data is None:
+        unit_data = ConversionData(unit_group = get_unit_group(data))    
     if unit_data.unit_group == "time":
-        print_time_instructions()
-        unit_data.time_input = get_users_input("Enter time conversion: ").strip().lower()
+        if unit_data.time_input is None:
+            print_time_instructions()
+            unit_data.time_input = get_users_input("Enter time conversion: ").strip().lower()
         unit_data.validate_time_input()
         converter_time(data, unit_data)
         return
-    unit_data.from_type, unit_data.to_type = get_converter_units(data, unit_data)
-    unit_data.amount = get_amount(unit_data)
+    if unit_data.from_type is None and unit_data.to_type is None:
+        unit_data.from_type, unit_data.to_type = get_converter_units(data, unit_data)
+    if unit_data.amount is None:
+        unit_data.amount = get_amount(unit_data)
     unit_data.validate_for_conversion(data)
     unit_data.new_value = converter(data, unit_data)
 
-    print(f"{format_value(unit_data.amount)} {unit_data.from_type} = {format_value(unit_data.new_value)} {unit_data.to_type}")   
+    print(f"{format_value(unit_data.amount)} {unit_data.from_type} = {format_value(unit_data.new_value)} {unit_data.to_type}")
 
 
 def converter(data, unit_data) -> float:
     """Convert one value to another"""
-    unit_data.validate_for_conversion(data)
     # Separates conversion logic when dealing with temperature
     if unit_data.unit_group == "temperature":
         unit_data.new_value = converter_temp(data, unit_data)
@@ -296,7 +295,7 @@ def converter_time(data, unit_data) -> None:
     unit_data.validate_time_args(data)
     args = unit_data.time_input.split()
     if len(args) == 2:
-        converter_time_2args(data, unit_data)    
+        converter_time_2args(data, unit_data)
     elif len(args) == 3:
         converter_time_3args(data, unit_data)
     # E.g. 5 years 10 months 10 days 8 hours 56 minutes seconds
@@ -325,7 +324,7 @@ def converter_time_3args(data, unit_data):
     factor_time = unit_data.factor_time
 
     # E.g. minutes seconds 1
-    if from_time in data.units[unit_group] and to_time in data.units[unit_group]:           
+    if from_time in data.units[unit_group] and to_time in data.units[unit_group]:
         total_seconds = factor_time * data.units[unit_group][from_time]
         zero_division_checker(data.units[unit_group][to_time])
         unit_data.new_time = total_seconds / data.units[unit_group][to_time]
@@ -341,7 +340,7 @@ def converter_time_3args(data, unit_data):
             new_to_time = parse_time_input(to_time)
             unit_data.new_time = fabs((new_from_time - new_to_time) / data.units[unit_group][factor_time])
             print(f"There are {format_value(unit_data.new_time)} {factor_time} between {from_time} and {to_time}")
-        
+
         # E.g. JAN DEC days
         elif from_time in data.all_months and to_time in data.all_months:
             from_datetime = datetime(2023, get_index_from_month(data, from_time), 1)
@@ -400,7 +399,7 @@ def converter_time_3args(data, unit_data):
 def converter_time_2args(data, unit_data):
     unit_group = unit_data.unit_group
     from_time = unit_data.from_time
-    factor_time = unit_data.factor_time   
+    factor_time = unit_data.factor_time
     zero_division_checker(data.units[unit_group][factor_time])
 
     # E.g. 17h:28m:36s seconds
@@ -498,10 +497,10 @@ def manage_type(data, unit_data=None) -> None:
 
 def add_temp_type(data, unit_data) -> None:
     """Handles all logic for adding temperature units"""
-    if unit_data.factor == None:
+    if unit_data.factor is None:
         unit_data.factor = get_users_input(f"Enter conversion factor to base unit '{data.base_units[unit_data.unit_group]}' of 'temperature' group: ").strip().lower()
     unit_data.validate_factor()
-    if unit_data.offset == None:
+    if unit_data.offset is None:
         unit_data.offset = get_users_input(f"Enter offset value to base unit '{data.base_units[unit_data.unit_group]}' of 'temperature' group: ").strip().lower()
     unit_data.validate_offset()
     data.units[unit_data.unit_group][unit_data.unit_type] = [unit_data.factor, unit_data.offset]

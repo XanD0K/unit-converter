@@ -30,7 +30,7 @@ def load_data():
         month_days = json.load(file)
     
     validate_data(units, base_units, conversion_log, unit_aliases, month_days)
-    return DataStore(units, base_units, conversion_log, unit_aliases, month_days)
+    return units, base_units, conversion_log, unit_aliases, month_days
 
 
 def validate_data(units, base_units, conversion_log, unit_aliases, month_days):

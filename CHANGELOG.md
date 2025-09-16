@@ -3,7 +3,7 @@
 
 ## [Unreleased]
 ### Added
-- Created `api.py` file with an `UnitConverter` class, which allow users to access the program by declaring class objects
+
 
 ### Changed
 
@@ -14,18 +14,25 @@
 ## [0.9.6] - 2025-09-15
 ### Added
 - Created `round_if_repeting` function that uses `fractions` module to round repeating decimals when refactoring. Allows to consistency and precision when changing base unit
+- Created `api.py` file with an `Converter` class, which allow users to access the program by declaring class objects
+
+### Changed
+- Changed `conversion_logic`, `converter` and `converter_temp` functions to accept `unit_data` attribute, keeping consistency with other actions
 
 ### Fixed
-- Fixed `manage-group` logic in `handle_cli` function
+- Fixed `manage-group` action logic in `handle_cli` function
+- Fixed `convert` action logic in `handle_cli` function
 
 
 ## [0.9.5] - 2025-09-14
 ### Added
 - Added `manage_group` logic into `handle_cli` function, allowing users to add and remove `unit_groups` through command-line arguments
-- Created `get_users_input` function to allow users exit the program by entering 'quit' anytime they want
+- Created `get_users_input` function that allow users to exit the program by entering 'quit' as input
+
 ### Changed
 - Segregated `UnitData` class into `ConversionData`, `ManageTypeData`, `AliasesData` and `ChangeBaseData` classes
 - Changed all `input` functions to recently created `get_users_input` function
+
 ### Fixed
 - Fixed `converter_time` function that wasn't properly handling all time formats
 - Fixed `validate_alias` function output, in `UnitData` class

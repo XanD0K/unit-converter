@@ -81,7 +81,7 @@ class ConversionData:
             pass
         elif parse_date_input(self.to_time) is not None:
             years, months, days = parse_date_input(self.to_time)
-            validate_date(years, months, days)  
+            validate_date(years, months, days)
         else:
             raise ValueError(f"Invalid 'to_time': {self.to_time}")
 
@@ -114,8 +114,8 @@ class ConversionData:
                 try:
                     float(number)
                 except:
-                    raise ValueError(f"'{number}' is an invalid amount!") 
-                unit = resolve_aliases(data, self.unit_group, unit)           
+                    raise ValueError(f"'{number}' is an invalid amount!")
+                unit = resolve_aliases(data, self.unit_group, unit)
                 if unit is False or unit not in data.units[self.unit_group]:
                     raise ValueError(f"'{unit}' is not a type for '{self.unit_group}' group!")
         else:
@@ -145,15 +145,15 @@ class ManageGroupData:
             raise ValueError("'action' cannot be empty!")
         if self.action not in ["add", "remove"]:
             raise ValueError(f"Invalid action: '{self.action}'")
-    
+
     def validate_add_action(self, data):
         if self.unit_group in data.units:
-            raise KeyError(f"'{self.unit_group}' is already an existed group!") 
+            raise KeyError(f"'{self.unit_group}' is already an existed group!")
            
     def validate_remove_action(self,data):
         if self.unit_group not in data.units:
-            raise KeyError(f"'{self.unit_group}' is not a valid group!") 
-        
+            raise KeyError(f"'{self.unit_group}' is not a valid group!")
+
     def validate_for_manage_group(self, data):
         validate_unit_group(self.unit_group, data)
         self.validate_action()
@@ -198,7 +198,6 @@ class ManageTypeData:
         elif self.unit_type == data.base_units[self.unit_group]:
             raise ValueError("Cannot remove base unit!")
 
-
     def validate_value(self):
         if self.value is None:
             raise ValueError("'value' cannot be empty!")
@@ -216,7 +215,7 @@ class ManageTypeData:
             raise ValueError("Invalid conversion factor or offset!")
         if self.factor <= 0:
             raise ValueError("Conversion factor must be positive!")
-        
+
     def validate_offset(self):
         if self.offset is None:
             raise ValueError("You can't leave a field empty!")
@@ -251,7 +250,7 @@ class AliasesData:
     def validate_unit_type(self, data):
         if self.unit_type not in data.units[self.unit_group]:
             raise KeyError(f"'{self.unit_type}' is not a valid unit type for '{self.unit_group}' group!")
-        
+
     def validate_alias(self, data):
         if not self.alias:
             raise ValueError("Alias cannot be empty!")
@@ -263,7 +262,7 @@ class AliasesData:
                 raise KeyError(f"'{self.alias}' is already being used to name an unit group!")
             if self.alias in data.units[self.unit_group]:
                 raise KeyError(f"'{self.alias}' is already being used as an unit type in '{self.unit_group}'!")
-               
+
         elif self.action == "remove":
             if self.alias not in all_group_aliases:
                 raise ValueError(f"'{self.alias}' is not an alias of '{self.unit_type}'")
