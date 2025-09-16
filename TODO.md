@@ -4,7 +4,6 @@
 ## New features
 - [ ] Add style to introductory messages and instruction messages and add separator (e.g. with `-`, `=` or `_`)
 - [ ] Use `inflect` library to output singular/plural unit group/type
-- [ ] In `api.py` file, allow users to load a different data file
 
 
 ## Refactoring tasks
@@ -24,6 +23,7 @@
 
 ## BACKLOG
 - [ ] Add `money` group to allow currency conversion through API requests (https://data.ecb.europa.eu/help/api/data)
+- [ ] In `api.py` file, allow users to load a different data file
 
 
 ## DONE

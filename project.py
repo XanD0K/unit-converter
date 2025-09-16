@@ -82,6 +82,7 @@ def handle_cli(args, data):
     
     if parsed_args.command in ["groups", "g"]:
         print_groups(data)
+
     elif parsed_args.command in ["history", "h"]:
         limit = parsed_args.limit
         try:
@@ -91,10 +92,12 @@ def handle_cli(args, data):
         except (ValueError, TypeError):
             raise ValueError("'limit' must be a positive number!")
         print_history(data, limit)
+
     elif parsed_args.command in ["types", "t"]:
         unit_group = parsed_args.unit_group.lower()
         validate_unit_group(unit_group, data)
         print_types(data, unit_group)
+
     elif parsed_args.command in ["convert", "c"]:
         validate_unit_group(parsed_args.unit_group.lower(), data)
         unit_data = ConversionData(unit_group=parsed_args.unit_group.lower())
@@ -103,10 +106,11 @@ def handle_cli(args, data):
         else:
             if len(parsed_args.args) not in [2, 3]:
                 raise ValueError("Invalid format for non-time conversion! Usage: <from_type> <to_type> [amount]")
-            unit_data.from_type = resolve_aliases(data, unit_data.unit_group, parsed_args.args[0].lower())
-            unit_data.to_type = resolve_aliases(data, unit_data.unit_group, parsed_args.args[1].lower())
+            unit_data.from_type = parsed_args.args[0].lower()
+            unit_data.to_type = parsed_args.args[1].lower()
             unit_data.amount = float(parsed_args.args[2]) if len(parsed_args.args) == 3 else 1.0
-        conversion_logic(data, unit_data)
+        message = conversion_logic(data, unit_data)
+        print(message)
 
     elif parsed_args.command in ["manage-group", "mg"]:
         unit_data = ManageGroupData(
@@ -115,7 +119,8 @@ def handle_cli(args, data):
             new_base_unit = parsed_args.new_base_unit.lower()
         )
         unit_data.validate_for_manage_group(data)
-        manage_group(data, unit_data)
+        message = manage_group(data, unit_data)
+        print(message)
 
     elif parsed_args.command in ["manage-type", "mt"]:
         validate_unit_group(parsed_args.unit_group.lower(), data)
@@ -130,9 +135,10 @@ def handle_cli(args, data):
         unit_data.validate_for_manage_type(data)
         # Adds temperature type
         if unit_data.action == "add" and unit_data.unit_group == "temperature":
-            add_temp_type(data, unit_data)
+            message = add_temp_type(data, unit_data)
         else:
-            manage_type(data, unit_data)
+            message = manage_type(data, unit_data)
+        print(message)
 
     elif parsed_args.command in ["aliases", "a"]:
         validate_unit_group(parsed_args.unit_group.lower(), data)
@@ -142,7 +148,8 @@ def handle_cli(args, data):
             action = parsed_args.action.lower(),
             alias = parsed_args.alias.lower()
         )
-        manage_aliases(data, unit_data)
+        message = manage_aliases(data, unit_data)
+        print(message)
 
     elif parsed_args.command in ["change-base", "cb"]:
         validate_unit_group(parsed_args.unit_group.lower(), data)
@@ -150,7 +157,8 @@ def handle_cli(args, data):
             unit_group=parsed_args.unit_group.lower(),
             new_base_unit = parsed_args.new_base_unit.lower()
         )
-        change_base_unit(data, unit_data)
+        message = change_base_unit(data, unit_data)
+        print(message)
 
 
 def get_action(data) -> None:
@@ -168,19 +176,24 @@ def get_action(data) -> None:
                 print_types(data)
                 continue
             elif action in ["convert", "c"]:
-                conversion_logic(data)
+                message = conversion_logic(data)
+                print(message)
                 continue
             elif action in ["manage-group", "mg"]:
-                manage_group(data)
+                message = manage_group(data)
+                print(message)
                 continue
             elif action in ["manage-type", "mt"]:
-                manage_type(data)
+                message = manage_type(data)
+                print(message)
                 continue
             elif action in ["aliases", "a"]:
-                manage_aliases(data)
+                message = manage_aliases(data)
+                print(message)
                 continue
             elif action in ["change-base", "cb"]:
-                change_base_unit(data)
+                message = change_base_unit(data)
+                print(message)
                 continue
             else:
                 raise ValueError(f"'{action}' is not a valid action!")
@@ -232,25 +245,21 @@ def print_types(data, unit_group=None) -> None:
     print(f"'{unit_group}' units: " + ", ".join(formatted_output))
 
 
-def conversion_logic(data, unit_data=None) -> None:
+def conversion_logic(data, unit_data=None) -> str:
     """Handles all logic of unit conversion"""
     if unit_data is None:
-        unit_data = ConversionData(unit_group = get_unit_group(data))    
-    if unit_data.unit_group == "time":
-        if unit_data.time_input is None:
+        unit_data = ConversionData(unit_group = get_unit_group(data))
+        if unit_data.unit_group == "time":
             print_time_instructions()
             unit_data.time_input = get_users_input("Enter time conversion: ").strip().lower()
-        unit_data.validate_time_input()
-        converter_time(data, unit_data)
-        return
-    if unit_data.from_type is None and unit_data.to_type is None:
-        unit_data.from_type, unit_data.to_type = get_converter_units(data, unit_data)
-    if unit_data.amount is None:
-        unit_data.amount = get_amount(unit_data)
+        else:
+            unit_data.from_type, unit_data.to_type = get_converter_units(data, unit_data)
+            unit_data.amount = get_amount(unit_data)
     unit_data.validate_for_conversion(data)
+    if unit_data.unit_group == "time":
+        return converter_time(data, unit_data)
     unit_data.new_value = converter(data, unit_data)
-
-    print(f"{format_value(unit_data.amount)} {unit_data.from_type} = {format_value(unit_data.new_value)} {unit_data.to_type}")
+    return f"{format_value(unit_data.amount)} {unit_data.from_type} = {format_value(unit_data.new_value)} {unit_data.to_type}"
 
 
 def converter(data, unit_data) -> float:
@@ -284,12 +293,11 @@ def converter_temp(data, unit_data) -> float:
 
 def converter_time(data, unit_data) -> None:
     """Handles conversion for time units"""
-    unit_data.validate_time_args(data)
     args = unit_data.time_input.split()
     if len(args) == 2:
-        converter_time_2args(data, unit_data)
+        return converter_time_2args(data, unit_data)
     elif len(args) == 3:
-        converter_time_3args(data, unit_data)
+        return converter_time_3args(data, unit_data)
     # E.g. 5 years 10 months 10 days 8 hours 56 minutes seconds
     elif len(args) % 2 != 0 and len(args) > 3:
         unit_data.to_time = args[-1]
@@ -305,8 +313,9 @@ def converter_time(data, unit_data) -> None:
         unit_data.from_time = " ".join(f"{num} {unit}" for num, unit in formatted_value)
         unit_data.new_time = total_seconds / data.units[unit_data.unit_group][unit_data.to_time]
 
-        print(f"{' '.join(f'{num} {unit}' for num, unit in formatted_value)} = {format_value(unit_data.new_time)} {unit_data.to_time}")
         add_to_log(data, unit_data, is_time_convertion=True)
+        return f"{' '.join(f'{num} {unit}' for num, unit in formatted_value)} = {format_value(unit_data.new_time)} {unit_data.to_time}"
+        
 
 
 def converter_time_3args(data, unit_data):
@@ -320,7 +329,7 @@ def converter_time_3args(data, unit_data):
         total_seconds = factor_time * data.units[unit_group][from_time]
         zero_division_checker(data.units[unit_group][to_time])
         unit_data.new_time = total_seconds / data.units[unit_group][to_time]
-        print(f"{format_value(factor_time)} {from_time} = {format_value(unit_data.new_time)} {to_time}")
+        message = f"{format_value(factor_time)} {from_time} = {format_value(unit_data.new_time)} {to_time}"
 
     else:
         unit_data.validate_factor_time(data)
@@ -331,7 +340,7 @@ def converter_time_3args(data, unit_data):
             new_from_time = parse_time_input(from_time)
             new_to_time = parse_time_input(to_time)
             unit_data.new_time = fabs((new_from_time - new_to_time) / data.units[unit_group][factor_time])
-            print(f"There are {format_value(unit_data.new_time)} {factor_time} between {from_time} and {to_time}")
+            message = f"There are {format_value(unit_data.new_time)} {factor_time} between {from_time} and {to_time}"
 
         # E.g. JAN DEC days
         elif from_time in data.all_months and to_time in data.all_months:
@@ -349,7 +358,7 @@ def converter_time_3args(data, unit_data):
                 total_seconds = (timedelta(seconds=days * data.units[unit_group]["days"])).total_seconds()
                 zero_division_checker(data.units[unit_group][factor_time])
                 unit_data.new_time = total_seconds / data.units[unit_group][factor_time]
-            print(f"Between {from_time} and {to_time} there are {format_value(unit_data.new_time)} {factor_time}")
+            message = f"Between {from_time} and {to_time} there are {format_value(unit_data.new_time)} {factor_time}"
         
         # E.g. 2019-11-04 2056-04-28 days
         elif parse_date_input(from_time) is not None and parse_date_input(to_time) is not None:
@@ -374,13 +383,14 @@ def converter_time_3args(data, unit_data):
             total_days = abs((from_total_days - to_total_days)) + 1 + leap_years
             total_seconds = total_days * data.units[unit_group]["days"]
             unit_data.new_time = total_seconds / data.units[unit_group][factor_time]        
-            print(f"Between {from_time} and {to_time} there are {format_value(unit_data.new_time)} {factor_time}")
+            message = f"Between {from_time} and {to_time} there are {format_value(unit_data.new_time)} {factor_time}"
 
     unit_data.unit_group = unit_group
     unit_data.from_time=from_time
     unit_data.to_time=to_time
     unit_data.factor_time=factor_time
     add_to_log(data, unit_data, is_time_convertion=True)
+    return message
 
 
 def converter_time_2args(data, unit_data):
@@ -393,26 +403,27 @@ def converter_time_2args(data, unit_data):
     if parse_time_input(from_time) is not None:
         total_seconds = parse_time_input(from_time)
         unit_data.new_time = (total_seconds / data.units[unit_group][factor_time])
-        print(f"There are {format_value(unit_data.new_time)} {factor_time} in {from_time}")
+        message = f"There are {format_value(unit_data.new_time)} {factor_time} in {from_time}"
 
     # E.g. JAN minutes
     elif from_time in data.all_months:
         days = get_days_from_month(data, from_time)
         total_seconds = days * data.units[unit_group]["days"]
         unit_data.new_time = total_seconds / data.units[unit_group][factor_time]
-        print(f"There are {format_value(unit_data.new_time)} {factor_time} in {from_time}")
+        message = f"There are {format_value(unit_data.new_time)} {factor_time} in {from_time}"
 
     # E.g. 2019-11-04 days
     elif parse_date_input(from_time) is not None:
         years, months, days = parse_date_input(from_time)
         total_seconds = get_seconds(data, unit_group, years, months, days)
         unit_data.new_time = total_seconds / data.units[unit_group][factor_time]
-        print(f"There are {format_value(unit_data.new_time)} {factor_time} in {years} years, {months} months, {days} days")
+        message = f"There are {format_value(unit_data.new_time)} {factor_time} in {years} years, {months} months, {days} days"
 
     unit_data.unit_group = unit_group
     unit_data.from_time=from_time
     unit_data.factor_time=factor_time
     add_to_log(data, unit_data, is_time_convertion=True)
+    return message
 
 
 def manage_group(data, unit_data=None) -> None:
@@ -432,15 +443,16 @@ def manage_group(data, unit_data=None) -> None:
         data.units[unit_data.unit_group][unit_data.new_base_unit] = 1.0
         data.base_units[unit_data.unit_group] = unit_data.new_base_unit
         data.unit_aliases[unit_data.unit_group] = {}
-        print(f"You've just created a '{unit_data.unit_group}' group, with '{unit_data.new_base_unit}' as its base unit!")
+        message = f"You've just created a '{unit_data.unit_group}' group, with '{unit_data.new_base_unit}' as its base unit!"
     elif unit_data.action == "remove":
         data.units.pop(unit_data.unit_group)
         data.base_units.pop(unit_data.unit_group)
         data.unit_aliases.pop(unit_data.unit_group)
-        print(f"Group '{unit_data.unit_group}' successfullu removed!")
+        message = f"Group '{unit_data.unit_group}' successfullu removed!"
     save_data(data.units, "units")
     save_data(data.base_units, "base_units")
     save_data(data.unit_aliases, "unit_aliases")
+    return message
     
     
 def manage_type(data, unit_data=None) -> None:
@@ -456,21 +468,21 @@ def manage_type(data, unit_data=None) -> None:
             unit_data.unit_type = get_users_input(f"Enter type to remove from '{unit_data.unit_group}' group: ").strip().lower()       
 
     unit_data.validate_for_manage_type(data)
-    if unit_data.action == "add":    
+    if unit_data.action == "add":
         if unit_data.unit_group == "temperature":
-            add_temp_type(data, unit_data)
-            return
+            return add_temp_type(data, unit_data)
         data.units[unit_data.unit_group][unit_data.unit_type] = unit_data.value
-        print(f"A new unit type was added on '{unit_data.unit_group}' group: {unit_data.unit_type} = {unit_data.value}")
+        message = f"A new unit type was added on '{unit_data.unit_group}' group: {unit_data.unit_type} = {unit_data.value}"
     elif unit_data.action == "remove":
         data.units[unit_data.unit_group].pop(unit_data.unit_type)
         aliases_to_remove = [alias for alias, unit in data.unit_aliases[unit_data.unit_group].items() if unit == unit_data.unit_type]
         for alias in aliases_to_remove:
             data.unit_aliases[unit_data.unit_group].pop(alias)
-        print(f"'{unit_data.unit_type}' was removed from '{unit_data.unit_group}'")
+        message = f"'{unit_data.unit_type}' was removed from '{unit_data.unit_group}'"
     
     save_data(data.units, "units")
     save_data(data.unit_aliases, "unit_aliases")
+    return message
 
 
 def add_temp_type(data, unit_data=None) -> None:
@@ -482,8 +494,9 @@ def add_temp_type(data, unit_data=None) -> None:
         unit_data.validate_offset()
 
     data.units[unit_data.unit_group][unit_data.unit_type] = [unit_data.factor, unit_data.offset]
-    print(f"A new unit type was added on temperature group: {unit_data.unit_type} = [{unit_data.factor}, {unit_data.offset}]")
     save_data(data.units, "units")
+    return f"A new unit type was added on temperature group: {unit_data.unit_type} = [{unit_data.factor}, {unit_data.offset}]"
+    
 
 
 def manage_aliases(data, unit_data=None):
@@ -499,12 +512,13 @@ def manage_aliases(data, unit_data=None):
     
     if unit_data.action == "add":
         data.unit_aliases[unit_data.unit_group][unit_data.alias] = unit_data.unit_type
-        print(f"Alias successfully added! New alias for '{unit_data.unit_type}': '{unit_data.alias}'")
+        message = f"Alias successfully added! New alias for '{unit_data.unit_type}': '{unit_data.alias}'"
     elif unit_data.action == "remove":
         data.unit_aliases[unit_data.unit_group].pop(unit_data.alias) 
-        print(f"'{unit_data.alias}' successfully removed from '{unit_data.unit_type}'!")
+        message = f"'{unit_data.alias}' successfully removed from '{unit_data.unit_type}'!"
 
     save_data(data.unit_aliases, "unit_aliases")
+    return message
 
 
 def change_base_unit(data, unit_data=None):
@@ -522,7 +536,7 @@ def change_base_unit(data, unit_data=None):
     save_data(data.units, "units")
     save_data(data.base_units, "base_units")
 
-    print(f"You've just changed the base unit from '{unit_data.unit_group}' group, to '{unit_data.new_base_unit}'!")
+    return f"You've just changed the base unit from '{unit_data.unit_group}' group, to '{unit_data.new_base_unit}'!"
 
 
 if __name__ == "__main__":

@@ -12,8 +12,12 @@
 ### Removed
 
 ## [0.9.7] - 2025-09-16
+### Added
+- Added alias for all methods in `api.py` file
+
 ### Changed
-- Changed `change_base_unit`, ``
+- Changed `handle_cli`, `conversion_logic`, `converter_time`, ` converter_time_3args`, `converter_time_2args`, `manage_group`, `manage_type`, `manage_aliases` and `change_base_unit` functions, polishing them, removing unnecessary conditionals and centralizing variables validations on their respective classes in `data_models.py` file
+- Changed `convert`, `manage_group`, `manage_type`, `aliases` and `change_base` methods from `Convert` class, to also receive a `print_message` argument, set as `False` by default, which will controls if the output message will be displayed
 
 
 ## [0.9.6] - 2025-09-15

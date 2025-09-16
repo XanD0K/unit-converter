@@ -28,12 +28,14 @@ class ConversionData:
         self.new_time = new_time
 
     def validate_from_type(self, data):
+        self.from_type = resolve_aliases(data, self.unit_group, self.from_type)
         if not self.from_type:
             raise ValueError("Unit type cannot be empty!")
         if self.from_type not in data.units[self.unit_group]:
             raise KeyError("Invalid unit type!")
 
     def validate_to_type(self, data):
+        self.to_type = resolve_aliases(data, self.unit_group, self.to_type)
         if not self.to_type:
             raise ValueError("Unit type cannot be empty!")
         if self.to_type not in data.units[self.unit_group]:
@@ -48,13 +50,15 @@ class ConversionData:
         except:
             raise ValueError("Invalid amount!")
         # Prevents negative value for "Kelvin"
-        if self.amount < 0 and self.from_type == "kelvin":
+        if self.amount < 0 and self.unit_group == "temperature" and self.from_type == "kelvin":
             raise ValueError("Kelvin temperature cannot be negative!")
 
     def validate_time_input(self):
         if not self.time_input:
             raise ValueError("Time conversion can't be empty! Enter an expression!")
-
+        if not len(self.time_input.split()) >= 2:
+                raise ValueError("Incorrect format! Usage: <unit_group> <time_input>")
+           
     def validate_from_time(self, data):
         if not self.from_time:
             ValueError("Enter a value to convert from!")
@@ -122,6 +126,7 @@ class ConversionData:
             raise ValueError("Invalid format for date and time conversion!")
 
     def validate_for_conversion(self, data):
+        validate_unit_group(self.unit_group, data)
         if self.unit_group == "time":
             self.validate_time_input()
             self.validate_time_args(data)
@@ -197,7 +202,7 @@ class ManageTypeData:
             raise ValueError(f"'{self.unit_type}' is already being used as an alias in '{self.unit_group}' group")
 
     def validate_remove_action(self, data):
-        resolve_aliases(data, self.unit_group, self.unit_type)
+        self.unit_type = resolve_aliases(data, self.unit_group, self.unit_type)
         if not self.unit_type:
             raise ValueError("You can't leave that field empty!")
         elif self.unit_type not in data.units[self.unit_group]:

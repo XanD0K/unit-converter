@@ -34,23 +34,24 @@ class Converter:
         validate_unit_group(unit_group, self)
         print_types(self, unit_group.lower())
 
-    def convert(self, unit_group, user_input):
+    def convert(self, unit_group, user_input, print_result=False):
         convert_data = ConversionData(
-            unit_group = unit_group
+            unit_group = unit_group.lower()
         )
         if unit_group == "time":
-            if not len(user_input.strip()) >= 2:
-                raise ValueError("Incorrect format! Usage: <unit_group> <time_input>")
             convert_data.time_input = user_input.lower()
         else:
             args = user_input.split()
             if len(args) != 3:
                 raise ValueError("Incorrect format! Usage: <unit_group> <from_type> <to_type> <amount>")
             convert_data.from_type, convert_data.to_type, convert_data.amount = args
-            conversion_logic(self, convert_data)
+        
+        message = conversion_logic(self, convert_data)
+        if print_result:
+            print(message)
+        return convert_data.new_time if unit_group == "time" else convert_data.new_value
 
-
-    def manage_group(self, unit_group, user_input):
+    def manage_group(self, unit_group, user_input, print_message=False):
         args = user_input.split()
         if len(args) not in [1, 2]:
             raise ValueError("Incorrect format! Usage: <unit_group> <action> [new_base_unit]")
@@ -61,9 +62,9 @@ class Converter:
             action = action.lower(),
             new_base_unit = new_base_unit.lower()
         )
-        manage_group(self, manage_group_data)
+        return self._check_for_print(manage_group, manage_group_data, print_message)
 
-    def manage_type(self, unit_group, user_input):
+    def manage_type(self, unit_group, user_input, print_message=False):
         validate_unit_group(unit_group.lower(), self)
         args = user_input.split()
         if len(args) not in [2, 3, 5]:
@@ -81,9 +82,9 @@ class Converter:
             factor = factor,
             offset = offset
         )
-        manage_type(self, manage_type_data)
+        return self._check_for_print(manage_type, manage_type_data, print_message)
 
-    def aliases(self, unit_group, user_input):
+    def aliases(self, unit_group, user_input, print_message=False):
         validate_unit_group(unit_group.lower(), self)
         args = user_input.split()
         if len(args) != 3:
@@ -95,9 +96,9 @@ class Converter:
             action = action.lower(),
             alias = alias.lower()
         )
-        manage_aliases(self, alias_data)
+        return self._check_for_print(manage_aliases, alias_data, print_message)
 
-    def change_base(self, unit_group, user_input):
+    def change_base(self, unit_group, user_input, print_message=False):
         validate_unit_group(unit_group.lower(), self)
         args = user_input.split()
         if len(args) != 1:
@@ -107,4 +108,20 @@ class Converter:
             unit_group = unit_group.lower(),
             new_base_unit = new_base_unit.lower()
         )
-        change_base_unit(self, change_base_data)
+        return self._check_for_print(change_base_unit, change_base_data, print_message)
+
+    def _check_for_print(self, function, data, print_message=False):
+        message = function(self, data)
+        if print_message:
+            print(message)
+        return message
+
+    # Class methods aliases
+    g = groups
+    h = history
+    t = types
+    c = convert
+    mg = manage_group
+    mt = manage_type
+    a = aliases
+    cb = change_base
