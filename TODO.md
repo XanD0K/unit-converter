@@ -19,6 +19,7 @@
 ## Testing
 - [ ] Implement a test suite (`test_project.py`)
 - [ ] Validade type checking (by using `mypy`)
+- [ ] Test corner cases (e.g. lower/uper case, invalid values, empty values)
 
 
 ## BACKLOG

@@ -153,14 +153,20 @@ class ManageGroupData:
     def validate_remove_action(self,data):
         if self.unit_group not in data.units:
             raise KeyError(f"'{self.unit_group}' is not a valid group!")
+        
+    def validate_new_base_unit(self, data):
+        if not self.new_base_unit:
+            raise ValueError("You need to specify the base unit to create a new group")
+        if self.new_base_unit in data.units:
+            raise KeyError(f"'{self.new_base_unit}' is already an unit group name!")
 
     def validate_for_manage_group(self, data):
-        validate_unit_group(self.unit_group, data)
         self.validate_action()
         if self.action == "add":
             self.validate_add_action(data)
-            # Validates new_base_unit
+            self.validate_new_base_unit(data)
         elif self.action == "remove":
+            validate_unit_group(self.unit_group, data)
             self.validate_remove_action(data)
 
 
@@ -180,7 +186,7 @@ class ManageTypeData:
         if self.action not in ["add", "remove"]:
             raise ValueError(f"Invalid action: '{self.action}'")
 
-    def validate_add_action(self, data):
+    def validate_add_action(self, data):        
         if not self.unit_type:
             raise ValueError("You can't leave that field empty!")
         if self.unit_type in data.units:
@@ -191,6 +197,7 @@ class ManageTypeData:
             raise ValueError(f"'{self.unit_type}' is already being used as an alias in '{self.unit_group}' group")
 
     def validate_remove_action(self, data):
+        resolve_aliases(data, self.unit_group, self.unit_type)
         if not self.unit_type:
             raise ValueError("You can't leave that field empty!")
         elif self.unit_type not in data.units[self.unit_group]:
@@ -226,8 +233,6 @@ class ManageTypeData:
 
     def validate_for_manage_type(self, data):
         validate_unit_group(self.unit_group, data)
-        if self.unit_group not in data.units:
-            raise KeyError(f"'{self.unit_group}' is not a valid group!")
         self.validate_action()
         if self.action == "add":
             self.validate_add_action(data)
@@ -270,6 +275,7 @@ class AliasesData:
                 raise ValueError(f"'{self.alias}' is not an alias for '{self.unit_type}'")
 
     def validate_for_aliases(self, data):
+        self.unit_type = resolve_aliases(data, self.unit_group, self.unit_type)
         self.validate_unit_type(data)
         self.validate_alias(data)
 
@@ -281,9 +287,10 @@ class ChangeBaseData:
         self.new_base_unit = new_base_unit
 
     def validate_for_change_base(self, data):
+        new_base_unit = resolve_aliases(data, self.unit_group, self.new_base_unit)
         if not self.new_base_unit:
-            raise ValueError("Unit type cannot be empty!")    
-        elif self.new_base_unit not in data.units[self.unit_group]:
+            raise ValueError("Unit type cannot be empty!")        
+        elif new_base_unit not in data.units[self.unit_group]:
             raise KeyError(f"'{self.new_base_unit}' is not an unit type for '{self.unit_group}' group")
-        elif self.new_base_unit == data.base_units[self.unit_group]:
+        elif new_base_unit == data.base_units[self.unit_group]:
             raise ValueError(f"'{self.new_base_unit}' is already the current base unit for '{self.unit_group}' group")

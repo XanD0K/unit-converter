@@ -34,6 +34,14 @@ def get_users_input(prompt):
         sys.exit(0)
     return value
 
+
+def get_unit_group(data) -> str:
+    """Gets unit group"""
+    unit_group: str = get_users_input("Unit group: ").strip().lower()
+    validate_unit_group(unit_group, data)
+    return unit_group
+
+
 def validate_unit_group(unit_group, data):
     if not unit_group:
         raise ValueError("Unit group cannot be empty!")

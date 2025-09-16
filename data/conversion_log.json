@@ -78,5 +78,93 @@
         "to_time": null,
         "factor_time": "days",
         "result": 737763.413125
+    },
+    {
+        "date": "2025-09-16T08:49:56.857977",
+        "unit_group": "length",
+        "from_type": "meters",
+        "to_type": "yards",
+        "amount": 1.0,
+        "result": 1.0936132983377078
+    },
+    {
+        "date": "2025-09-16T08:50:31.209895",
+        "unit_group": "time",
+        "from_time": "5.0 years 10.0 months 10.0 days 8.0 hours 56.0 minutes",
+        "to_time": "seconds",
+        "factor_time": null,
+        "result": 184604160.0
+    },
+    {
+        "date": "2025-09-16T08:50:39.977415",
+        "unit_group": "time",
+        "from_time": "minutes",
+        "to_time": "seconds",
+        "factor_time": 1.0,
+        "result": 60.0
+    },
+    {
+        "date": "2025-09-16T08:50:46.090352",
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": "04h:15m:22s",
+        "factor_time": "seconds",
+        "result": 47594.0
+    },
+    {
+        "date": "2025-09-16T08:50:51.730253",
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": "dec",
+        "factor_time": "days",
+        "result": 365.0
+    },
+    {
+        "date": "2025-09-16T08:50:57.122085",
+        "unit_group": "time",
+        "from_time": "2019-11-04",
+        "to_time": "2056-04-28",
+        "factor_time": "days",
+        "result": 13326.0
+    },
+    {
+        "date": "2025-09-16T08:51:03.281787",
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": null,
+        "factor_time": "seconds",
+        "result": 62916.0
+    },
+    {
+        "date": "2025-09-16T08:51:10.505457",
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": null,
+        "factor_time": "minutes",
+        "result": 44640.0
+    },
+    {
+        "date": "2025-09-16T08:51:15.673244",
+        "unit_group": "time",
+        "from_time": "2019-11-04",
+        "to_time": null,
+        "factor_time": "days",
+        "result": 737763.413125
+    },
+    {
+        "date": "2025-09-16T08:57:13.357319",
+        "unit_group": "time",
+        "from_time": "minutes",
+        "to_time": "seconds",
+        "factor_time": 1.0,
+        "result": 60.0
+    },
+    {
+        "date": "2025-09-16T08:59:34.399768",
+        "unit_group": "time",
+        "from_time": "minutes",
+        "to_time": "seconds",
+        "factor_time": 1.0,
+        "result": 60.0
     }
 ]

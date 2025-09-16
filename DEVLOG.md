@@ -42,6 +42,10 @@ def parse_date_input(time_str):
     if matches := re.search(r"^(\d{4})-(\d{1,2})-(\d{1,2})$", time_str):
 
 
-    09-09
-    segregating project.py into multiple files, raising error about variables, specially global variables realated to ".json" files
-    Decided do go with a "data class", for easy access and passing around multiple functions and files
+09-09
+segregating project.py into multiple files, raising error about variables, specially global variables realated to ".json" files
+Decided do go with a "data class", for easy access and passing around multiple functions and files
+
+
+09-16
+Changed Converter methods in api.py file  so that it takes user's input as a single argument, and I strip it, instead of passing multiple arguments to the function

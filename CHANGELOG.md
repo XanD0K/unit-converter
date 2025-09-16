@@ -11,6 +11,11 @@
 
 ### Removed
 
+## [0.9.7] - 2025-09-16
+### Changed
+- Changed `change_base_unit`, ``
+
+
 ## [0.9.6] - 2025-09-15
 ### Added
 - Created `round_if_repeting` function that uses `fractions` module to round repeating decimals when refactoring. Allows to consistency and precision when changing base unit
