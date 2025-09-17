@@ -11,6 +11,18 @@
 
 ### Removed
 
+## [0.9.8] - 2025-09-17
+### Added
+- Created `original_units.json` file to be used by `refactor_value`, avoiding precision losses due to multiple and sequencial changes
+
+### Changed
+- Changed `manage_group`, `manage_type` and `add_temp_type` functions to use that new `original_units.json` file
+- Improved variable validations in `data_models.py` classes
+
+### Removed
+- Removed `round_if_repeting` function
+
+
 ## [0.9.7] - 2025-09-16
 ### Added
 - Added alias for all methods in `api.py` file

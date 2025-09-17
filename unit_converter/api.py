@@ -11,7 +11,7 @@ class Converter:
     def __init__(self):
         try:
             # Initiates a 'DataStore' object
-            self.units, self.base_units, self.conversion_log, self.unit_aliases, self.month_days = load_data()
+            self.units, self.base_units, self.conversion_log, self.unit_aliases, self.month_days, self.original_base_units = load_data()
             # Generates a global list containing all month's names
             self.all_months = [next(iter(value)) for value in self.month_days.values()]
         except (ValueError, FileNotFoundError, json.JSONDecodeError, KeyError) as e:

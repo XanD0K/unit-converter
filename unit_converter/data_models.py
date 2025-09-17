@@ -3,12 +3,13 @@ from .utils import validate_unit_group, resolve_aliases, parse_time_input, parse
 
 class DataStore:
     """Holds data from all '.json' files"""
-    def __init__(self, units, base_units, conversion_log, unit_aliases, month_days):
+    def __init__(self, units, base_units, conversion_log, unit_aliases, month_days, original_units):
         self.units = units
         self.base_units = base_units
         self.conversion_log = conversion_log
         self.unit_aliases = unit_aliases
         self.month_days = month_days
+        self.original_units = original_units
         # Generates a global list containing all month's names
         self.all_months = [next(iter(value)) for value in month_days.values()]
         
@@ -164,6 +165,8 @@ class ManageGroupData:
             raise ValueError("You need to specify the base unit to create a new group")
         if self.new_base_unit in data.units:
             raise KeyError(f"'{self.new_base_unit}' is already an unit group name!")
+        if self.new_base_unit == self.unit_group:
+            raise ValueError(f"Base unit can't have the same name as 'unit_group'")
 
     def validate_for_manage_group(self, data):
         self.validate_action()
@@ -261,18 +264,23 @@ class AliasesData:
         if self.unit_type not in data.units[self.unit_group]:
             raise KeyError(f"'{self.unit_type}' is not a valid unit type for '{self.unit_group}' group!")
 
+    def validate_action(self):
+        if not self.action:
+            raise ValueError("'action' cannot be empty!")
+        if self.action not in ["add", "remove"]:
+            raise ValueError(f"Invalid action: '{self.action}'")
+
     def validate_alias(self, data):
         if not self.alias:
             raise ValueError("Alias cannot be empty!")
         all_group_aliases = [alias for alias in data.unit_aliases[self.unit_group]]
         if self.action == "add":
             if self.alias in all_group_aliases:
-                raise ValueError(f"'{self.alias}' is already being used in {self.unit_group}!")
+                raise ValueError(f"'{self.alias}' is already being used as an alias in {self.unit_group}!")
             if self.alias in data.base_units:
                 raise KeyError(f"'{self.alias}' is already being used to name an unit group!")
             if self.alias in data.units[self.unit_group]:
                 raise KeyError(f"'{self.alias}' is already being used as an unit type in '{self.unit_group}'!")
-
         elif self.action == "remove":
             if self.alias not in all_group_aliases:
                 raise ValueError(f"'{self.alias}' is not an alias of '{self.unit_type}'")
@@ -280,8 +288,10 @@ class AliasesData:
                 raise ValueError(f"'{self.alias}' is not an alias for '{self.unit_type}'")
 
     def validate_for_aliases(self, data):
-        self.unit_type = resolve_aliases(data, self.unit_group, self.unit_type)
+        if resolve_aliases(data, self.unit_group, self.unit_type):
+            self.unit_type = resolve_aliases(data, self.unit_group, self.unit_type)
         self.validate_unit_type(data)
+        self.validate_action()
         self.validate_alias(data)
 
 

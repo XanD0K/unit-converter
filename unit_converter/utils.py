@@ -6,6 +6,7 @@ import sys
 def print_introductory_messages() -> None:
     """Prints introductory messages and instructions"""
     print("Welcome to unit converter!")
+    print("To print conversion history, enter 'history'")
     print("To check all group of units available, enter 'groups'")
     print("To check all types for a specific group, enter 'types'")
     print("To convert an unit, enter 'convert'")
@@ -13,7 +14,6 @@ def print_introductory_messages() -> None:
     print("To manage unit types, enter 'manage-types'")
     print("To manage aliases, enter 'aliases'")
     print("To change base unit for a group, enter 'change-base'")
-    print("To print conversion history, enter 'history'")
     print("Quit anytime by entering 'quit' or by pressing ctrl+d or ctrl+c", end="\n\n")
     
     

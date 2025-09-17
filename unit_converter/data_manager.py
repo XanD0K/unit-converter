@@ -28,12 +28,14 @@ def load_data():
         unit_aliases = json.load(file)
     with open(BASE_DIR / "data" / "month_days.json", "r") as file:
         month_days = json.load(file)
-    
-    validate_data(units, base_units, conversion_log, unit_aliases, month_days)
-    return units, base_units, conversion_log, unit_aliases, month_days
+    with open(BASE_DIR / "data" / "original_units.json", "r") as file:
+        original_units = json.load(file)
+
+    validate_data(units, base_units, conversion_log, unit_aliases, month_days, original_units)
+    return units, base_units, conversion_log, unit_aliases, month_days, original_units 
 
 
-def validate_data(units, base_units, conversion_log, unit_aliases, month_days):
+def validate_data(units, base_units, conversion_log, unit_aliases, month_days, original_units):
     """Validates dictionaries before entering the program"""
     # Ensures 'units.json' is a dictionary and it's not empty
     if not isinstance(units, dict) or not units:
@@ -51,9 +53,10 @@ def validate_data(units, base_units, conversion_log, unit_aliases, month_days):
         # Ensures base unit for each group is correctly define in 'units.json'
         if base_units[unit_group] not in units[unit_group]:
             raise KeyError(f"The base unit '{base_units[unit_group]}' for {unit_group} group is not present on 'units.json'!")
-    # Ensures 'convert_history' is a list
+    # Ensures 'conversion_log' is a list
     if not isinstance(conversion_log, list):
         raise ValueError("'convert_history' structure is corrupted!")
+    # Ensures 'month_days' is a dictionary and it's not empty
     if not isinstance(month_days, dict) or not month_days:
         raise ValueError("'month_days' structure is corrupted!")
     # Ensures 'unit_aliases' is a dictionary and it's not empty
@@ -71,6 +74,23 @@ def validate_data(units, base_units, conversion_log, unit_aliases, month_days):
             if alias in seen_aliases:
                 raise ValueError(f"'unit_aliases.json' is corrupted! There are duplicate aliases in '{unit_aliases[unit_group]}' group !")
             seen_aliases.add(alias)
+    # Ensures 'original_units.json' is a dictionary and it's not empty
+    if not isinstance(original_units, dict) or not original_units:
+        raise ValueError("'original_units.json' structure is corrupted!")
+    for unit_group in original_units:
+        # Ensures every unit group in 'original_units.json' is also a dictionary
+        if not isinstance(original_units[unit_group], dict):
+            raise ValueError(f"'units.json' is corrupted! Its '{original_units[unit_group]}' key should also be a dictionary!")
+        # Ensures every group in 'original_units.json' is also a group in 'base_units.json'
+        if unit_group not in base_units:
+            raise KeyError(f"Dictionaries don't match! '{unit_group}' should also be a key in 'base_units.json'!")
+        # Ensures base unit for each group is correctly define in 'original_units.json'
+        if base_units[unit_group] not in original_units[unit_group]:
+            raise KeyError(f"The base unit '{base_units[unit_group]}' for {unit_group} group is not present on 'units.json'!")
+        for unit_type in original_units[unit_group]:
+            if unit_type not in units[unit_group]:
+                raise KeyError(f"The unit_type '{unit_type}' should also be an unit_type in 'units.json'!")
+ 
 
 
 def add_to_log(data, unit_data, is_time_convertion=False) -> None:
@@ -136,29 +156,20 @@ def save_data(data, file_name):
 def refactor_value(data, unit_group, new_base_unit):
     """Refactor all values for 'chage-base' action"""
     if unit_group == "temperature":
-        new_base_factor, new_base_offset = data.units[unit_group][new_base_unit]
+        new_base_factor, new_base_offset = data.original_units[unit_group][new_base_unit]
         zero_division_checker(new_base_factor)            
-        for unit_type in data.units[unit_group]:
-            factor, offset = data.units[unit_group][unit_type]
+        for unit_type in data.original_units[unit_group]:
+            factor, offset = data.original_units[unit_group][unit_type]
             factor /= new_base_factor
             offset -= new_base_offset
             data.units[unit_group][unit_type] = [factor, offset]
     else:
-        zero_division_checker(data.units[unit_group][new_base_unit])
-        new_base_factor = data.units[unit_group][new_base_unit]
-        for unit_type in data.units[unit_group]:
-            data.units[unit_group][unit_type] = round_if_repeting(data.units[unit_group][unit_type] / new_base_factor)
+        new_base_factor = data.original_units[unit_group][new_base_unit]
+        zero_division_checker(new_base_factor)        
+        for unit_type in data.original_units[unit_group]:
+            value = data.original_units[unit_group][unit_type] / new_base_factor
+            data.units[unit_group][unit_type] = value
     return
-
-
-def round_if_repeting(value, decimals=10):
-    """Rounds repeating decimals when refactoring"""
-    try:
-        fraction = Fraction(value).limit_denominator(100)
-        if fraction.denominator <= 100:
-            return round(float(fraction), decimals)
-    except (ValueError, OverflowError):        
-        return value
 
 
 def zero_division_checker(num):
