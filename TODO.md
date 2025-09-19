@@ -7,12 +7,10 @@
 
 
 ## Refactoring tasks
-- [ ] Add remmaining comments throughout the codebase
-- [ ] Add remmaining type hints throughout the codebase
-- [ ] Clean program by removing multiple repetitive logic throught the codebase and transforming it into a single function
 - [ ] Polish code, improving readability
 - [ ] Reestructure `project.py` file into multiple files to keep program cleaner
 - [ ] Reestructure `final-project` directory
+- [ ] Improve `--help` message in command-line arguments
 
 
 ## Testing
@@ -72,3 +70,6 @@
 - [x] Allow users to remove unit_group
 - [x] Segregate `UnitData` class into multiple classes
 - [x] Add a class that encapsulates all program's logic, allowing users to also access it's features throughout an Class's object
+- [x] Add remmaining comments throughout the codebase
+- [x] Add remmaining type hints throughout the codebase
+- [x] Clean program by removing multiple repetitive logic throught the codebase and transforming it into a single function

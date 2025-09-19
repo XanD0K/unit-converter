@@ -11,6 +11,17 @@
 
 ### Removed
 
+
+
+## [0.9.9] - 2025-09-18
+### Added
+- Added type hints throughout codebase
+- Added comments throughout codebase
+
+### Fixed
+- Fixed error handling on all actions in `api.py` file
+
+
 ## [0.9.8] - 2025-09-17
 ### Added
 - Created `original_units.json` file to be used by `refactor_value`, avoiding precision losses due to multiple and sequencial changes

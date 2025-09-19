@@ -1,9 +1,11 @@
+from typing import Optional
+
 from .utils import validate_unit_group, resolve_aliases, parse_time_input, parse_date_input, validate_date
 
 
 class DataStore:
     """Holds data from all '.json' files"""
-    def __init__(self, units, base_units, conversion_log, unit_aliases, month_days, original_units):
+    def __init__(self, units: dict, base_units: dict, conversion_log: list, unit_aliases: dict, month_days: dict, original_units: dict):
         self.units = units
         self.base_units = base_units
         self.conversion_log = conversion_log
@@ -16,7 +18,7 @@ class DataStore:
 
 class ConversionData:
     """Holds unit data related to unit conversion"""
-    def __init__(self, unit_group, from_type=None, to_type=None, amount=None, new_value=None, time_input=None, from_time=None, to_time=None, factor_time=None, new_time=None):
+    def __init__(self, unit_group: str, from_type: Optional[str]=None, to_type: Optional[str]=None, amount: Optional[str]=None, new_value: Optional[str]=None, time_input: Optional[str]=None, from_time: Optional[str]=None, to_time: Optional[str]=None, factor_time: Optional[str]=None, new_time: Optional[str]=None):
         self.unit_group = unit_group
         self.from_type = from_type
         self.to_type = to_type
@@ -28,21 +30,21 @@ class ConversionData:
         self.factor_time = factor_time
         self.new_time = new_time
 
-    def validate_from_type(self, data):
+    def validate_from_type(self, data: DataStore) -> None:
         self.from_type = resolve_aliases(data, self.unit_group, self.from_type)
         if not self.from_type:
             raise ValueError("Unit type cannot be empty!")
         if self.from_type not in data.units[self.unit_group]:
             raise KeyError("Invalid unit type!")
 
-    def validate_to_type(self, data):
+    def validate_to_type(self, data: DataStore) -> None:
         self.to_type = resolve_aliases(data, self.unit_group, self.to_type)
         if not self.to_type:
             raise ValueError("Unit type cannot be empty!")
         if self.to_type not in data.units[self.unit_group]:
             raise KeyError("Invalid unit type!")
 
-    def validate_amount(self):
+    def validate_amount(self) -> None:
         if self.amount is None:
             raise ValueError("Amount cannot be empty")
         # Ensures amount is a number
@@ -54,13 +56,13 @@ class ConversionData:
         if self.amount < 0 and self.unit_group == "temperature" and self.from_type == "kelvin":
             raise ValueError("Kelvin temperature cannot be negative!")
 
-    def validate_time_input(self):
+    def validate_time_input(self) -> None:
         if not self.time_input:
             raise ValueError("Time conversion can't be empty! Enter an expression!")
         if not len(self.time_input.split()) >= 2:
                 raise ValueError("Incorrect format! Usage: <unit_group> <time_input>")
            
-    def validate_from_time(self, data):
+    def validate_from_time(self, data: DataStore) -> None:
         if not self.from_time:
             ValueError("Enter a value to convert from!")
         elif resolve_aliases(data, self.unit_group, self.from_time) in data.units[self.unit_group]:
@@ -75,7 +77,7 @@ class ConversionData:
         else:
             raise ValueError(f"Invalid 'from_time': {self.from_time}")
 
-    def validate_to_time(self, data):
+    def validate_to_time(self, data: DataStore) -> None:
         if not self.to_time:
             raise ValueError("Enter a value to convert to!")
         elif resolve_aliases(data, self.unit_group, self.to_time) in data.units[self.unit_group]:
@@ -90,7 +92,7 @@ class ConversionData:
         else:
             raise ValueError(f"Invalid 'to_time': {self.to_time}")
 
-    def validate_factor_time(self, data):
+    def validate_factor_time(self, data: DataStore) -> None:
         if not self.factor_time:
             raise ValueError("'factor_time' cannot be empty!")
         try:
@@ -101,8 +103,8 @@ class ConversionData:
                 raise KeyError(f"Unit type '{self.factor_time}' not found in '{self.unit_group}' group!")
             self.factor_time = factor_time
 
-    def validate_time_args(self, data):
-        args = self.time_input.split()
+    def validate_time_args(self, data: DataStore) -> None:
+        args: list[str] = self.time_input.split()
         if len(args) == 2:
             self.from_time, self.factor_time = args
             self.validate_from_time(data)
@@ -120,13 +122,13 @@ class ConversionData:
                     float(number)
                 except:
                     raise ValueError(f"'{number}' is an invalid amount!")
-                unit = resolve_aliases(data, self.unit_group, unit)
+                unit: str = resolve_aliases(data, self.unit_group, unit)
                 if unit is False or unit not in data.units[self.unit_group]:
                     raise ValueError(f"'{unit}' is not a type for '{self.unit_group}' group!")
         else:
             raise ValueError("Invalid format for date and time conversion!")
 
-    def validate_for_conversion(self, data):
+    def validate_for_conversion(self, data: DataStore) -> None:
         validate_unit_group(self.unit_group, data)
         if self.unit_group == "time":
             self.validate_time_input()
@@ -141,26 +143,26 @@ class ConversionData:
 
 class ManageGroupData:
     """Holds unit data related to creation/deletion of unit groups"""
-    def __init__(self, unit_group, action=None, new_base_unit=None):
+    def __init__(self, unit_group: str, action: Optional[str]=None, new_base_unit: Optional[str]=None):
         self.unit_group = unit_group
         self.action = action
         self.new_base_unit = new_base_unit
 
-    def validate_action(self):
+    def validate_action(self) -> None:
         if not self.action:
             raise ValueError("'action' cannot be empty!")
         if self.action not in ["add", "remove"]:
             raise ValueError(f"Invalid action: '{self.action}'")
 
-    def validate_add_action(self, data):
+    def validate_add_action(self, data: DataStore) -> None:
         if self.unit_group in data.units:
             raise KeyError(f"'{self.unit_group}' is already an existed group!")
            
-    def validate_remove_action(self,data):
+    def validate_remove_action(self,data: DataStore) -> None:
         if self.unit_group not in data.units:
             raise KeyError(f"'{self.unit_group}' is not a valid group!")
         
-    def validate_new_base_unit(self, data):
+    def validate_new_base_unit(self, data: DataStore) -> None:
         if not self.new_base_unit:
             raise ValueError("You need to specify the base unit to create a new group")
         if self.new_base_unit in data.units:
@@ -168,7 +170,7 @@ class ManageGroupData:
         if self.new_base_unit == self.unit_group:
             raise ValueError(f"Base unit can't have the same name as 'unit_group'")
 
-    def validate_for_manage_group(self, data):
+    def validate_for_manage_group(self, data: DataStore) -> None:
         self.validate_action()
         if self.action == "add":
             self.validate_add_action(data)
@@ -180,7 +182,7 @@ class ManageGroupData:
 
 class ManageTypeData:
     """Holds unit data related to creation/deletion of unit types"""
-    def __init__(self, unit_group, unit_type=None, action=None, value=None, factor=None, offset=None):
+    def __init__(self, unit_group: str, unit_type: Optional[str]=None, action: Optional[str]=None, value: Optional[str]=None, factor: Optional[str]=None, offset: Optional[str]=None):
         self.unit_group = unit_group
         self.unit_type = unit_type
         self.action = action
@@ -188,13 +190,13 @@ class ManageTypeData:
         self.factor = factor
         self.offset = offset
 
-    def validate_action(self):
+    def validate_action(self) -> None:
         if not self.action:
             raise ValueError("'action' cannot be empty!")
         if self.action not in ["add", "remove"]:
             raise ValueError(f"Invalid action: '{self.action}'")
 
-    def validate_add_action(self, data):        
+    def validate_add_action(self, data: DataStore) -> None:        
         if not self.unit_type:
             raise ValueError("You can't leave that field empty!")
         if self.unit_type in data.units:
@@ -204,7 +206,7 @@ class ManageTypeData:
         elif self.unit_type in data.unit_aliases[self.unit_group]: 
             raise ValueError(f"'{self.unit_type}' is already being used as an alias in '{self.unit_group}' group")
 
-    def validate_remove_action(self, data):
+    def validate_remove_action(self, data: DataStore) -> None:
         self.unit_type = resolve_aliases(data, self.unit_group, self.unit_type)
         if not self.unit_type:
             raise ValueError("You can't leave that field empty!")
@@ -213,7 +215,7 @@ class ManageTypeData:
         elif self.unit_type == data.base_units[self.unit_group]:
             raise ValueError("Cannot remove base unit!")
 
-    def validate_value(self):
+    def validate_value(self) -> None:
         if self.value is None:
             raise ValueError("'value' cannot be empty!")
         try:
@@ -221,7 +223,7 @@ class ManageTypeData:
         except:
             raise ValueError("Invalid conversion factor!")
 
-    def validate_factor(self):
+    def validate_factor(self) -> None:
         if self.factor is None:
             raise ValueError("You can't leave a field empty!")
         try:
@@ -231,7 +233,7 @@ class ManageTypeData:
         if self.factor <= 0:
             raise ValueError("Conversion factor must be positive!")
 
-    def validate_offset(self):
+    def validate_offset(self) -> None:
         if self.offset is None:
             raise ValueError("You can't leave a field empty!")
         try:
@@ -239,7 +241,7 @@ class ManageTypeData:
         except:
             raise ValueError("Invalid conversion factor or offset!")
 
-    def validate_for_manage_type(self, data):
+    def validate_for_manage_type(self, data: DataStore) -> None:
         validate_unit_group(self.unit_group, data)
         self.validate_action()
         if self.action == "add":
@@ -254,26 +256,26 @@ class ManageTypeData:
 
 class AliasesData:
     """Holds unit related data"""
-    def __init__(self, unit_group, unit_type=None, action=None, alias=None):
+    def __init__(self, unit_group: str, unit_type: Optional[str]=None, action: Optional[str]=None, alias: Optional[str]=None):
         self.unit_group = unit_group
         self.unit_type = unit_type
         self.action = action
         self.alias = alias
 
-    def validate_unit_type(self, data):
+    def validate_unit_type(self, data: DataStore) -> None:
         if self.unit_type not in data.units[self.unit_group]:
             raise KeyError(f"'{self.unit_type}' is not a valid unit type for '{self.unit_group}' group!")
 
-    def validate_action(self):
+    def validate_action(self) -> None:
         if not self.action:
             raise ValueError("'action' cannot be empty!")
         if self.action not in ["add", "remove"]:
             raise ValueError(f"Invalid action: '{self.action}'")
 
-    def validate_alias(self, data):
+    def validate_alias(self, data: DataStore) -> None:
         if not self.alias:
             raise ValueError("Alias cannot be empty!")
-        all_group_aliases = [alias for alias in data.unit_aliases[self.unit_group]]
+        all_group_aliases: list[str] = [alias for alias in data.unit_aliases[self.unit_group]]
         if self.action == "add":
             if self.alias in all_group_aliases:
                 raise ValueError(f"'{self.alias}' is already being used as an alias in {self.unit_group}!")
@@ -287,7 +289,7 @@ class AliasesData:
             if data.unit_aliases[self.unit_group][self.alias] != self.unit_type:
                 raise ValueError(f"'{self.alias}' is not an alias for '{self.unit_type}'")
 
-    def validate_for_aliases(self, data):
+    def validate_for_aliases(self, data: DataStore) -> None:
         if resolve_aliases(data, self.unit_group, self.unit_type):
             self.unit_type = resolve_aliases(data, self.unit_group, self.unit_type)
         self.validate_unit_type(data)
@@ -297,11 +299,11 @@ class AliasesData:
 
 class ChangeBaseData:
     """Holds unit data related to changing base unit"""
-    def __init__(self, unit_group, new_base_unit=None):
+    def __init__(self, unit_group: str, new_base_unit: Optional[str]=None):
         self.unit_group = unit_group
         self.new_base_unit = new_base_unit
 
-    def validate_for_change_base(self, data):
+    def validate_for_change_base(self, data: DataStore) -> None:
         new_base_unit = resolve_aliases(data, self.unit_group, self.new_base_unit)
         if not self.new_base_unit:
             raise ValueError("Unit type cannot be empty!")        
