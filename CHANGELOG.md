@@ -4,13 +4,19 @@
 ## [Unreleased]
 ### Added
 
-
 ### Changed
 
 ### Fixed
 
 ### Removed
 
+
+
+## [0.9.10] - 2025-09-19
+### Added
+- Created `validate_for_history` function in `data_models.py` to validate "history" action
+- Created `validate_args_number` in `data_models.py` to check and validade excessive arguments (`*args` and `**kwargs`)
+- Updated all class methods in `Converter` to accept `*args` and `**kwargs` arguments, which will be used to catch `TypeError` in situations where user inputs more arguments than required when using program thought API
 
 
 ## [0.9.9] - 2025-09-18

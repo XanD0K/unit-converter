@@ -7,7 +7,7 @@ from math import fabs
 from typing import Optional
 
 from unit_converter.data_manager import load_data, add_to_log, refactor_value, save_data, zero_division_checker
-from unit_converter.data_models import DataStore, ConversionData, ManageGroupData, ManageTypeData, AliasesData, ChangeBaseData
+from unit_converter.data_models import DataStore, ConversionData, ManageGroupData, ManageTypeData, AliasesData, ChangeBaseData, validate_for_history
 from unit_converter.utils import print_introductory_messages, print_time_instructions, get_users_input, get_unit_group, validate_unit_group, get_converter_units, get_amount, resolve_aliases, parse_time_input, parse_date_input, get_seconds, format_value, calculate_leap_years, validate_date, get_days_from_month, get_index_from_month, gets_days_from_index
 
 
@@ -89,12 +89,7 @@ def handle_cli(data: DataStore, args: list[str]) -> None:
     # 'history command
     elif parsed_args.command in ["history", "h"]:
         limit: str = parsed_args.limit
-        try:
-            limit = int(limit)
-            if limit < 0:
-                raise ValueError("'limit' must be a positive number!")
-        except (ValueError, TypeError):
-            raise ValueError("'limit' must be a positive number!")
+        validate_for_history(data, limit)
         message = print_history(data, limit)
         print(message)
     # 'types' command
@@ -223,11 +218,10 @@ def print_groups(data: DataStore) -> str:
 def print_history(data: DataStore, limit: int = 10) -> str:
     """Prints the last 10 conversion entries"""
     try:
-        if not data.conversion_log:
-            return "Conversion history is empty!"
+        validate_for_history(data, limit)
         # Used to construct the sequence of entries in 'conversion_log.json' dictionary
         entries: list[str] = []
-        for entry in data.conversion_log[-limit:]:  # Gets the last 10 entries
+        for entry in data.conversion_log[-int(limit):]:  # Gets the last 10 entries
             # Generates specific messages based on 'unit_group'
             if entry["unit_group"] == "time":
                 if entry["from_time"] in data.units["time"]:

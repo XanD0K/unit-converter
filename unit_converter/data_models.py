@@ -303,11 +303,29 @@ class ChangeBaseData:
         self.unit_group = unit_group
         self.new_base_unit = new_base_unit
 
-    def validate_for_change_base(self, data: DataStore) -> None:
+    def validate_for_change_base(self, data: DataStore, *args, **kwargs) -> None:
+        validate_args_number(*args, command="change-base", **kwargs)
         new_base_unit = resolve_aliases(data, self.unit_group, self.new_base_unit)
         if not self.new_base_unit:
-            raise ValueError("Unit type cannot be empty!")        
+            raise ValueError("Unit type cannot be empty!")
         elif new_base_unit not in data.units[self.unit_group]:
             raise KeyError(f"'{self.new_base_unit}' is not an unit type for '{self.unit_group}' group")
         elif new_base_unit == data.base_units[self.unit_group]:
             raise ValueError(f"'{self.new_base_unit}' is already the current base unit for '{self.unit_group}' group")
+
+
+def validate_for_history(data: DataStore, limit):
+    """Validate 'conversion_log.json' data, and 'limit' value"""
+    if not data.conversion_log:
+        raise ValueError("Conversion history is empty!")
+    if not str(limit).isdigit():
+        raise ValueError("'limit' must be a positive number!")
+    if int(limit) < 0:
+        raise ValueError("'limit' must be a positive number!")
+
+
+def validate_args_number(*args, command: str, **kwargs) -> None:
+    if args:
+        raise TypeError(f"Too many positional arguments for '{command}' command!")
+    if kwargs:
+        raise TypeError(f"Unexpected keyword argument for '{command}' command!")
