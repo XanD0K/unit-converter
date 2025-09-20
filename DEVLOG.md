@@ -7,6 +7,50 @@
 
 **Progress**
 
+## [DATE]
+**Plans**
+
+**Challenges**
+
+**Progress**
+
+
+## [2025-09-09] - Version 0.9.0
+**Plans**
+- Segregate `project.py` file, which was the core of the program, into multiple files. It already had almost 1000 lines of code
+
+**Challenges**
+- Segregating `project.py` into multiple files, raised errors about variables, specially global variables realated to ".json" files. Decided do go with a "data class", for easy access and passing around multiple functions and files
+
+**Progress**
+- Created `unit_converter` directory to store all functions from `project.py`: `utils.py` containing all helper functions and `data_manager_.py` with all functions that acess, modify and save data in any `.json` file
+- Moved all `.json` files into a new `data` directory
+
+
+## [2025-09-07] - Version 0.8.2
+**Plans**
+- Continue improving time conversion logic, cleaning and polishing codebase
+
+**Challenges**
+- I had already created 3 `.json` files to help with time conversion
+- To deal with new `month_days.json` file, I needed to learn how `next` and `iter` work
+
+**Progress**
+- Merged `month_index_days.json` and `month_indexes.json` files into `month_days.json`, creating a nested dictionary file with all info needed
+
+
+## [2025-09-05] - Version 0.8.0
+**Plans**
+-Continue improving time conversion, cleaning code, improving user's UX
+
+**Challenges**
+- Every time format required a different logic (and consequently a different function to handle that logic)
+- Needed to search and think a lot about how mathematical logic to calculate leap years works
+
+**Progress**
+- Improved regex in `parse_date_input` function
+- Createad `get_seconds`, `calculate_leap_years` and `validate_date` helpers functions to imrpove time conversions
+- Created `month_index_days.json` and `month_indexes.json` file to help dealing with month's index and the number of days in that respective month
 
 
 ## [2025-09-03] - Version 0.7.0
@@ -29,6 +73,7 @@
 
 **Challenges**
 - Deal with multiple formats means deal with different users inputs
+- Had to learn the basics of `datetime` library
 
 **Progress**
 - Created `days_to_month.json` file to strore a relationship between month's name and the number of days on that month
@@ -102,21 +147,6 @@
 **Progress**
 - Create a `units` dictionary, with all unit groups and unit types, and their respective values based on Internation System of Units (SI)
 - Implemented the core logic with `get_amount`, `get_unit_group` `get_converter_unit` and `converter` functions
-
-
-
-
-
-09-04
-changed
-def parse_date_input(time_str):
-    """Gets user's input of a date, and outputs the year, month and day"""
-    if matches := re.search(r"^(\d{4})-(\d{1,2})-(\d{1,2})$", time_str):
-
-
-09-09
-segregating project.py into multiple files, raising error about variables, specially global variables realated to ".json" files
-Decided do go with a "data class", for easy access and passing around multiple functions and files
 
 
 09-16

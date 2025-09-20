@@ -192,31 +192,112 @@ def test_get_seconds_invalid(data_store):
 
 # Test 'parse_date_input' function
 def test_parse_date_input_valid():
-    assert parse_date_input("1994-01-12") == (1994, 1, 12)
+    assert parse_date_input("1994-12-1") == (1994, 12, 1)
+
+def test_parse_date_input_big_dates():
+    assert parse_date_input("3000-100-50") == (3000, 100, 50)
 
 def test_parse_date_input_no_year():
-    assert parse_date_input("0-01-12") == (0, 1, 12)
+    assert parse_date_input("0-12-01") == (0, 12, 1)
 
 def test_parse_date_input_no_month():
-    assert parse_date_input("1994-01-12") == (1994, 0, 12)
+    assert parse_date_input("1994-0-1") == (1994, 0, 1)
 
 def test_parse_date_input_no_days():
-    assert parse_date_input("1994-01-0") == (1994, 1, 0)
+    assert parse_date_input("1994-12-0") == (1994, 12, 0)
 
 def test_parse_date_input_only_year():
     assert parse_date_input("1994-0-0") == (1994, 0, 0)
 
 def test_parse_date_input_only_month():
-    assert parse_date_input("0-01-0") == (0, 1, 0)
+    assert parse_date_input("0-12-0") == (0, 12, 0)
 
 def test_parse_date_input_only_days():
-    assert parse_date_input("0-0-12") == (0, 0, 12)
+    assert parse_date_input("0-0-1") == (0, 0, 1)
 
 def test_parse_date_input_all_zeroes():
     assert parse_date_input("0-0-0") == (0, 0, 0)
 
 def test_parse_date_input_invalid_format():
-    assert parse_date_input("1994/01/12") is None
+    assert parse_date_input("1994/12/1") is None
 
 def test_parse_date_input_str():
     assert parse_date_input("December first nineteen ninety four") is None
+
+
+# Test 'format_value' function
+def test_format_value_integer():
+    assert format_value(10) == "10.0"
+
+def test_format_value_float():
+    assert format_value(10.0) == "10.0"
+
+def test_format_value_trailling_zeroes():
+    assert format_value(10.00000) == "10.0"
+
+def test_format_value_decimals():
+    assert format_value(10.99999) == "10.99999"
+
+def test_format_value_round():
+    assert format_value(10.999999) == "11.0"
+
+
+# Test 'calculate_leap_years' function
+def test_calculate_leap_years_valid
+    assert calculate_leap_years()
+
+
+# Test 'is_leap' function
+def test_is_leap_by4():
+    assert is_leap(2004) == True
+
+def test_is_leap_by100():
+    assert is_leap(2100) == False
+
+def test_is_leap_by400():
+    assert is_leap(2000) == True
+
+
+# Test 'validate_date' function
+def test_validate_date_valid():
+    assert validate_date(1994, 12, 1) == True
+
+def test_validate_date_invalid_month():
+    with pytest.raise(ValueError, match="Invalid date! '13' is not a valid month"):
+        validate_date(1994, 13, 1)
+
+def test_validate_date_negative_month():
+    with pytest.raise(ValueError, match="Invalid date! '-12' is not a valid month"):
+        validate_date(1994, -12, 1)
+
+def test_validate_date_invalid_day():
+    with pytest.raise(ValueError, match="Invalid date! '32' is not a valid day for '12'"):
+        validate_date(1994, 12, 32)
+
+def test_validate_date_invalid_leap_feb():
+    with pytest.raise(ValueError, match="Invalid date! '29' is not a valid day for '2'"):
+        validate_date(2003, 2, 29)
+
+
+# Test 'get_days_from_month' function
+def test_get_days_from_month_valid(data_store):
+    assert get_days_from_month(data_store, "DEC") == 31
+
+def test_get_days_from_month_invalid(data_store):
+    assert get_days_from_month(data_store, "invalid") is None
+
+
+# Test 'get_index_from_month' function
+def test_get_index_from_month_valid(data_store):
+    assert get_index_from_month(data_store, "DEC") == 12
+
+def test_get_index_from_month_invalid(data_store):
+    assert get_index_from_month(data_store, "invalid") is None
+
+
+# Test 'gets_days_from_index' function
+def test_get_days_from_index_valid(data_store):
+    assert gets_days_from_index(data_store, "12") == 31
+
+def test_get_days_from_index_invalid(data_store):
+    assert gets_days_from_index(data_store, "13") is None

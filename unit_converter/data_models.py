@@ -72,8 +72,9 @@ class ConversionData:
         elif self.from_time in data.all_months:
             pass
         elif parse_date_input(self.from_time) is not None:
-            years, months, days = parse_date_input(self.from_time)
-            validate_date(years, months, days)  
+            years, months, days = parse_date_input(self.from_time) 
+            if self.to_time:
+                validate_date(years, months, days)
         else:
             raise ValueError(f"Invalid 'from_time': {self.from_time}")
 

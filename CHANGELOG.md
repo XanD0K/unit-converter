@@ -11,6 +11,11 @@
 ### Removed
 
 ## [0.9.11] - 2025-09-20
+### Added
+- Created `test_utils.py` file to test functions on `utils.py` file
+
+### Fixed
+- Fixed `validate_from_time` module from `ConversionData` class to allow "invalid" data (e.g. 3000-100-50) when there is no `to_type` (e.g. 3000-100-50 days)
 
 
 ## [0.9.10] - 2025-09-19
@@ -19,7 +24,6 @@
 - Created `validate_args_number` in `data_models.py` to check and validade excessive arguments (`*args` and `**kwargs`)
 - Updated all class methods in `Converter` to accept `*args` and `**kwargs` arguments, which will be used to catch `TypeError` in situations where user inputs more arguments than required when using program thought API
 - Created `tests` directory to store all test files
-- Created `test_utils.py` file to test functions on `utils.py` file
 
 
 ## [0.9.9] - 2025-09-18
