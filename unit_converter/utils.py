@@ -101,7 +101,7 @@ def parse_time_input(time_str: str) -> int | None:
 
 def check_time_is_none(time_str: str) -> int:
     """Checks if a specific time unit was provided"""
-    if time_str is not None:
+    if not time_str:
         return int(time_str)
     else:
         return 0
@@ -109,9 +109,12 @@ def check_time_is_none(time_str: str) -> int:
 
 def get_seconds(data: "DataStore", unit_group: str, years: int, months: int, days: int) -> float:
     """Returns the approximated duration of a data in seconds"""
-    approx_year_duration: float = 365.2425 * data.units[unit_group]["days"]
-    approx_month_duration: float = 30.436875 * data.units[unit_group]["days"]
-    return years * approx_year_duration + months * approx_month_duration + days * data.units[unit_group]["days"]
+    try:
+        approx_year_duration: float = 365.2425 * data.units[unit_group]["days"]
+        approx_month_duration: float = 30.436875 * data.units[unit_group]["days"]
+        return years * approx_year_duration + months * approx_month_duration + days * data.units[unit_group]["days"]
+    except KeyError:
+         raise KeyError(f"'{unit_group}' is not a valid group!")
 
 
 def parse_date_input(time_str: str) -> tuple[int, int,int] | None:

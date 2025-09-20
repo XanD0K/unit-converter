@@ -3,20 +3,40 @@
 ## [DATE]
 **Plans**
 
-**Decisions**
-
 **Challenges**
 
 **Progress**
+
+
+
+## [2025-09-03] - Version 0.7.0
+**Plans**
+- Add aliases to all actions to improve UX
+- Decided to remove `while` loops that kept user inside each input, keeping only the `while` loop in `get_action`, so user can trigger multiple acctions in a single session
+
+**Challenges**
+- `argparse` module doesn't have a direct interaction between argument's name and argument's aliases. I can't just check for its name. I also need to check for its aliases
+
+**Progress**
+- Created `unit_alises.json` file, that contain all aliases for each unit_type. Also created `manage_aliases` function that allows users to add and remove aliases from that file
+- Created `resolve_aliases` function to get user's input, either the full unit name or its alias, and outputs its respective name
+- Changed `handle_cli` to also allow aliases manipulation through CLI
 
 
 ## [2025-09-01] - Version 0.6.0
 **Plans**
-- Allow users to convert multiple time unit formats
+- Allow users to input multiple time unit formats
 
 **Challenges**
+- Deal with multiple formats means deal with different users inputs
 
 **Progress**
+- Created `days_to_month.json` file to strore a relationship between month's name and the number of days on that month
+- Created `converter_time` function to handle multiple formats for time conversion (e.g. seconds minutes 10, 17:28:36 04:15:22 seconds, JAN NOV minutes, 2019-11-04 2056-04-28 days)
+- Created `parse_time_input`, `check_time_is_none` and `parse_date_input` helper functions that use `re` and `datetime` modules to assist on time conversion
+- Changed `add_to_log` function to also accept multiple time formats
+- Changed `print_history` function to print different messages based on conversion time format
+- Changed `handle_cli` function to also accept multiple formats for time conversion
 
 
 ## [2025-08-31] - Version 0.5.0
@@ -85,10 +105,6 @@
 
 
 
-09-02
-aliases
-turn back to previous code because current approach was getting too verbose, with repetitive code, and helpers functions to solve new problems that just appeared with my solution.
-Thought that probably could have a better way
 
 
 09-04
