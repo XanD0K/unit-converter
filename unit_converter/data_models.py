@@ -279,14 +279,14 @@ class AliasesData:
         all_group_aliases: list[str] = [alias for alias in data.unit_aliases[self.unit_group]]
         if self.action == "add":
             if self.alias in all_group_aliases:
-                raise ValueError(f"'{self.alias}' is already being used as an alias in {self.unit_group}!")
+                raise ValueError(f"'{self.alias}' is already being used as an alias in '{self.unit_group}'!")
             if self.alias in data.base_units:
                 raise KeyError(f"'{self.alias}' is already being used to name an unit group!")
             if self.alias in data.units[self.unit_group]:
-                raise KeyError(f"'{self.alias}' is already being used as an unit type in '{self.unit_group}'!")
+                raise KeyError(f"'{self.alias}' is already being used as an unit type in '{self.unit_group}' group!")
         elif self.action == "remove":
             if self.alias not in all_group_aliases:
-                raise ValueError(f"'{self.alias}' is not an alias of '{self.unit_type}'")
+                raise ValueError(f"'{self.alias}' is not an alias of '{self.unit_group}' group")
             if data.unit_aliases[self.unit_group][self.alias] != self.unit_type:
                 raise ValueError(f"'{self.alias}' is not an alias for '{self.unit_type}'")
 
@@ -320,7 +320,7 @@ def validate_for_history(data: DataStore, limit):
     if not data.conversion_log:
         raise ValueError("Conversion history is empty!")
     if not str(limit).isdigit():
-        raise ValueError("'limit' must be a positive number!")
+        raise ValueError("'limit' must be a number!")
     if int(limit) < 0:
         raise ValueError("'limit' must be a positive number!")
 

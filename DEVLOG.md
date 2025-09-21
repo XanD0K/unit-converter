@@ -17,6 +17,8 @@
 
 **Progress**
 - Created `test_utils.py` file to test functions in `utils.py`
+- Created `test_data_manager.py` file to test functions on `data_manager.py`. Skipped `validate_data`, `add_to_log`, `clean_history` and `save_data` functions due to their complexity, leaving as TODO's as a post-course activity
+- Created `test_data_models.py` file to test all methods of all classes in `data_models.py`, except `DataStore` class which is just a data class
 
 
 ## [2025-09-19] - Version 0.9.10

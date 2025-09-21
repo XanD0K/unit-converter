@@ -8,17 +8,15 @@ from unit_converter.data_manager import load_data
 from unit_converter.data_models import DataStore, ConversionData
 
 
-# Setup DataStore to be used on all tests
+# Setup DataStore to be used on all tests that require DataStore
 @pytest.fixture
 def data_store():
     return DataStore(*load_data())
 
-# Setup ConversionData to be used on all tests
+# Setup ConversionData to be used on all tests that require ConversionData
 @pytest.fixture
 def conversion_data():
-    return ConversionData(
-        unit_group="length"
-    )
+    return ConversionData(unit_group="length")
 
 
 # Tests 'get_users_input' function
@@ -243,8 +241,16 @@ def test_format_value_round():
 
 
 # Test 'calculate_leap_years' function
-def test_calculate_leap_years_valid():
-    assert calculate_leap_years()
+def test_calculate_leap_years():
+    assert calculate_leap_years(2000, 1, 2004, 1, 1) == 1
+
+# Test 'calculate_leap_years' function
+def test_calculate_leap_years_same_year():
+    assert calculate_leap_years(2000, 1, 2000, 1, 1) == 0
+
+# Test 'calculate_leap_years' function
+def test_calculate_leap_years_same_year():
+    assert calculate_leap_years(2000, 1, 2000, 1, 1) == 0
 
 
 # Test 'is_leap' function

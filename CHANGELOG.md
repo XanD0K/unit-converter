@@ -10,6 +10,16 @@
 
 ### Removed
 
+
+## [0.9.12] - 2025-09-21
+### Added
+- Created `test_data_manager.py` file to test functions on `data_manager.py`
+- Created `test_data_models.py` file to test all methods of all classes in `data_models.py`
+
+### Fixed
+- Fixed test for `calculate_leap_years` function
+
+
 ## [0.9.11] - 2025-09-20
 ### Added
 - Created `test_utils.py` file to test functions on `utils.py` file
