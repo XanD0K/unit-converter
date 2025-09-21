@@ -21,7 +21,7 @@
 ## [0.9.10] - 2025-09-19
 ### Added
 - Created `validate_for_history` function in `data_models.py` to validate "history" action
-- Created `validate_args_number` in `data_models.py` to check and validade excessive arguments (`*args` and `**kwargs`)
+- Created `validate_args_number` in `data_models.py` to check and validate excessive arguments (`*args` and `**kwargs`)
 - Updated all class methods in `Converter` to accept `*args` and `**kwargs` arguments, which will be used to catch `TypeError` in situations where user inputs more arguments than required when using program thought API
 - Created `tests` directory to store all test files
 
@@ -37,7 +37,7 @@
 
 ## [0.9.8] - 2025-09-17
 ### Added
-- Created `original_units.json` file to be used by `refactor_value`, avoiding precision losses due to multiple and sequencial changes
+- Created `original_units.json` file to be used by `refactor_value` function, avoiding precision losses due to multiple and sequencial changes
 
 ### Changed
 - Changed `manage_group`, `manage_type` and `add_temp_type` functions to use that new `original_units.json` file

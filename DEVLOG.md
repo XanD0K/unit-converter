@@ -7,12 +7,76 @@
 
 **Progress**
 
-## [DATE]
+
+## [2025-09-21] - Version 0.9.12
 **Plans**
+- Implement test files to test all functions and methods in my program
 
 **Challenges**
+- Understand how to properly manage classess and user's input in a test file, specially by using `mock` and `patch` from `unittest` module
 
 **Progress**
+- Created `test_utils.py` file to test functions in `utils.py`
+
+
+## [2025-09-19] - Version 0.9.10
+**Plans**
+- Prevent users to enter invalid number of positional arguments and key-word arguments
+
+**Progress**
+- Created `validate_args_number` in `data_models.py` to check and validate excessive arguments (`*args` and `**kwargs`), updating all methods in `Converter` class to accept `*args` and `**kwargs` arguments, allowing to catch `TypeError` in situations where user inputs more arguments than required
+
+## [2025-09-17] - Version 0.9.8
+**Plans**
+- Fix `refactor_value` function used in "change-base" action
+
+**Challenges**
+- Refactoring was always leading to repeating decimals
+
+**Progress**
+- First approach was a manual refactoring, but "change-base" action was leading to repeating decimals, losing precision over multiple and sequencial triggers. I also tried to use `fractions` module to round repeating decimals when refactoring, but it was getting overkill. My final approach was to create `original_units.json` file
+- Created `original_units.json` file to keep track of original conversion factors. Used by `refactor_value` function, instead of using `units.json` file, which keeps track of most recent value. It allowed to keep precision while avoided repeating decimals
+
+
+## [2025-09-15] - Version 0.9.6
+**Plans**
+- Allow user to declare an object class, so that he can use the program through API, besides current CLI and interactive mode
+
+**Progress**
+- Created `api.py` file with an `Converter` class, and used existed functions to develop that class, creating different methods for every action
+- Changed `Convert` class methods, to also receive a `print_message` argument, set as `False` by default, which will controls the output message display
+- Added aliases for all methods in `Convert` class
+- Changed `Converter` methods in `api.py` file so that it takes user's input as a single argument, and I strip it, instead of passing multiple arguments to the function, making codebase cleaner
+
+
+## [2025-09-14] - Version 0.9.5
+**Plans**
+- Segregate `ConversionData` class into multiple classes, since that class had almost 300 lines
+- Allow user to quit anytime he wants
+
+**Progress**
+- Segregated `UnitData` class into `ConversionData`, `ManageTypeData`, `AliasesData` and `ChangeBaseData` classes
+- Created `get_users_input` function to be used instead of Python's `input` function. It allows users to quit anytime they want, by checking for 'quit' input
+
+
+## [2025-09-11] - Version 0.9.2
+**Plans**
+- Cleaning codebase and centralizing similar data
+
+**Progress**
+- Created an `UnitData` class to hold all that related to units, including `unit_group`, `from_type`, `to_type`, `amount`, `new_value`, `time_input`, `from_time`, `to_time`, `factor_time`, `new_time`, `action, value`, `alias`, `factor` and `offset` variables
+- Centralized all variable's validations in `UnitData` class, cleaning `project.py`
+
+
+## [2025-09-10] - Version 0.9.1
+**Plans**
+- Create data class so that all `.json` files can be user throughout all files
+
+**Challenges**
+- I first thought to use variables that make reference to `.json` files as global variables, importing throughtout all files. The code was getting too overkill, with every change leading to a new one. I then decided to use a class to handle that, making cove cleaner and reusable
+
+**Progress**
+- Created `ConversionData` data class to store all data from `.json` files
 
 
 ## [2025-09-09] - Version 0.9.0
@@ -147,7 +211,3 @@
 **Progress**
 - Create a `units` dictionary, with all unit groups and unit types, and their respective values based on Internation System of Units (SI)
 - Implemented the core logic with `get_amount`, `get_unit_group` `get_converter_unit` and `converter` functions
-
-
-09-16
-Changed Converter methods in api.py file  so that it takes user's input as a single argument, and I strip it, instead of passing multiple arguments to the function

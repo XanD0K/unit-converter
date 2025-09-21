@@ -243,7 +243,7 @@ def test_format_value_round():
 
 
 # Test 'calculate_leap_years' function
-def test_calculate_leap_years_valid
+def test_calculate_leap_years_valid():
     assert calculate_leap_years()
 
 
@@ -263,19 +263,19 @@ def test_validate_date_valid():
     assert validate_date(1994, 12, 1) == True
 
 def test_validate_date_invalid_month():
-    with pytest.raise(ValueError, match="Invalid date! '13' is not a valid month"):
+    with pytest.raises(ValueError, match="Invalid date! '13' is not a valid month"):
         validate_date(1994, 13, 1)
 
 def test_validate_date_negative_month():
-    with pytest.raise(ValueError, match="Invalid date! '-12' is not a valid month"):
+    with pytest.raises(ValueError, match="Invalid date! '-12' is not a valid month"):
         validate_date(1994, -12, 1)
 
 def test_validate_date_invalid_day():
-    with pytest.raise(ValueError, match="Invalid date! '32' is not a valid day for '12'"):
+    with pytest.raises(ValueError, match="Invalid date! '32' is not a valid day for '12'"):
         validate_date(1994, 12, 32)
 
 def test_validate_date_invalid_leap_feb():
-    with pytest.raise(ValueError, match="Invalid date! '29' is not a valid day for '2'"):
+    with pytest.raises(ValueError, match="Invalid date! '29' is not a valid day for '2'"):
         validate_date(2003, 2, 29)
 
 
