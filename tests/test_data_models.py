@@ -34,12 +34,213 @@ def change_base_data():
 
 
 # Test 'ConversionData' class methods
+def test_validate_from_type_valid(data_store, conversion_data):
+    conversion_data.from_type = "meters"
+    conversion_data.validate_from_type(data_store)
+
+def test_validate_from_type_empty(data_store, conversion_data):
+    with pytest.raises(ValueError, match="'unit_type' cannot be empty!"):
+        conversion_data.validate_from_type(data_store)
+
+def test_validate_from_type_invalid(data_store, conversion_data):
+    conversion_data.from_type = "invalid"
+    with pytest.raises(KeyError, match="Invalid unit type!"):
+        conversion_data.validate_from_type(data_store)
+
+def test_validate_to_type_valid(data_store, conversion_data):
+    conversion_data.to_type = "meters"
+    conversion_data.validate_to_type(data_store)
+
+def test_validate_to_type_empty(data_store, conversion_data):
+    with pytest.raises(ValueError, match="'unit_type' cannot be empty!"):
+        conversion_data.validate_to_type(data_store)
+
+def test_validate_to_type_invalid(data_store, conversion_data):
+    conversion_data.to_type = "invalid"
+    with pytest.raises(KeyError, match="Invalid unit type!"):
+        conversion_data.validate_to_type(data_store)
+
+def test_validate_amount_valid(conversion_data):
+    conversion_data.amount = "10"
+    conversion_data.validate_amount()
+    assert conversion_data.amount = 10.0
+
+def test_validate_amount_empty(conversion_data):
+    with pytest.raises(ValueError, match="'amount' cannot be empty"):
+        conversion_data.validate_amount()
+
+def test_validate_amount_invalid(conversion_data):
+    conversion_data.amount = "invalid"
+    with pytest.raises(ValueError, match="Invalid amount!"):
+        conversion_data.validate_amount()
+
+def test_validate_amount_negative_kelvin(conversion_data):
+    conversion_data.unit_group = "kelvin"
+    conversion_data.amount = "-10"
+    with pytest.raises(ValueError, match="Kelvin temperature cannot be negative!"):
+        conversion_data.validate_amount()
+
+def test_validate_time_input_valid(conversion_data):
 
 
 # Test 'ManageGroupData' class methods
+def test_validate_action_valid(manage_group_data):
+    manage_group_data.action = "add"
+    manage_group_data.validate_action()
+
+def test_validate_action_empty(manage_group_data):
+    with pytest.raises(ValueError, match="'action' cannot be empty!"):
+        manage_group_data.validate_action()
+
+def test_validate_action_invalid(manage_group_data):
+    manage_group_data.action = "invalid"
+    with pytest.raises(ValueError, match="Invalid action: 'invalid'"):
+        manage_group_data.validate_action()
+
+def test_validate_add_action_valid(data_store, manage_group_data):
+    manage_group_data.unit_group = "new_group"
+    manage_group_data.validate_add_action(data_store)
+
+def test_validate_add_action_already_group(data_store, manage_group_data):
+    with pytest.raises(KeyError, match="'length' is already an existed group!")
+        manage_group_data.validate_add_action(data_store)
+
+def test_validate_remove_action_valid(data_store, manage_group_data):
+    manage_group_data.validate_remove_action(data_store)
+
+def test_validate_remove_action_invalid_type(data_store, manage_group_data):
+    manage_group_data.unit_group = "invalid"
+    with pytest.raises(KeyError, match="'invalid' is not a valid group!"):
+        manage_group_data.validate_remove_action(data_store)
+
+def test_validate_new_base_unit_valid(data_store, manage_group_data):
+    manage_group_data.unit_group = "new_group"
+    manage_group_data.new_base_unit = "new_base_unit"
+    validate_new_base_unit(data_store)
+    assert manage_group_data.unit_group = "new_group"
+    assert manage_group_data.new_base_unit = "new_base_unit"
+
+def test_validate_new_base_unit_empty(data_store, manage_group_data):
+    with pytest.raises(ValueError, match="'new_base_unit' cannot be empty"):
+        manage_group_data.validate_new_base_unit(data_store)
+
+def test_validate_new_base_unit_already_group(data_store, manage_group_data):
+    manage_group_data.new_base_unit = "length"
+    with pytest.raises(KeyError, match="'{self.new_base_unit}' is already an unit group name!"):
+        manage_group_data.validate_new_base_unit(data_store)
+
+def test_validate_new_base_unit_same_name(data_store, manage_group_data):
+    manage_group_data.unit_group = "new_group"
+    manage_group_data.new_base_unit = "new_group"
+    with pytest.raises(ValueError, match="'new_base_unit' can't have the same name as 'unit_group'"):
+        manage_group_data.validate_new_base_unit(data_store)
+
+def test_validate_for_manage_group():
 
 
 # Test 'ManageTypeData' class methods
+def test_validate_action_valid(manage_type_data):
+    aliases_data.action = "add"
+    aliases_data.validate_action()
+
+def test_validate_action_empty(manage_type_data):
+    with pytest.raises(ValueError, match="'action' cannot be empty!"):
+        aliases_data.validate_action()
+
+def test_validate_action_invalid(manage_type_data):
+    aliases_data.action = "invalid"
+    with pytest.raises(ValueError, match="Invalid action: 'invalid'"):
+        aliases_data.validate_action()
+
+def test_validate_add_action_valid(data_store, manage_type_data):
+    manage_type_data.unit_type = "new_type"
+    manage_type_data.validate_add_action(data_store)
+
+def test_validate_add_action_empty_type(data_store, manage_type_data):
+    with pytest.raises(ValueError, match="You can't leave that field empty!"):
+        manage_type_data.validate_add_action(data_store)
+
+def test_validate_add_action_already_group(data_store, manage_type_data):
+    manage_type_data.unit_type = "length"
+    with pytest.raises(KeyError, match="'length' is already an unit group name!"):
+        manage_type_data.validate_add_action(data_store)
+
+def test_validate_add_action_already_type(data_store, manage_type_data):
+    manage_type_data.unit_type = "meters"
+    with pytest.raises(ValueError, match="'meters' is already an unit type in 'length' group!"):
+        manage_type_data.validate_add_action(data_store)
+
+def test_validate_add_action_already_alias(data_store, manage_type_data):
+    manage_type_data.unit_type = "m"
+    with pytest.raises(ValueError, match="'m' is already being used as an alias in 'length' group"):
+        manage_type_data.validate_add_action(data_store)
+
+def test_validate_remove_action_valid(data_store, manage_type_data):
+    manage_type_data.unit_type = "mile"
+    manage_type_data.validate_remove_action(data_store)
+
+def test_validate_remove_action_empty_type(data_store, manage_type_data):
+    with pytest.raises(ValueError, match="You can't leave that field empty!"):
+        manage_type_data.validate_remove_action(data_store)
+
+def test_validate_remove_action_invalid_type(data_store, manage_type_data):
+    manage_type_data.unit_type = "invalid"
+    with pytest.raises(ValueError, match="'invalid' is not an unit type in 'length' group!"):
+        manage_type_data.validate_remove_action(data_store)
+
+def test_validate_remove_action_already_base(data_store, manage_type_data):
+    manage_type_data.unit_type = data_store.base_units["length"]
+    with pytest.raises(ValueError, match= "Cannot remove base unit!"):
+        manage_type_data.validate_remove_action(data_store)
+
+def test_validate_value_valid(manage_type_data):
+    manage_type_data.value = "10"
+    manage_type_data.validate_value()
+    assert manage_type_data.value == 10.0
+
+def test_validate_value_empty(manage_type_data):
+    with pytest.raises(ValueError, match="'value' cannot be empty!"):
+        manage_type_data.validate_value()
+
+def test_validate_value_invalid(manage_type_data):
+    manage_type_data.value = "invalid"
+    with pytest.raises(ValueError, match="Invalid conversion factor!"):
+        manage_type_data.validate_value()
+
+def test_validate_factor_valid(manage_type_data):
+    manage_type_data.factor = "10"
+    manage_type_data.validate_factor()
+    assert manage_type_data.factor == 10.0
+
+def test_validate_factor_empty(manage_type_data):
+    with pytest.raises(ValueError, match="'factor' cannot be empty!"):
+        manage_type_data.validate_factor()
+
+def test_validate_factor_invalid(manage_type_data):
+    manage_type_data.factor = "invalid"
+    with pytest.raises(ValueError, match="Invalid conversion factor!"):
+        manage_type_data.validate_factor()
+
+def test_validate_factor_negative(manage_type_data):
+    manage_type_data.factor = -10
+    with pytest.raises(ValueError, match="Conversion factor must be positive!"):
+        manage_type_data.validate_factor()
+
+def test_validate_offset_valid(manage_type_data):
+    manage_type_data.offset = "10"
+    manage_type_data.validate_offset()
+    assert manage_type_data.offset == 10.0
+
+def test_validate_offset_empty(manage_type_data):
+    with pytest.raises(ValueError, match="'offset' cannot be empty!"):
+        manage_type_data.validate_offset()
+
+def test_validate_offset_invalid(manage_type_data):
+    manage_type_data.offset = "invalid"
+    with pytest.raises(ValueError, match="Invalid conversion offset!"):
+        manage_type_data.validate_offset()
+
+def test_validate_for_manage_type_add_valid(data_store, manage_type_data):
 
 
 # Test 'AliasesData' class methods

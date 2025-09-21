@@ -33,20 +33,20 @@ class ConversionData:
     def validate_from_type(self, data: DataStore) -> None:
         self.from_type = resolve_aliases(data, self.unit_group, self.from_type)
         if not self.from_type:
-            raise ValueError("Unit type cannot be empty!")
+            raise ValueError("'unit_type' cannot be empty!")
         if self.from_type not in data.units[self.unit_group]:
             raise KeyError("Invalid unit type!")
 
     def validate_to_type(self, data: DataStore) -> None:
         self.to_type = resolve_aliases(data, self.unit_group, self.to_type)
         if not self.to_type:
-            raise ValueError("Unit type cannot be empty!")
+            raise ValueError("'unit_type' cannot be empty!")
         if self.to_type not in data.units[self.unit_group]:
             raise KeyError("Invalid unit type!")
 
     def validate_amount(self) -> None:
         if self.amount is None:
-            raise ValueError("Amount cannot be empty")
+            raise ValueError("'amount' cannot be empty")
         # Ensures amount is a number
         try:
             self.amount = float(self.amount)
@@ -165,11 +165,11 @@ class ManageGroupData:
         
     def validate_new_base_unit(self, data: DataStore) -> None:
         if not self.new_base_unit:
-            raise ValueError("You need to specify the base unit to create a new group")
+            raise ValueError("'new_base_unit' cannot be empty")
         if self.new_base_unit in data.units:
             raise KeyError(f"'{self.new_base_unit}' is already an unit group name!")
         if self.new_base_unit == self.unit_group:
-            raise ValueError(f"Base unit can't have the same name as 'unit_group'")
+            raise ValueError(f"'new_base_unit' can't have the same name as 'unit_group'")
 
     def validate_for_manage_group(self, data: DataStore) -> None:
         self.validate_action()
@@ -203,7 +203,7 @@ class ManageTypeData:
         if self.unit_type in data.units:
             raise KeyError(f"'{self.unit_type}' is already an unit group name!")
         elif self.unit_type in data.units[self.unit_group]:
-            raise ValueError(f"'{self.unit_type}' is already an unit type!")
+            raise ValueError(f"'{self.unit_type}' is already an unit type in '{self.unit_group}' group!")
         elif self.unit_type in data.unit_aliases[self.unit_group]: 
             raise ValueError(f"'{self.unit_type}' is already being used as an alias in '{self.unit_group}' group")
 
@@ -226,21 +226,21 @@ class ManageTypeData:
 
     def validate_factor(self) -> None:
         if self.factor is None:
-            raise ValueError("You can't leave a field empty!")
+            raise ValueError("'factor' cannot be empty!")
         try:
             self.factor = float(self.factor)
         except:
-            raise ValueError("Invalid conversion factor or offset!")
+            raise ValueError("Invalid conversion factor!")
         if self.factor <= 0:
             raise ValueError("Conversion factor must be positive!")
 
     def validate_offset(self) -> None:
         if self.offset is None:
-            raise ValueError("You can't leave a field empty!")
+            raise ValueError("'offset' cannot be empty!")
         try:
             self.offset = float(self.offset)
         except:
-            raise ValueError("Invalid conversion factor or offset!")
+            raise ValueError("Invalid conversion offset!")
 
     def validate_for_manage_type(self, data: DataStore) -> None:
         validate_unit_group(self.unit_group, data)
