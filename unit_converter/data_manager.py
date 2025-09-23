@@ -157,7 +157,7 @@ def refactor_value(data: DataStore, unit_group: str, new_base_unit: str) -> None
     """Refactor all values for 'chage-base' action"""
     if unit_group == "temperature":
         new_base_factor, new_base_offset = data.original_units[unit_group][new_base_unit]
-        zero_division_checker(new_base_factor)            
+        zero_division_checker(new_base_factor)         
         for unit_type in data.original_units[unit_group]:
             factor, offset = data.original_units[unit_group][unit_type]
             factor /= new_base_factor

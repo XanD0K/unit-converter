@@ -1,22 +1,38 @@
 [
     {
-        "date": "2025-09-20T18:39:27.743896",
-        "unit_group": "length",
-        "from_type": "meters",
-        "to_type": "yards",
-        "amount": 50000.123059,
-        "result": 54680.799495844265
+        "date": "2025-09-23T09:39:56.914011",
+        "unit_group": "time",
+        "from_time": "minutes",
+        "to_time": "seconds",
+        "factor_time": 1.0,
+        "result": 60.0
     },
     {
-        "date": "2025-09-20T18:43:48.752476",
-        "unit_group": "length",
-        "from_type": "meters",
-        "to_type": "yards",
-        "amount": 10.99999,
-        "result": 12.029735345581804
+        "date": "2025-09-23T09:40:11.681262",
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": "dec",
+        "factor_time": "days",
+        "result": 365.0
     },
     {
-        "date": "2025-09-22T15:25:27.696580",
+        "date": "2025-09-23T10:29:59.159285",
+        "unit_group": "time",
+        "from_time": "minutes",
+        "to_time": "seconds",
+        "factor_time": 1.0,
+        "result": 60.0
+    },
+    {
+        "date": "2025-09-23T11:36:55.795295",
+        "unit_group": "temperature",
+        "from_type": "celsius",
+        "to_type": "kelvin",
+        "amount": 10.0,
+        "result": 283.15
+    },
+    {
+        "date": "2025-09-23T11:44:37.544629",
         "unit_group": "length",
         "from_type": "meters",
         "to_type": "yards",
@@ -24,59 +40,19 @@
         "result": 10.936132983377078
     },
     {
-        "date": "2025-09-22T15:26:41.106617",
-        "unit_group": "length",
-        "from_type": "meters",
-        "to_type": "yards",
+        "date": "2025-09-23T11:49:29.307303",
+        "unit_group": "temperature",
+        "from_type": "celsius",
+        "to_type": "kelvin",
         "amount": 10.0,
-        "result": 10.936132983377078
+        "result": 283.15
     },
     {
-        "date": "2025-09-22T15:26:49.334993",
-        "unit_group": "length",
-        "from_type": "meters",
-        "to_type": "yards",
+        "date": "2025-09-23T11:49:42.592043",
+        "unit_group": "temperature",
+        "from_type": "celsius",
+        "to_type": "fahrenheit",
         "amount": 10.0,
-        "result": 10.936132983377078
-    },
-    {
-        "date": "2025-09-22T15:27:28.240037",
-        "unit_group": "length",
-        "from_type": "meters",
-        "to_type": "yards",
-        "amount": 10.0,
-        "result": 10.936132983377078
-    },
-    {
-        "date": "2025-09-22T15:27:35.502676",
-        "unit_group": "length",
-        "from_type": "meters",
-        "to_type": "yards",
-        "amount": 10.0,
-        "result": 10.936132983377078
-    },
-    {
-        "date": "2025-09-22T15:27:37.017781",
-        "unit_group": "length",
-        "from_type": "meters",
-        "to_type": "yards",
-        "amount": 10.0,
-        "result": 10.936132983377078
-    },
-    {
-        "date": "2025-09-22T15:30:33.301529",
-        "unit_group": "length",
-        "from_type": "meters",
-        "to_type": "yards",
-        "amount": 10.0,
-        "result": 10.936132983377078
-    },
-    {
-        "date": "2025-09-22T15:30:34.360236",
-        "unit_group": "length",
-        "from_type": "meters",
-        "to_type": "yards",
-        "amount": 10.0,
-        "result": 10.936132983377078
+        "result": 50.0
     }
 ]

@@ -91,7 +91,7 @@ class ConversionData:
             years, months, days = parse_date_input(self.to_time)
             validate_date(years, months, days)
         else:
-            raise ValueError(f"Invalid 'to_time': {self.to_time}")
+            raise ValueError(f"Invalid 'to_time': '{self.to_time}'")
 
     def validate_factor_time(self, data: DataStore) -> None:
         if not self.factor_time:
@@ -101,7 +101,7 @@ class ConversionData:
         except ValueError:
             factor_time = resolve_aliases(data, self.unit_group, self.factor_time)
             if factor_time  is False or factor_time not in data.units[self.unit_group]:
-                raise KeyError(f"Unit type '{self.factor_time}' not found in '{self.unit_group}' group!")
+                raise KeyError(f"Factor time '{self.factor_time}' not found in '{self.unit_group}' group!")
             self.factor_time = factor_time
 
     def validate_time_args(self, data: DataStore) -> None:
@@ -310,13 +310,14 @@ class ChangeBaseData:
 
     def validate_for_change_base(self, data: DataStore, *args, **kwargs) -> None:
         validate_args_number(*args, command="change-base", **kwargs)
-        new_base_unit = resolve_aliases(data, self.unit_group, self.new_base_unit)
+        if resolve_aliases(data, self.unit_group, self.new_base_unit):
+            self.new_base_unit = resolve_aliases(data, self.unit_group, self.new_base_unit)        
         if not self.new_base_unit:
             raise ValueError("Unit type cannot be empty!")
-        elif new_base_unit not in data.units[self.unit_group]:
+        elif self.new_base_unit not in data.units[self.unit_group] or self.new_base_unit is False:
             raise KeyError(f"'{self.new_base_unit}' is not an unit type for '{self.unit_group}' group")
-        elif new_base_unit == data.base_units[self.unit_group]:
-            raise ValueError(f"'{self.new_base_unit}' is already the current base unit for '{self.unit_group}' group")
+        elif self.new_base_unit == data.base_units[self.unit_group]:
+            raise ValueError(f"'{self.new_base_unit}' is already the current base unit for '{self.unit_group}' group")   
 
 
 def validate_for_history(data: DataStore, limit):

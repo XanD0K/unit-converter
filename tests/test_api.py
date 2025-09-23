@@ -194,12 +194,12 @@ def test_manage_group_alias_remove(converter):
     assert converter.mg("length", "remove") == "Group 'length' successfully removed!"
 
 def test_manage_group_add_print_message(converter):
-    result = converter.manage_group("new_group", "add new_base_unit", print_message=True)
-    assert result == "You've just created a 'new_group' group, with 'new_base_unit' as its base unit!"
+    message = converter.manage_group("new_group", "add new_base_unit", print_message=True)
+    assert message == "You've just created a 'new_group' group, with 'new_base_unit' as its base unit!"
 
 def test_manage_group_remove_print_message(converter):
-    result = converter.manage_group("length", "remove", print_message=True)
-    assert result =="Group 'length' successfully removed!"
+    message = converter.manage_group("length", "remove", print_message=True)
+    assert message =="Group 'length' successfully removed!"
 
 def test_manage_group_add_already_group(converter):
     assert converter.manage_group("length", "add new_base_unit") == "Error: 'new_group' is already an existed group!"
@@ -253,12 +253,12 @@ def test_manage_type_remove_alias(converter):
     assert converter.mt("length", "remove mile") == "'mile' was removed from 'length'"
 
 def test_manage_type_add_print_message(converter):
-    result = converter.manage_type("length", "add new_type 10", print_message=True)
-    assert result == "A new unit type was added on 'length' group: new_type = 10.0"
+    message = converter.manage_type("length", "add new_type 10", print_message=True)
+    assert message == "A new unit type was added on 'length' group: new_type = 10.0"
 
 def test_manage_type_remove_print_message(converter):
-    result = converter.manage_type("length", "remove mile", print_message=True) == "'mile' was removed from 'length'"
-    assert result == "'mile' was removed from 'length'"
+    message = converter.manage_type("length", "remove mile", print_message=True) == "'mile' was removed from 'length'"
+    assert message == "'mile' was removed from 'length'"
 
 def test_manage_type_add_temperature(converter):
     assert converter.manage_type("temperature", "add new_type 1 1") == "A new unit type was added on 'temperature' group: new_type = [1.0, 1.0]"
@@ -340,13 +340,13 @@ def test_aliases_remove_alias(converter):
     assert converter.a("length", "remove meters mtr") == "'mtr' successfully removed from 'meters'!"
 
 def test_aliases_add_print_message(converter):
-    result = converter.aliases("length", "add meters mtr", print_message=True) 
-    assert result == "Alias successfully added! New alias for 'meters': 'mtr'"
+    message = converter.aliases("length", "add meters mtr", print_message=True) 
+    assert message == "Alias successfully added! New alias for 'meters': 'mtr'"
 
 def test_aliases_remove_print_message(converter):
     converter.unit_aliases["length"]["mtr"] = "meters"
-    result = converter.aliases("length", "remove meters mtr", print_message=True) 
-    assert result == "'mtr' successfully removed from 'meters'!"
+    message = converter.aliases("length", "remove meters mtr", print_message=True) 
+    assert message == "'mtr' successfully removed from 'meters'!"
 
 def test_aliases_invalid_format(converter):
     assert converter.aliases("length", "add") == "Error: Incorrect format! Usage: <unit_group> <unit_type> <alias> <action>"
@@ -384,8 +384,35 @@ def test_aliases_extra_kwargs(converter):
 
 # Test 'change-base' action
 def test_change_base(converter):
-    assert converter.change_base("length", "mile") ==
+    converter.base_units["length"] = "meters"
+    assert converter.change_base("length", "yards") == "You've just changed the base unit from 'length' group, to 'yards'!"
 
+def test_change_base_alias(converter):
+    converter.base_units["length"] = "meters"
+    assert converter.cb("length", "yd") == "You've just changed the base unit from 'length' group, to 'yards'!"
+
+def test_change_base_print_message(converter):
+    converter.base_units["length"] = "meters"
+    message = converter.change_base("length", "yards", print_message=True) 
+    assert message == "You've just changed the base unit from 'length' group, to 'yards'!"
+    
+def test_change_base_invalid_format(converter):
+    assert converter.change_base("length", " ") == "Error: Incorrec format! Usage: <unit_group> <new_base_unit>"
 
 def test_change_base_invalid_group(converter):
     assert converter.change_base("invalid", "new_base_unit") == "Error: 'invalid' is not a valid group!"
+
+def test_change_base_invalid_alias(converter):
+    assert converter.change_base("length", "invalid") == "Error: 'invalid' is not an unit type for 'length' group"
+
+def test_change_base_already_base(converter):
+    converter.base_units["length"] = "meters"
+    assert converter.change_base("length", "meters") == "Error: 'meters' is already the current base unit for 'length' group"
+
+def test_change_base_extra_args(converter):
+    converter.base_units["length"] = "meters"
+    assert converter.change_base("length", "yards", "extra") == "Error: Too many positional arguments for 'change-base' command!"
+
+def test_change_base_extra_kwargs(converter):
+    converter.base_units["length"] = "meters"
+    assert converter.change_base(unit_group="length", user_input="yards", extra="extra") == "Error: Unexpected keyword argument for 'change-base' command!"

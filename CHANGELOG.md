@@ -10,6 +10,13 @@
 
 ### Removed
 
+## [0.9.14] - 2025-09-23
+### Added
+- Created `test_project.py` file to test all functions in `project.py` file
+
+### Fixed
+- Fixes `resolve_alias` function
+
 
 ## [0.9.13] - 2025-09-22
 ### Added

@@ -172,7 +172,7 @@ def test_validate_factor_time_empty(data_store, conversion_data):
 def test_validate_factor_time_invalid(data_store, conversion_data):
     conversion_data.unit_group = "time"
     conversion_data.factor_time = "invalid"
-    with pytest.raises(KeyError, match="Unit type 'invalid' not found in 'time' group!"):
+    with pytest.raises(KeyError, match="Factor time 'invalid' not found in 'time' group!"):
         conversion_data.validate_factor_time(data_store)
 
 def test_validate_time_args_valid(data_store, conversion_data):

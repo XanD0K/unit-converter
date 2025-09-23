@@ -21,7 +21,7 @@ converter = Converter()
 # result = converter.manage_type("temperature", "add new_type 1 1")
 # print(f"Result: {result}")
 
-result = converter.change_base("length", "yard")
+result = converter.change_base("length", "meters")
 print(f"Result: {result}")
 
 # result = converter.aliases("length", "remove meters mtr", print_message=True)
