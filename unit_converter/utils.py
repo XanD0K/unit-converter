@@ -163,7 +163,7 @@ def validate_date(year: int, month: int, day: int) -> bool:
         raise ValueError(f"Invalid date! '{month}' is not a valid month")
     max_days = calendar.monthrange(year, month)[1]
     if not 1 <= day <= max_days:
-         raise ValueError(f"Invalid date! '{day}' is not a valid day for '{month}'")
+         raise ValueError(f"Invalid date! '{day}' is not a valid day for '{month}' month")
     return True
 
 

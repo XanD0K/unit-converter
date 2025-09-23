@@ -11,10 +11,21 @@
 ### Removed
 
 
+## [0.9.13] - 2025-09-22
+### Added
+- Added tests for `ConversionData` class in `test_data_models.py` file
+- Created `test_api.py` file to test `Converter` class methods from `api.py` file
+
+### Fixed
+- Fixed `manage_group` method from `Converter` class
+- Fixed `manage_type` method from `Converter` class to keep consistency with CLI approach
+- Fixed `validate_remove_action` method from `ManageGroupData` class
+
+
 ## [0.9.12] - 2025-09-21
 ### Added
 - Created `test_data_manager.py` file to test functions on `data_manager.py`
-- Created `test_data_models.py` file to test all methods of all classes in `data_models.py`
+- Created `test_data_models.py` file to test all methods of all classes in `data_models.py` file, except `ConversionData` class
 
 ### Fixed
 - Fixed test for `calculate_leap_years` function

@@ -44,7 +44,7 @@ class Converter:
             return f"Error: {str(e)}"
 
     # 'convert' action
-    def convert(self, unit_group: str, user_input: str, *args, print_result: bool=False, **kwargs):
+    def convert(self, unit_group: str, user_input: str, *args, print_message: bool=False, **kwargs):
         """Handles all conversion logic"""
         try:
             validate_args_number(*args, command="convert", **kwargs)
@@ -59,7 +59,7 @@ class Converter:
                     raise ValueError("Incorrect format! Usage: <unit_group> <from_type> <to_type> <amount>")
                 convert_data.from_type, convert_data.to_type, convert_data.amount = input_args
             message = conversion_logic(self, convert_data)
-            if print_result:
+            if print_message:
                 print(message)
                 return message
             return convert_data.new_time if unit_group == "time" else convert_data.new_value
@@ -71,11 +71,11 @@ class Converter:
         """Allows to add/remove unit groups"""
         try:
             validate_args_number(*args, command="manage-group", **kwargs)
-            args = user_input.split()
-            if len(args) not in [1, 2]:
+            user_args = user_input.split()
+            if len(user_args) not in [1, 2]:
                 raise ValueError("Incorrect format! Usage: <unit_group> <action> [new_base_unit]")
-            action = args[0]
-            new_base_unit = args[1] if len(args) == 2 else None
+            action = user_args[0]
+            new_base_unit = user_args[1] if len(user_args) == 2 else None
             manage_group_data = ManageGroupData(
                 unit_group = unit_group.lower(),
                 action = action.lower(),
@@ -92,17 +92,17 @@ class Converter:
             validate_args_number(*args, command="manage-type", **kwargs)
             validate_unit_group(unit_group.lower(), self)
             args = user_input.split()
-            if len(args) not in [2, 3, 5]:
+            if len(args) not in [2, 3, 4]:
                 raise ValueError("Incorrect format! Usage: <unit_group> <unit_type> <action> <value> [factor] [offset]")
-            unit_type, action = args[:2]
+            action, unit_type = args[:2]
             value = args[2] if len(args) >= 3 else None
-            factor = args[3] if len(args) == 5 else None
-            offset = args[4] if len(args) == 5 else None
+            factor = args[2] if len(args) == 4 else None
+            offset = args[3] if len(args) == 4 else None
 
             manage_type_data = ManageTypeData(
                 unit_group = unit_group.lower(),
-                unit_type = unit_type.lower(),
                 action = action.lower(),
+                unit_type = unit_type.lower(),
                 value = value,
                 factor = factor,
                 offset = offset
@@ -120,7 +120,7 @@ class Converter:
             args = user_input.split()
             if len(args) != 3:
                 raise ValueError("Incorrect format! Usage: <unit_group> <unit_type> <alias> <action>")
-            unit_type, action, alias = args
+            action, unit_type, alias = args
             alias_data = AliasesData(
                 unit_group = unit_group.lower(),
                 unit_type = unit_type.lower(),

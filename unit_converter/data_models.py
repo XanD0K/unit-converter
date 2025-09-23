@@ -60,7 +60,7 @@ class ConversionData:
         if not self.time_input:
             raise ValueError("Time conversion can't be empty! Enter an expression!")
         if not len(self.time_input.split()) >= 2:
-                raise ValueError("Incorrect format! Usage: <unit_group> <time_input>")
+                raise ValueError("Incorrect format for time conversion!")
            
     def validate_from_time(self, data: DataStore) -> None:
         if not self.from_time:
@@ -76,7 +76,7 @@ class ConversionData:
             if self.to_time:
                 validate_date(years, months, days)
         else:
-            raise ValueError(f"Invalid 'from_time': {self.from_time}")
+            raise ValueError(f"Invalid 'from_time': '{self.from_time}'")
 
     def validate_to_time(self, data: DataStore) -> None:
         if not self.to_time:
@@ -115,7 +115,7 @@ class ConversionData:
             self.validate_from_time(data)
             self.validate_to_time(data)
             self.validate_factor_time(data)
-        elif len(args) % 2 != 0 and len(args) > 2:
+        elif len(args) % 2 != 0 and len(args) > 3:
             self.to_time = args[-1]
             self.validate_to_time(data)
             for number, unit in zip(args[0::2], args[1::2]):
@@ -162,6 +162,8 @@ class ManageGroupData:
     def validate_remove_action(self,data: DataStore) -> None:
         if self.unit_group not in data.units:
             raise KeyError(f"'{self.unit_group}' is not a valid group!")
+        if self.new_base_unit:
+            raise ValueError("Incorrect usage when removing a group! Usage: <unit_group> remove")
         
     def validate_new_base_unit(self, data: DataStore) -> None:
         if not self.new_base_unit:
@@ -215,6 +217,8 @@ class ManageTypeData:
             raise ValueError(f"'{self.unit_type}' is not an unit type in '{self.unit_group}' group!")
         elif self.unit_type == data.base_units[self.unit_group]:
             raise ValueError("Cannot remove base unit!")
+        if self.value or self.factor or self.offset:
+            raise ValueError("Incorrect usage when removing a type! Usage: <unit_group> remove <unit_type>")
 
     def validate_value(self) -> None:
         if self.value is None:
@@ -275,7 +279,7 @@ class AliasesData:
 
     def validate_alias(self, data: DataStore) -> None:
         if not self.alias:
-            raise ValueError("Alias cannot be empty!")
+            raise ValueError("'alias' cannot be empty!")
         all_group_aliases: list[str] = [alias for alias in data.unit_aliases[self.unit_group]]
         if self.action == "add":
             if self.alias in all_group_aliases:

@@ -551,7 +551,7 @@ def add_temp_type(data: DataStore, unit_data: Optional[ManageTypeData]=None) -> 
     save_data(data.units, "units")
     save_data(data.original_units, "original_units")
 
-    return f"A new unit type was added on temperature group: {unit_data.unit_type} = [{unit_data.factor}, {unit_data.offset}]"
+    return f"A new unit type was added on 'temperature' group: {unit_data.unit_type} = [{unit_data.factor}, {unit_data.offset}]"
 
 
 

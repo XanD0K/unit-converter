@@ -8,18 +8,18 @@
 **Progress**
 
 
-## [2025-09-21] - Version 0.9.12
+## [2025-09-22] - Version 0.9.13
 **Plans**
 - Implement test files to test all functions and methods in my program
 
 **Challenges**
-- Understand how to properly manage classess and user's input in a test file, specially by using `mock` and `patch` from `unittest` module
+- Understand how to properly manage classess and user's input in a test file, especially by using `mock` and `patch` from `unittest` module and how to create `fixture` from `pytest` library
 
 **Progress**
 - Created `test_utils.py` file to test functions in `utils.py`
 - Created `test_data_manager.py` file to test functions on `data_manager.py`. Skipped `validate_data`, `add_to_log`, `clean_history` and `save_data` functions due to their complexity, leaving as TODO's as a post-course activity
 - Created `test_data_models.py` file to test all methods of all classes in `data_models.py`, except `DataStore` class which is just a data class
-
+- Created `test_api.py` file to test `Converter` class methods
 
 ## [2025-09-19] - Version 0.9.10
 **Plans**
