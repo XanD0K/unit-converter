@@ -31,14 +31,16 @@ class ConversionData:
         self.new_time = new_time
 
     def validate_from_type(self, data: DataStore) -> None:
-        self.from_type = resolve_aliases(data, self.unit_group, self.from_type)
+        if(resolve_aliases(data, self.unit_group, self.from_type)):
+            self.from_type = resolve_aliases(data, self.unit_group, self.from_type)
         if not self.from_type:
             raise ValueError("'unit_type' cannot be empty!")
         if self.from_type not in data.units[self.unit_group]:
             raise KeyError("Invalid unit type!")
 
     def validate_to_type(self, data: DataStore) -> None:
-        self.to_type = resolve_aliases(data, self.unit_group, self.to_type)
+        if(resolve_aliases(data, self.unit_group, self.to_type)):
+            self.to_type = resolve_aliases(data, self.unit_group, self.to_type)
         if not self.to_type:
             raise ValueError("'unit_type' cannot be empty!")
         if self.to_type not in data.units[self.unit_group]:
@@ -64,7 +66,7 @@ class ConversionData:
            
     def validate_from_time(self, data: DataStore) -> None:
         if not self.from_time:
-            ValueError("Enter a value to convert from!")
+            raise ValueError("Enter a value to convert from!")
         elif resolve_aliases(data, self.unit_group, self.from_time) in data.units[self.unit_group]:
             self.from_time = resolve_aliases(data, self.unit_group, self.from_time)
         elif parse_time_input(self.from_time) is not None:
@@ -123,7 +125,8 @@ class ConversionData:
                     float(number)
                 except:
                     raise ValueError(f"'{number}' is an invalid amount!")
-                unit: str = resolve_aliases(data, self.unit_group, unit)
+                if resolve_aliases(data, self.unit_group, unit):
+                    unit: str = resolve_aliases(data, self.unit_group, unit)
                 if unit is False or unit not in data.units[self.unit_group]:
                     raise ValueError(f"'{unit}' is not a type for '{self.unit_group}' group!")
         else:
@@ -326,7 +329,9 @@ def validate_for_history(data: DataStore, limit):
     """Validate 'conversion_log.json' data, and 'limit' value"""
     if not data.conversion_log:
         raise ValueError("Conversion history is empty!")
-    if not str(limit).isdigit():
+    try:
+        limit = int(limit)
+    except:
         raise ValueError("'limit' must be a number!")
     if int(limit) < 0:
         raise ValueError("'limit' must be a positive number!")

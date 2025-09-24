@@ -59,9 +59,9 @@ def validate_unit_group(unit_group: str, data: "DataStore") -> None:
 
 def get_converter_units(data: "DataStore", unit_data: "ConversionData") -> tuple[str, str]:
     """Gets unit_type for conversion"""
-    unit_data.from_type = resolve_aliases(data, unit_data.unit_group, get_users_input("From: ").strip().lower())
+    unit_data.from_type = get_users_input("From: ").strip().lower()
+    unit_data.to_type = get_users_input("To: ").strip().lower()
     unit_data.validate_from_type(data)
-    unit_data.to_type = resolve_aliases(data, unit_data.unit_group, get_users_input("To: ").strip().lower())
     unit_data.validate_to_type(data)
     return unit_data.from_type, unit_data.to_type
 
@@ -89,7 +89,7 @@ def resolve_aliases(data: "DataStore", unit_group: str, unit_type: str) -> str |
 
 def parse_time_input(time_str: str) -> int | None:
     """Gets user's input of a time and outputs that correspondent value in seconds"""
-    if matches := re.search(r"^(?:(\d+)h:)?(?:(\d+)m:)?(?:(\d+)s)?$", time_str):
+    if matches := re.search(r"^(?:(\d+)h)?(?:\:(\d+)m)?(?:\:(\d+)s)?$", time_str):
         hours, minutes, seconds = matches.group(1), matches.group(2), matches.group(3)
         hours = check_time_is_none(hours)
         minutes = check_time_is_none(minutes)
@@ -168,12 +168,14 @@ def validate_date(year: int, month: int, day: int) -> bool:
 
 def get_days_from_month(data: "DataStore", month: str) -> int | None:
     """Gets days for a specificed month's name"""
+    month = month.lower()
     return next((value[month] for value in data.month_days.values() if month in value), None)
     # return next((days for value in month_days.values() for name, days in value.items() if name==month), None)
 
 
 def get_index_from_month(data: "DataStore", month: str) -> int | None:
     """Gets month's index given its name"""
+    month = month.lower()
     return next((int(index) for index, value in data.month_days.items() if month in value), None)
 
 

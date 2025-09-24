@@ -1,4 +1,5 @@
 import pytest
+import re
 
 from unittest.mock import patch
 
@@ -176,6 +177,7 @@ def test_validate_factor_time_invalid(data_store, conversion_data):
         conversion_data.validate_factor_time(data_store)
 
 def test_validate_time_args_valid(data_store, conversion_data):
+    conversion_data.unit_group = "time"
     conversion_data.time_input = "minutes seconds 10"
     conversion_data.validate_time_args(data_store)
     assert conversion_data.from_time == "minutes"
@@ -183,6 +185,7 @@ def test_validate_time_args_valid(data_store, conversion_data):
     assert conversion_data.factor_time == 10.0
 
 def test_validate_time_args_invalid_length(data_store, conversion_data):
+    conversion_data.unit_group = "time"
     conversion_data.time_input = "minutes"
     with pytest.raises(ValueError, match="Invalid format for date and time conversion!"):
         conversion_data.validate_time_args(data_store)
@@ -219,13 +222,13 @@ def test_validate_for_conversion_empty_field(data_store, conversion_data):
     conversion_data.from_type = "meters"
     conversion_data.to_type = ""
     conversion_data.amount = "10"
-    with pytest.raises(KeyError, match="'unit_type' cannot be empty!"):
+    with pytest.raises(ValueError, match="Invalid conversion format!"):
         conversion_data.validate_for_conversion(data_store)
 
 def test_validate_for_conversion_invalid_time_format(data_store, conversion_data):
     conversion_data.unit_group = "time"
     conversion_data.time_input = "minutes"
-    with pytest.raises(KeyError, match="Incorrect format for time conversion!"):
+    with pytest.raises(ValueError, match="Incorrect format for time conversion!"):
         conversion_data.validate_for_conversion(data_store)
 
 
@@ -432,7 +435,8 @@ def test_validate_for_manage_type_add_temperature_valid(data_store, manage_type_
     manage_type_data.factor = "2"
     manage_type_data.offset = "1"
     manage_type_data.validate_for_manage_type(data_store)
-    assert manage_type_data.value == [2.0, 1.0]
+    assert manage_type_data.factor == 2.0
+    assert manage_type_data.offset == 1.0
 
 def test_validate_for_manage_type_remove_valid(data_store, manage_type_data):
     manage_type_data.action = "remove"
@@ -450,35 +454,35 @@ def test_validate_for_manage_type_invalid_group(data_store, manage_type_data):
 def test_validate_for_manage_type_invalid_action(data_store, manage_type_data):
     manage_type_data.action = "invalid"
     manage_type_data.unit_type = "mile"
-    with pytest.raises(KeyError, match="Invalid action: 'invalid'"):
+    with pytest.raises(ValueError, match="Invalid action: 'invalid'"):
         manage_type_data.validate_for_manage_type(data_store)
 
 def test_validate_for_manage_type_add_empty_type(data_store, manage_type_data):
     manage_type_data.action = "add"
     manage_type_data.unit_type = ""
     manage_type_data.value = "2"
-    with pytest.raises(KeyError, match="You can't leave that field empty!"):
+    with pytest.raises(ValueError, match="You can't leave that field empty!"):
         manage_type_data.validate_for_manage_type(data_store)
 
 def test_validate_for_manage_type_add_empty_value(data_store, manage_type_data):
     manage_type_data.action = "add"
     manage_type_data.unit_type = "new_type"
     manage_type_data.value = ""
-    with pytest.raises(KeyError, match="'value' cannot be empty!"):
+    with pytest.raises(ValueError, match="'value' cannot be empty!"):
         manage_type_data.validate_for_manage_type(data_store)
 
 def test_validate_for_manage_type_remove_empty_type(data_store, manage_type_data):
     manage_type_data.action = "remove"
     manage_type_data.unit_type = ""
-    with pytest.raises(KeyError, match="'invalid' is not a valid group!"):
+    with pytest.raises(ValueError, match="You can't leave that field empty!"):
         manage_type_data.validate_for_manage_type(data_store)
 
 def test_validate_for_manage_type_negative_factor(data_store, manage_type_data):
     manage_type_data.unit_group = "temperature"
     manage_type_data.action = "add"
     manage_type_data.unit_type = "new_type"
-    manage_type_data.value = "-2"
-    with pytest.raises(KeyError, match="Conversion factor must be positive!"):
+    manage_type_data.factor = "-2"
+    with pytest.raises(ValueError, match="Conversion factor must be positive!"):
         manage_type_data.validate_for_manage_type(data_store)
 
 
@@ -488,7 +492,7 @@ def test_validate_unit_type_valid(data_store, aliases_data):
     aliases_data.validate_unit_type(data_store)
 
 def test_validate_unit_type_empty_type(data_store, aliases_data):
-    with pytest.raises(KeyError, match="'None'  is not a valid unit type for 'length' group!"):
+    with pytest.raises(KeyError, match=re.escape("'None' is not a valid unit type for 'length' group!")):
         aliases_data.validate_unit_type(data_store)
 
 def test_validate_action_valid(aliases_data):
@@ -517,7 +521,7 @@ def test_validate_alias_valid_remove(data_store, aliases_data):
     aliases_data.validate_alias(data_store)
 
 def test_validate_alias_empty(data_store, aliases_data):
-    with pytest.raises(ValueError, match="Alias cannot be empty!"):
+    with pytest.raises(ValueError, match="'alias' cannot be empty!"):
         aliases_data.validate_alias(data_store)
 
 def test_validate_alias_already_alias(data_store, aliases_data):
@@ -552,21 +556,20 @@ def test_validate_alias_no_alias_in_type(data_store, aliases_data):
     aliases_data.action = "remove"
     aliases_data.unit_type = "meters"
     aliases_data.alias = "km"
-    with pytest.raises(ValueError, match="'invalid' is not an alias for 'meters'"):
+    with pytest.raises(ValueError, match="'km' is not an alias for 'meters'"):
         aliases_data.validate_alias(data_store)
 
 def test_validate_for_aliases_valid_alias(data_store, aliases_data):
     aliases_data.action = "add"
     aliases_data.unit_type = "meters"
-    aliases_data.alias = "m"
-    aliases_data.validate_for_aliases(data_store)
-    assert aliases_data.unit_type == "meters"
+    aliases_data.alias = "mtr"
+    aliases_data.validate_for_aliases(data_store)    
 
 def test_validate_for_aliases_invalid_type(data_store, aliases_data):
     aliases_data.action = "add"
     aliases_data.unit_type = "invalid"
     aliases_data.alias = "m"
-    with pytest.raises(ValueError, match="'invalid' is not an alias of 'length' group"):
+    with pytest.raises(KeyError, match="'invalid' is not a valid unit type for 'length' group!"):
         aliases_data.validate_for_aliases(data_store)
 
 

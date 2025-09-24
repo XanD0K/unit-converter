@@ -41,7 +41,7 @@ class Converter:
             message = print_types(self, unit_group.lower())
             return message
         except (ValueError, KeyError, TypeError) as e:
-            return f"Error: {str(e)}"
+            return f"Error: {e.args[0] if e.args else str(e)}"
 
     # 'convert' action
     def convert(self, unit_group: str, user_input: str, *args, print_message: bool=False, **kwargs):
@@ -64,7 +64,7 @@ class Converter:
                 return message
             return convert_data.new_time if unit_group == "time" else convert_data.new_value
         except (ValueError, KeyError, ZeroDivisionError, AttributeError, TypeError) as e:
-            return f"Error: {str(e)}"
+            return f"Error: {e.args[0] if e.args else str(e)}"
 
     # 'manage-group' action
     def manage_group(self, unit_group: str, user_input: str, *args, print_message: bool=False, **kwargs):
@@ -83,7 +83,7 @@ class Converter:
             )
             return self._check_for_print(manage_group, manage_group_data, print_message)
         except (ValueError, KeyError, TypeError) as e:
-            return f"Error: {str(e)}"
+            return f"Error: {e.args[0] if e.args else str(e)}"
 
     # 'manage-type' action
     def manage_type(self, unit_group: str, user_input: str, *args, print_message: bool=False, **kwargs):
@@ -94,9 +94,12 @@ class Converter:
             args = user_input.split()
             if len(args) not in [2, 3, 4]:
                 raise ValueError("Incorrect format! Usage: <unit_group> <unit_type> <action> <value> [factor] [offset]")
+            if len(args) == 4 and unit_group != "temperature":
+                raise ValueError("Incorrect format! Usage: <unit_group> <unit_type> <action> <value> [factor] [offset]")
+
             action, unit_type = args[:2]
             value = args[2] if len(args) >= 3 else None
-            factor = args[2] if len(args) == 4 else None
+            factor = args[2] if len(args) >= 3 else None
             offset = args[3] if len(args) == 4 else None
 
             manage_type_data = ManageTypeData(
@@ -109,7 +112,7 @@ class Converter:
             )
             return self._check_for_print(manage_type, manage_type_data, print_message)
         except (ValueError, KeyError, TypeError) as e:
-            return f"Error: {str(e)}"
+            return f"Error: {e.args[0] if e.args else str(e)}"
 
     # 'aliases' action
     def aliases(self, unit_group: str, user_input: str, *args, print_message: bool=False, **kwargs):
@@ -129,7 +132,7 @@ class Converter:
             )
             return self._check_for_print(manage_aliases, alias_data, print_message)
         except (ValueError, KeyError, TypeError) as e:
-            return f"Error: {str(e)}"
+            return f"Error: {e.args[0] if e.args else str(e)}"
 
     # 'change-base' action
     def change_base(self, unit_group: str, user_input: str, *args, print_message: bool=False, **kwargs):
@@ -146,7 +149,7 @@ class Converter:
             )
             return self._check_for_print(change_base_unit, change_base_data, print_message)
         except (ValueError, KeyError, TypeError) as e:
-            return f"Error: {str(e)}"
+            return f"Error: {e.args[0] if e.args else str(e)}"
 
     def _check_for_print(self, function, data, print_message: bool=False):
         """Checks if user wants to print the output message"""

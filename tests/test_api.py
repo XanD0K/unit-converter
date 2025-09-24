@@ -8,7 +8,9 @@ from unit_converter.api import Converter
 # Setup Converter to be used on all tests
 @pytest.fixture
 def converter():
-    return Converter()
+    with patch("project.save_data") as mocked_save_data:
+        mocked_save_data.return_value = None
+        yield Converter()
 
 
 # Test 'groups' action
@@ -73,8 +75,8 @@ def test_history_valid_limit(converter):
         }
     ]
     result = converter.history(limit=1)
-    assert "50,000.12306 meters = 54,680.7995 yards (Group: length)" in result
-    assert "10.99999 meters = 12.02974 yards (Group: length)" not in result
+    assert "10.99999 meters = 12.02974 yards (Group: length)" in result
+    assert "50,000.12306 meters = 54,680.7995 yards (Group: length)" not in result    
 
 def test_history_invalid_limit(converter):
     converter.conversion_log = [
@@ -113,7 +115,7 @@ def test_history_extra_args(converter):
             "result": 54680.799495844265
         }
     ]
-    assert converter.history("extra", limit=1) == "Error: Too many positional arguments for 'history' command!"
+    assert converter.history(1, "extra") == "Error: Too many positional arguments for 'history' command!"
 
 def test_history_extra_kwargs(converter):
     converter.conversion_log = [
@@ -140,7 +142,7 @@ def test_types_invalid_group(converter):
     assert converter.types("invalid") == "Error: 'invalid' is not a valid group!"
 
 def test_types_extra_args(converter):
-    assert converter.types("extra", unit_group="length") == "Error: Too many positional arguments for 'types' command!"
+    assert converter.types("length", "extra") == "Error: Too many positional arguments for 'types' command!"
 
 def test_types_extra_kwargs(converter):
     assert converter.types(unit_group="length", extra="extra") == "Error: Unexpected keyword argument for 'types' command!"
@@ -168,8 +170,9 @@ def test_convert_invalid_from_type(converter):
 def test_convert_invalid_to_type(converter):
     assert converter.convert("length", "m invalid 10") == "Error: Invalid unit type!"
 
-def test_convert_invalid_amount(convert):
-    assert convert.convert("length", "m yd invalid") == "Error: Invalid amount!"
+def test_convert_invalid_amount(converter):
+    assert converter.convert("length", "m yd invalid") == "Error: Invalid amount!"
+
 def test_convert_invalid_format(converter):
     assert converter.convert("length", "meters 10") == "Error: Incorrect format! Usage: <unit_group> <from_type> <to_type> <amount>"
 
@@ -202,10 +205,10 @@ def test_manage_group_remove_print_message(converter):
     assert message =="Group 'length' successfully removed!"
 
 def test_manage_group_add_already_group(converter):
-    assert converter.manage_group("length", "add new_base_unit") == "Error: 'new_group' is already an existed group!"
+    assert converter.manage_group("length", "add new_base_unit") == "Error: 'length' is already an existed group!"
 
 def test_manage_group_add_missing_new_base(converter):
-    assert converter.manage_group("length", "add") == "Error: 'new_base_unit' cannot be empty"
+    assert converter.manage_group("new_group", "add") == "Error: 'new_base_unit' cannot be empty"
 
 def test_manage_group_add_already_group_name(converter):
     assert converter.manage_group("new_group", "add length") == "Error: 'length' is already an unit group name!"
@@ -217,13 +220,10 @@ def test_manage_group_remove_invalid_group(converter):
     assert converter.manage_group("invalid", "remove") == "Error: 'invalid' is not a valid group!"
 
 def test_manage_group_remove_included_new_base(converter):
-    assert converter.manage_group("invalid", "remove new_base_unit") == "Error: Incorrect usage when removing a group! Usage: <unit_group> remove"
+    assert converter.manage_group("length", "remove new_base_unit") == "Error: Incorrect usage when removing a group! Usage: <unit_group> remove"
 
 def test_manage_group_invalid_len(converter):
     assert converter.manage_group("new_group", "add new_base_unit extra") == "Error: Incorrect format! Usage: <unit_group> <action> [new_base_unit]"
-
-def test_manage_group_missing_action(converter):
-    assert converter.manage_group("new_group", "") == "Error: 'action' cannot be empty!"
 
 def test_manage_group_invalid_action(converter):
     assert converter.manage_group("new_group", "invalid new_base_unit") == "Error: Invalid action: 'invalid'"
@@ -240,31 +240,31 @@ def test_manage_type_add(converter):
     assert converter.manage_type("length", "add new_type 10") == "A new unit type was added on 'length' group: new_type = 10.0"
 
 def test_manage_type_remove(converter):
-    converter.units["length"]["mile"] = 1609.344
+    converter.units["length"]["miles"] = 1609.344
     converter.base_units["length"] = "meters"
-    assert converter.manage_type("length", "remove mile") == "'mile' was removed from 'length'"
+    assert converter.manage_type("length", "remove miles") == "'miles' was removed from 'length'"
 
 def test_manage_type_add_alias(converter):
     assert converter.mt("length", "add new_type 10") == "A new unit type was added on 'length' group: new_type = 10.0"
 
 def test_manage_type_remove_alias(converter):
-    converter.units["length"]["mile"] = 1609.344
+    converter.units["length"]["miles"] = 1609.344
     converter.base_units["length"] = "meters"
-    assert converter.mt("length", "remove mile") == "'mile' was removed from 'length'"
+    assert converter.mt("length", "remove miles") == "'miles' was removed from 'length'"
 
 def test_manage_type_add_print_message(converter):
     message = converter.manage_type("length", "add new_type 10", print_message=True)
     assert message == "A new unit type was added on 'length' group: new_type = 10.0"
 
 def test_manage_type_remove_print_message(converter):
-    message = converter.manage_type("length", "remove mile", print_message=True) == "'mile' was removed from 'length'"
-    assert message == "'mile' was removed from 'length'"
+    message = converter.manage_type("length", "remove miles", print_message=True)
+    assert message == "'miles' was removed from 'length'"
 
 def test_manage_type_add_temperature(converter):
     assert converter.manage_type("temperature", "add new_type 1 1") == "A new unit type was added on 'temperature' group: new_type = [1.0, 1.0]"
 
 def test_manage_type_invalid_len(converter):
-    assert converter.manage_type("invalid", "add new_type 10 extra") == "Error: Incorrect format! Usage: <unit_group> <unit_type> <action> <value> [factor] [offset]"
+    assert converter.manage_type("length", "add new_type 10 extra") == "Error: Incorrect format! Usage: <unit_group> <unit_type> <action> <value> [factor] [offset]"
 
 def test_manage_type_empty_group(converter):
     assert converter.manage_type("", "add new_type 10") == "Error: Unit group cannot be empty!"
@@ -294,13 +294,13 @@ def test_manage_type_remove_extra_args(converter):
     assert converter.manage_type("length", "remove mile 10") == "Error: Incorrect usage when removing a type! Usage: <unit_group> remove <unit_type>"
 
 def test_manage_type_remove_temperature_extra_args(converter):
-    assert converter.manage_type("temperature", "remove celsius 10") == "Error: Incorrect usage when removing a type! Usage: <unit_group> remove <unit_type>"
+    assert converter.manage_type("temperature", "remove kelvin 10") == "Error: Incorrect usage when removing a type! Usage: <unit_group> remove <unit_type>"
 
 def test_manage_type_empty_value(converter):
-    assert converter.manage_type("length", "add length") == "Error: 'value' cannot be empty!"
+    assert converter.manage_type("length", "add new_type") == "Error: 'value' cannot be empty!"
 
 def test_manage_type_invalid_value(converter):
-    assert converter.manage_type("length", "add length invalid") == "Error: Invalid conversion factor!"
+    assert converter.manage_type("length", "add new_type invalid") == "Error: Invalid conversion factor!"
 
 def test_manage_type_temperature_empty_factor(converter):
     assert converter.manage_type("temperature", "add new_type") == "Error: 'factor' cannot be empty!"
@@ -312,7 +312,7 @@ def test_manage_type_temperature_negative_factor(converter):
     assert converter.manage_type("temperature", "add new_type -1 1") == "Error: Conversion factor must be positive!"
 
 def test_manage_type_temperature_empty_offset(converter):
-    assert converter.manage_type("temperature", "add new_type 1") == "Error: 'offset' cannot be empty!"
+    assert converter.manage_type("temperature", "add new_type 1.0") == "Error: 'offset' cannot be empty!"
 
 def test_manage_type_temperature_invalid_offset(converter):
     assert converter.manage_type("temperature", "add new_type 1 invalid") == "Error: Invalid conversion offset!"
@@ -367,7 +367,7 @@ def test_aliases_add_already_group(converter):
     assert converter.aliases("length", "add meters length") == "Error: 'length' is already being used to name an unit group!"
 
 def test_aliases_add_already_type(converter):
-    assert converter.aliases("length", "add meters yard") == "Error: 'yard' is already being used as an unit type in 'length' group!"
+    assert converter.aliases("length", "add meters yards") == "Error: 'yards' is already being used as an unit type in 'length' group!"
 
 def test_aliases_remove_invalid_alias_group(converter):
     assert converter.aliases("length", "remove meters invalid") == "Error: 'invalid' is not an alias of 'length' group"

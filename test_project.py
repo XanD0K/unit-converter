@@ -15,23 +15,33 @@ def data_store():
 # Setup fixtures to be used on their respective class tests
 @pytest.fixture
 def conversion_data():
-    return ConversionData(unit_group="length")
+    with patch("project.add_to_log") as mocked_add_to_log:
+        mocked_add_to_log.return_value = None
+        yield ConversionData(unit_group="length")
 
 @pytest.fixture
 def manage_group_data():
-    return ManageGroupData(unit_group="length")
+    with patch("project.save_data") as mocked_save_data:
+        mocked_save_data.return_value = None
+        yield ManageGroupData(unit_group="length")
 
 @pytest.fixture
 def manage_type_data():
-    return ManageTypeData(unit_group="length")
+    with patch("project.save_data") as mocked_save_data:
+        mocked_save_data.return_value = None
+        yield ManageTypeData(unit_group="length")
 
 @pytest.fixture
 def aliases_data():
-    return AliasesData(unit_group="length")
+    with patch("project.save_data") as mocked_save_data:
+        mocked_save_data.return_value = None
+        yield AliasesData(unit_group="length")
 
 @pytest.fixture
 def change_base_data():
-    return ChangeBaseData(unit_group="length")
+    with patch("project.save_data") as mocked_save_data:
+        mocked_save_data.return_value = None
+        yield ChangeBaseData(unit_group="length")
 
 
 # TODO: Test 'get_action' function
@@ -104,8 +114,8 @@ def test_print_history_valid_limit(data_store):
         }
     ]
     result = print_history(data_store, limit=1)
-    assert "50,000.12306 meters = 54,680.7995 yards (Group: length)" in result
-    assert "10.99999 meters = 12.02974 yards (Group: length)" not in result
+    assert "10.99999 meters = 12.02974 yards (Group: length)" in result
+    assert "50,000.12306 meters = 54,680.7995 yards (Group: length)" not in result
 
 def test_print_history_invalid_limit(data_store):
     data_store.conversion_log = [
@@ -142,16 +152,16 @@ def test_types_print_invalid_group(data_store):
     assert print_types(data_store, "invalid") == "Error: 'invalid' is not a valid group!"
 
 def test_print_types_get_input(data_store):
-    with patch("project.get_users_input", return_value="length"):
+    with patch("project.get_unit_group", return_value="length"):
         assert print_types(data_store) == "'length' units: meters ('m', 'meter', 'metre', 'metres'), centimeters ('cm', 'centimeter', 'centimetre', 'cetimetres'), millimeters ('mm', 'millimeter', 'millimetre', 'millimetres'), kilometers ('km', 'kilometer', 'kilometre', 'kilometres'), feet ('ft', 'foot'), inches ('in', 'inch'), yards ('yd', 'yds', 'yard'), miles ('mi', 'mile'), nautical_miles ('nmi', 'nm', 'nautical_mile')"
 
 def test_print_types_get_input_empty_group(data_store):
-    with patch("project.get_users_input", return_value=""):
+    with patch("project.get_unit_group", return_value=""):
         with pytest.raises(ValueError, match="Unit group cannot be empty!"):
             print_types(data_store)
 
 def test_print_types_get_input_invalid_group(data_store):
-    with patch("project.get_users_input", return_value="invalid"):
+    with patch("project.get_unit_group", return_value="invalid"):
         with pytest.raises(KeyError, match="'invalid' is not a valid group!"):
             print_types(data_store)
 
@@ -289,8 +299,9 @@ def test_conversion_logic_invalid_factor_time(data_store, conversion_data):
         conversion_logic(data_store, conversion_data)
 
 def test_conversion_logic_get_input(data_store):
-    with patch("project.get_users_input", side_effect=["length", ("meters", "yards"), "10"]):
-        assert conversion_logic(data_store) == "10.0 meters = 10.93613 yards"
+    with patch("project.get_unit_group", return_value="length"):
+        with patch("project.get_users_input", side_effect=[("meters", "yards"), "10"]):
+            assert conversion_logic(data_store) == "10.0 meters = 10.93613 yards"
 
 def test_conversion_logic_get_input_time(data_store):
     with patch("project.get_users_input", side_effect=["length", "minutes seconds 1"]):
@@ -353,39 +364,50 @@ def test_converter_time_invalid_format(data_store, conversion_data):
 # Test 'converter_time_3args' function
 def test_converter_time_3args_units(data_store, conversion_data):
     conversion_data.unit_group = "time"
-    conversion_data.time_input = "minutes seconds 1"
+    conversion_data.from_time = "minutes"
+    conversion_data.to_time = "seconds"
+    conversion_data.factor_time = 1
     assert converter_time_3args(data_store, conversion_data) == "1.0 minutes = 60.0 seconds"
 
 def test_converter_time_3args_time(data_store, conversion_data):
     conversion_data.unit_group = "time"
-    conversion_data.time_input = "17h:28m:36s 04h:15m:22s seconds"
+    conversion_data.from_time = "17h:28m:36s"
+    conversion_data.to_time = "04h:15m:22s"
+    conversion_data.factor_time = "seconds"
     assert converter_time_3args(data_store, conversion_data) == "There are 47,594.0 seconds between 17h:28m:36s and 04h:15m:22s"
 
 def test_converter_time_3args_months(data_store, conversion_data):
     conversion_data.unit_group = "time"
-    conversion_data.time_input = "JAN DEC days"
+    conversion_data.from_time = "JAN"
+    conversion_data.to_time = "DEC"
+    conversion_data.factor_time = "days"
     assert converter_time_3args(data_store, conversion_data) == "Between jan and dec there are 365.0 days"
 
 def test_converter_time_3args_date(data_store, conversion_data):
     conversion_data.unit_group = "time"
-    conversion_data.time_input = "2019-11-04 2056-04-28 days"
+    conversion_data.from_time = "2019-11-04"
+    conversion_data.to_time = "2056-04-28"
+    conversion_data.factor_time = "days"
     assert converter_time_3args(data_store, conversion_data) == "Between 2019-11-04 and 2056-04-28 there are 13,326.0 days"
 
 
 # Test 'converter_time_2args' function
 def test_converter_time_2args_time(data_store, conversion_data):
     conversion_data.unit_group = "time"
-    conversion_data.time_input = "17h:28m:36s seconds"
+    conversion_data.from_time = "17h:28m:36s"
+    conversion_data.factor_time = "seconds"
     assert converter_time_2args(data_store, conversion_data) == "There are 62,916.0 seconds in 17h:28m:36s"
 
 def test_converter_time_2args_month(data_store, conversion_data):
     conversion_data.unit_group = "time"
-    conversion_data.time_input = "JAN days"
+    conversion_data.from_time = "JAN"
+    conversion_data.factor_time = "days"
     assert converter_time_2args(data_store, conversion_data) == "There are 31.0 days in jan"
 
 def test_converter_time_2args_date(data_store, conversion_data):
     conversion_data.unit_group = "time"
-    conversion_data.time_input = "2019-11-04 days"
+    conversion_data.from_time = "2019-11-04"
+    conversion_data.factor_time = "days"
     assert converter_time_2args(data_store, conversion_data) == "There are 737,763.41312 days in 2019 years, 11 months, 4 days"
 
 

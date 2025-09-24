@@ -26,7 +26,7 @@ def main() -> None:
             handle_cli(data, sys.argv)
             sys.exit(0)  # Exits program after command-line execution
     except (ValueError, KeyError, ZeroDivisionError, TypeError) as e:
-        print(f"Error: {str(e)}")
+        print(f"Error: {e.args[0] if e.args else str(e)}")
         sys.exit(1)  # Exits the program if any error happens
 
     # Handles interactive approach
@@ -204,7 +204,7 @@ def get_action(data: DataStore) -> None:
         except (EOFError, KeyboardInterrupt):
             sys.exit("\nBye!")
         except (KeyError, ValueError, ZeroDivisionError, AttributeError) as e:
-            print(f"Error: {str(e)}")
+            print(f"Error: {e.args[0] if e.args else str(e)}")
             continue
 
 
@@ -232,7 +232,7 @@ def print_history(data: DataStore, limit: int = 10) -> str:
                 entries.append(f"{format_value(entry['amount'])} {entry['from_type']} = {format_value(entry['result'])} {entry['to_type']} (Group: {entry['unit_group']})")
         return "\n".join(entries)
     except (ValueError, KeyError) as e:
-        return f"Error: {str(e)}"
+        return f"Error: {e.args[0] if e.args else str(e)}"
 
 
 def print_types(data: DataStore, unit_group: Optional[str]=None) -> str:
@@ -241,6 +241,7 @@ def print_types(data: DataStore, unit_group: Optional[str]=None) -> str:
         if unit_group is None:
             unit_group = get_unit_group(data)
         # Used to construct the sequence of unit_type and its respective aliases
+        validate_unit_group(unit_group, data)
         formatted_output: list[str] = []
         # Iterates over the outter keys of 'units.json' dictionary
         for unit_type in data.units[unit_group]:
@@ -252,7 +253,7 @@ def print_types(data: DataStore, unit_group: Optional[str]=None) -> str:
                 formatted_output.append(unit_type)
         return f"'{unit_group}' units: " + ", ".join(formatted_output)
     except (ValueError, KeyError) as e:
-        return f"Error: {str(e)}"
+        return f"Error: {e.args[0] if e.args else str(e)}"
 
 
 def conversion_logic(data: DataStore, unit_data: Optional[ConversionData]=None) -> str:
@@ -376,7 +377,7 @@ def converter_time_3args(data: DataStore, unit_data: ConversionData) -> str:
                 zero_division_checker(data.units[unit_group][factor_time])
                 unit_data.new_time = total_seconds / data.units[unit_group][factor_time]
             message = f"Between {from_time} and {to_time} there are {format_value(unit_data.new_time)} {factor_time}"
-        
+
         # E.g. 2019-11-04 2056-04-28 days
         elif parse_date_input(from_time) is not None and parse_date_input(to_time) is not None:
             year_duration: int = 365

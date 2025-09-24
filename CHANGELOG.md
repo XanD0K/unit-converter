@@ -10,6 +10,13 @@
 
 ### Removed
 
+
+## [0.9.15] - 2025-09-24
+### Fixed
+- Fixed and tested all test files (`test_utils.py`, `test_data_models.py`, `test_data_manager.py`, `test_api.py` and `test_project.py`)
+- Fixed and improved functions in `utils.py`, `data_models.py`, `data_manager.py`, `api.py` and `project.py` files
+
+
 ## [0.9.14] - 2025-09-23
 ### Added
 - Created `test_project.py` file to test all functions in `project.py` file

@@ -148,7 +148,7 @@ def save_data(data: DataStore, file_name: str) -> DataStore:
         with open(BASE_DIR / "data" / f"{file_name}.json", "w") as file:
             json.dump(data, file, indent=4)
     except PermissionError:
-        print(f"Error! You don't have permition to write to {file_name}!")        
+        print(f"Error! You don't have permition to write to {file_name}!")
         return backup
     return data
 
