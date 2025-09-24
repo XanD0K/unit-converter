@@ -54,5 +54,229 @@
         "to_type": "fahrenheit",
         "amount": 10.0,
         "result": 50.0
+    },
+    {
+        "date": "2025-09-23T14:12:31.004724",
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": null,
+        "factor_time": "days",
+        "result": 31.0
+    },
+    {
+        "date": "2025-09-23T14:13:03.882875",
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": "dec",
+        "factor_time": "days",
+        "result": 365.0
+    },
+    {
+        "date": "2025-09-23T14:13:42.869226",
+        "unit_group": "time",
+        "from_time": "1.0 years 1.0 months 1.0 days",
+        "to_time": "days",
+        "factor_time": null,
+        "result": 396.25
+    },
+    {
+        "date": "2025-09-23T14:18:34.376722",
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": null,
+        "factor_time": "seconds",
+        "result": 0.0
+    },
+    {
+        "date": "2025-09-23T14:18:50.839891",
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": null,
+        "factor_time": "seconds",
+        "result": 0.0
+    },
+    {
+        "date": "2025-09-23T14:19:37.060003",
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": null,
+        "factor_time": "seconds",
+        "result": 0.0
+    },
+    {
+        "date": "2025-09-23T14:20:02.538595",
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": null,
+        "factor_time": "seconds",
+        "result": 0.0
+    },
+    {
+        "date": "2025-09-23T14:20:34.894848",
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": null,
+        "factor_time": "seconds",
+        "result": 0.0
+    },
+    {
+        "date": "2025-09-23T14:20:54.123094",
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": null,
+        "factor_time": "seconds",
+        "result": 0.0
+    },
+    {
+        "date": "2025-09-23T14:21:21.612287",
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": null,
+        "factor_time": "seconds",
+        "result": 0.0
+    },
+    {
+        "date": "2025-09-23T14:25:46.011686",
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": null,
+        "factor_time": "days",
+        "result": 0.0
+    },
+    {
+        "date": "2025-09-23T14:25:58.250791",
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": null,
+        "factor_time": "days",
+        "result": 0.0
+    },
+    {
+        "date": "2025-09-23T14:26:35.489712",
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": null,
+        "factor_time": "days",
+        "result": 0.0
+    },
+    {
+        "date": "2025-09-23T14:26:40.296149",
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": null,
+        "factor_time": "days",
+        "result": 0.0
+    },
+    {
+        "date": "2025-09-23T14:26:57.292796",
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": null,
+        "factor_time": "days",
+        "result": 0.0
+    },
+    {
+        "date": "2025-09-23T14:31:26.404181",
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": null,
+        "factor_time": "seconds",
+        "result": 0.0
+    },
+    {
+        "date": "2025-09-23T14:31:48.571842",
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": null,
+        "factor_time": "days",
+        "result": 31.0
+    },
+    {
+        "date": "2025-09-23T14:31:57.523594",
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": "dec",
+        "factor_time": "days",
+        "result": 365.0
+    },
+    {
+        "date": "2025-09-23T14:34:27.475779",
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": null,
+        "factor_time": "days",
+        "result": 0.0
+    },
+    {
+        "date": "2025-09-23T14:34:59.222030",
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": null,
+        "factor_time": "days",
+        "result": 0.0
+    },
+    {
+        "date": "2025-09-23T14:35:04.885392",
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": null,
+        "factor_time": "days",
+        "result": 0.0
+    },
+    {
+        "date": "2025-09-23T14:37:28.872402",
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": null,
+        "factor_time": "days",
+        "result": 0.7281944444444445
+    },
+    {
+        "date": "2025-09-23T14:37:41.553266",
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": null,
+        "factor_time": "seconds",
+        "result": 62916.0
+    },
+    {
+        "date": "2025-09-23T14:38:12.480292",
+        "unit_group": "time",
+        "from_time": "2019-11-04",
+        "to_time": null,
+        "factor_time": "days",
+        "result": 737763.413125
+    },
+    {
+        "date": "2025-09-23T14:39:51.313763",
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": "04h:15m:22s",
+        "factor_time": "seconds",
+        "result": 47594.0
+    },
+    {
+        "date": "2025-09-23T14:40:22.577072",
+        "unit_group": "time",
+        "from_time": "minutes",
+        "to_time": "seconds",
+        "factor_time": 1.0,
+        "result": 60.0
+    },
+    {
+        "date": "2025-09-23T14:40:39.992088",
+        "unit_group": "time",
+        "from_time": "jan",
+        "to_time": "dec",
+        "factor_time": "days",
+        "result": 365.0
+    },
+    {
+        "date": "2025-09-23T14:40:57.109459",
+        "unit_group": "time",
+        "from_time": "2019-11-04",
+        "to_time": "2056-04-28",
+        "factor_time": "days",
+        "result": 13326.0
     }
 ]

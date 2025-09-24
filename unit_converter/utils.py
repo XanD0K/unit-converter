@@ -94,17 +94,16 @@ def parse_time_input(time_str: str) -> int | None:
         hours = check_time_is_none(hours)
         minutes = check_time_is_none(minutes)
         seconds = check_time_is_none(seconds)
-
         return hours * 3600 + minutes * 60 + seconds
     return None
 
 
 def check_time_is_none(time_str: str) -> int:
     """Checks if a specific time unit was provided"""
-    if not time_str:
-        return int(time_str)
-    else:
+    if time_str is None or time_str == '':
         return 0
+    else:
+        return int(time_str)
 
 
 def get_seconds(data: "DataStore", unit_group: str, years: int, months: int, days: int) -> float:

@@ -210,7 +210,8 @@ class ManageTypeData:
             raise ValueError(f"'{self.unit_type}' is already being used as an alias in '{self.unit_group}' group")
 
     def validate_remove_action(self, data: DataStore) -> None:
-        self.unit_type = resolve_aliases(data, self.unit_group, self.unit_type)
+        if resolve_aliases(data, self.unit_group, self.unit_type):
+            self.unit_type = resolve_aliases(data, self.unit_group, self.unit_type)
         if not self.unit_type:
             raise ValueError("You can't leave that field empty!")
         elif self.unit_type not in data.units[self.unit_group]:
@@ -221,7 +222,7 @@ class ManageTypeData:
             raise ValueError("Incorrect usage when removing a type! Usage: <unit_group> remove <unit_type>")
 
     def validate_value(self) -> None:
-        if self.value is None:
+        if not self.value:
             raise ValueError("'value' cannot be empty!")
         try:
             self.value = float(self.value)
@@ -229,7 +230,7 @@ class ManageTypeData:
             raise ValueError("Invalid conversion factor!")
 
     def validate_factor(self) -> None:
-        if self.factor is None:
+        if not self.factor:
             raise ValueError("'factor' cannot be empty!")
         try:
             self.factor = float(self.factor)
@@ -239,7 +240,7 @@ class ManageTypeData:
             raise ValueError("Conversion factor must be positive!")
 
     def validate_offset(self) -> None:
-        if self.offset is None:
+        if not self.offset:
             raise ValueError("'offset' cannot be empty!")
         try:
             self.offset = float(self.offset)
@@ -250,11 +251,12 @@ class ManageTypeData:
         validate_unit_group(self.unit_group, data)
         self.validate_action()
         if self.action == "add":
-            self.validate_add_action(data)
-            self.validate_value()
+            self.validate_add_action(data)            
             if self.unit_group == "temperature":
                 self.validate_factor()
                 self.validate_offset()
+            else:
+                self.validate_value()
         elif self.action == "remove":
             self.validate_remove_action(data)
 

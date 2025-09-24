@@ -14,8 +14,12 @@
 ### Added
 - Created `test_project.py` file to test all functions in `project.py` file
 
+### Changed
+- Changed `handle_cli` function, removing `choices` atribute from arguments
+
 ### Fixed
-- Fixes `resolve_alias` function
+- Fixed `resolve_alias` function
+- Fixed `check_time_is_none` function
 
 
 ## [0.9.13] - 2025-09-22

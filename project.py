@@ -59,21 +59,21 @@ def handle_cli(data: DataStore, args: list[str]) -> None:
     # 'manage-group' command
     manage_group_parser = subparser.add_parser("manage-group", aliases=["mg"], help="Add new unit group")
     manage_group_parser.add_argument("unit_group", help="Unit group")
-    manage_group_parser.add_argument("action", choices=["add", "remove"], help="Action to perform")
+    manage_group_parser.add_argument("action", help="Action to perform")
     manage_group_parser.add_argument("new_base_unit", nargs="?", help="New base unit")
     # 'manage-type' command
     manage_type_parser = subparser.add_parser("manage-type", aliases=["mt"], help="Add new unit type")
     manage_type_parser.add_argument("unit_group", help="Unit group")
-    manage_type_parser.add_argument("action", choices=["add", "remove"], help="Action to perform")
+    manage_type_parser.add_argument("action", help="Action to perform")
     manage_type_parser.add_argument("unit_type", help="Unit type to be added")
     manage_type_parser.add_argument("value", nargs="?", help="Conversion factor to base unit (not used for temperature)")
-    manage_type_parser.add_argument("--factor", type=float, help="Conversion factor to temperature's base unit")
-    manage_type_parser.add_argument("--offset", type=float, help="Offset to temperature")
+    manage_type_parser.add_argument("--factor", help="Conversion factor to temperature's base unit")
+    manage_type_parser.add_argument("--offset", help="Offset to temperature")
     # 'aliases' command
     aliases_parser = subparser.add_parser("aliases", aliases=["a"], help="Manage unit's aliases")
     aliases_parser.add_argument("unit_group", help="Unit group")
     aliases_parser.add_argument("unit_type", help="Unit type")
-    aliases_parser.add_argument("action", choices=["add", "remove"], help="Action to perform")
+    aliases_parser.add_argument("action", help="Action to perform")
     aliases_parser.add_argument("alias", help="Alias used to add/remove to/from an unit")
     # 'change-base' command
     change_base_parser = subparser.add_parser("change-base", aliases=["cb"], help="Change unit base for a group")
@@ -119,7 +119,6 @@ def handle_cli(data: DataStore, args: list[str]) -> None:
             action = parsed_args.action.lower(),
             new_base_unit = parsed_args.new_base_unit.lower() if parsed_args.new_base_unit else None
         )
-        unit_data.validate_for_manage_group(data)
         message = manage_group(data, unit_data)
         print(message)
     # 'manage-type' command
@@ -133,7 +132,6 @@ def handle_cli(data: DataStore, args: list[str]) -> None:
             factor = parsed_args.factor,
             offset = parsed_args.offset
         )
-        unit_data.validate_for_manage_type(data)
         # Adds temperature type
         if unit_data.action == "add" and unit_data.unit_group == "temperature":
             message = add_temp_type(data, unit_data)
@@ -542,6 +540,7 @@ def add_temp_type(data: DataStore, unit_data: Optional[ManageTypeData]=None) -> 
         unit_data.validate_factor()
         unit_data.offset = get_users_input(f"Enter offset value to base unit '{data.base_units[unit_data.unit_group]}' of 'temperature' group: ").strip().lower()
         unit_data.validate_offset()
+    unit_data.validate_for_manage_type(data)
 
     # Changes respective '.json' files
     data.units[unit_data.unit_group][unit_data.unit_type] = [unit_data.factor, unit_data.offset]
