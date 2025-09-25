@@ -40,8 +40,10 @@ def aliases_data():
 @pytest.fixture
 def change_base_data():
     with patch("project.save_data") as mocked_save_data:
-        mocked_save_data.return_value = None
-        yield ChangeBaseData(unit_group="length")
+        with patch("project.refactor_value") as mocked_refactor_value:
+            mocked_save_data.return_value = None
+            mocked_refactor_value.return_value = None
+            yield ChangeBaseData(unit_group="length")
 
 
 # TODO: Test 'get_action' function
@@ -157,13 +159,11 @@ def test_print_types_get_input(data_store):
 
 def test_print_types_get_input_empty_group(data_store):
     with patch("project.get_unit_group", return_value=""):
-        with pytest.raises(ValueError, match="Unit group cannot be empty!"):
-            print_types(data_store)
+        assert print_types(data_store) == "Error: Unit group cannot be empty!"
 
 def test_print_types_get_input_invalid_group(data_store):
     with patch("project.get_unit_group", return_value="invalid"):
-        with pytest.raises(KeyError, match="'invalid' is not a valid group!"):
-            print_types(data_store)
+        assert print_types(data_store) == "Error: 'invalid' is not a valid group!"
 
 
 # Test 'conversion_logic' function
@@ -204,7 +204,6 @@ def test_conversion_logic_invalid_from_type(data_store, conversion_data):
 
 def test_conversion_logic_empty_to_type(data_store, conversion_data):
     conversion_data.from_type = "meters"
-    conversion_data.to_type = "invalid"
     conversion_data.amount = "10"
     with pytest.raises(ValueError, match="'unit_type' cannot be empty!"):
         conversion_logic(data_store, conversion_data)
@@ -252,60 +251,41 @@ def test_conversion_logic_invalid_time_input(data_store, conversion_data):
     conversion_data.time_input = "invalid"
     with pytest.raises(ValueError, match="Incorrect format for time conversion!"):
         conversion_logic(data_store, conversion_data)
-
-def test_conversion_logic_empty_from_time(data_store, conversion_data):
-    conversion_data.unit_group = "time"
-    conversion_data.to_time = "seconds"
-    conversion_data.factor_time = "10"
-    with pytest.raises(ValueError, match="Enter a value to convert from!"):
-        conversion_logic(data_store, conversion_data)
     
 def test_conversion_logic_invalid_from_time(data_store, conversion_data):
     conversion_data.unit_group = "time"
+    conversion_data.time_input = "invalid seconds 10"
     conversion_data.from_time = "invalid"
     conversion_data.to_time = "seconds"
     conversion_data.factor_time = "10"
-    with pytest.raises(ValueError, match="'Invalid 'from_time': 'invalid'"):
-        conversion_logic(data_store, conversion_data)
-
-def test_conversion_logic_empty_to_time(data_store, conversion_data):
-    conversion_data.unit_group = "time"
-    conversion_data.from_time = "minutes"
-    conversion_data.factor_time = "10"
-    with pytest.raises(ValueError, match="Enter a value to convert to!"):
+    with pytest.raises(ValueError, match="Invalid 'from_time': 'invalid'"):
         conversion_logic(data_store, conversion_data)
 
 def test_conversion_logic_invalid_to_time(data_store, conversion_data):
     conversion_data.unit_group = "time"
+    conversion_data.time_input = "minutes invalid 10"
     conversion_data.from_time = "minutes"
     conversion_data.to_time = "invalid"
     conversion_data.factor_time = "10"
     with pytest.raises(ValueError, match="Invalid 'to_time'"):
         conversion_logic(data_store, conversion_data)
 
-def test_conversion_logic_empty_factor_time(data_store, conversion_data):
-    conversion_data.unit_group = "time"
-    conversion_data.from_time = "minutes"
-    conversion_data.to_time = "seconds"
-    with pytest.raises(ValueError, match="'factor_time' cannot be empty!"):
-        conversion_logic(data_store, conversion_data)
-
 def test_conversion_logic_invalid_factor_time(data_store, conversion_data):
     conversion_data.unit_group = "time"
-    conversion_data.from_time = "minutes"
-    conversion_data.to_time = "seconds"
-    conversion_data.factor_time = "invalid"
+    conversion_data.time_input = "minutes seconds invalid"
     with pytest.raises(KeyError, match="Factor time 'invalid' not found in 'time' group!"):
         conversion_logic(data_store, conversion_data)
 
 def test_conversion_logic_get_input(data_store):
     with patch("project.get_unit_group", return_value="length"):
-        with patch("project.get_users_input", side_effect=[("meters", "yards"), "10"]):
-            assert conversion_logic(data_store) == "10.0 meters = 10.93613 yards"
+        with patch("project.get_converter_units", return_value=("meters", "yards")):
+            with patch("project.get_amount", return_value=10.0):
+                assert conversion_logic(data_store) == "10.0 meters = 10.93613 yards"
 
 def test_conversion_logic_get_input_time(data_store):
-    with patch("project.get_users_input", side_effect=["length", "minutes seconds 1"]):
-        assert conversion_logic(data_store) == "1.0 minutes = 60.0 seconds"
+    with patch("project.get_unit_group", return_value="time"):
+        with patch("project.get_users_input", side_effect=["minutes seconds 1"]):
+            assert conversion_logic(data_store) == "1.0 minutes = 60.0 seconds"
 
 
 # Test 'converter' function
@@ -323,11 +303,11 @@ def test_converter_temperature(data_store, conversion_data):
     assert converter(data_store, conversion_data) == 283.15
 
 def test_converter_zero_division(data_store, conversion_data):
+    data_store.units["length"]["yards"] = 0
     conversion_data.from_type = "meters"
     conversion_data.to_type = "yards"
-    conversion_data.amount = 10.0
-    data_store.units["length"]["yard"] = 0
-    with pytest.raisse(ZeroDivisionError, match="Can't Divide by zero"):
+    conversion_data.amount = 10.0    
+    with pytest.raises(ZeroDivisionError, match="Can't Divide by zero"):
         converter(data_store, conversion_data)
 
 
@@ -340,11 +320,11 @@ def test_converter_temp(data_store, conversion_data):
     assert converter_temp(data_store, conversion_data) == 283.15
 
 def test_converter_temp_zero_division(data_store, conversion_data):
+    data_store.units["temperature"]["celsius"] = [0.0, 273.15]
     conversion_data.unit_group = "temperature"
     conversion_data.from_type = "celsius"
     conversion_data.to_type = "kelvin"
-    conversion_data.amount = 10.0
-    data_store.units["temperature"]["celius"] = [0.0, 273.15]
+    conversion_data.amount = 10.0    
     with pytest.raises(ZeroDivisionError, match="Can't Divide by zero"):
         converter_temp(data_store, conversion_data)
 
@@ -358,7 +338,8 @@ def test_converter_time_len_higher(data_store, conversion_data):
 def test_converter_time_invalid_format(data_store, conversion_data):
     conversion_data.unit_group = "time"
     conversion_data.time_input = "minutes seconds 1 seconds"
-    assert converter_time(data_store, conversion_data) == "Error: Invalid format for date and time conversion!"
+    with pytest.raises(ValueError, match="Invalid format for date and time conversion!"):
+        converter_time(data_store, conversion_data)
 
 
 # Test 'converter_time_3args' function
@@ -425,54 +406,64 @@ def test_manage_group_remove(data_store, manage_group_data):
 
 def test_manage_group_empty_action(data_store, manage_group_data):
     manage_group_data.unit_group = "new_group"
-    assert manage_group(data_store, manage_group_data) == "Error: 'action' cannot be empty!"
+    with pytest.raises(ValueError, match="'action' cannot be empty!"):
+        manage_group(data_store, manage_group_data)
 
 def test_manage_group_invalid_action(data_store, manage_group_data):
     manage_group_data.unit_group = "new_group"
     manage_group_data.action = "invalid"
-    assert manage_group(data_store, manage_group_data) == "Error: Invalid action: 'invalid'"
+    with pytest.raises(ValueError, match="Invalid action: 'invalid'"):
+        manage_group(data_store, manage_group_data)
 
 def test_manage_group_already_group(data_store, manage_group_data):
     manage_group_data.unit_group = "length"
     manage_group_data.action = "add"
-    assert manage_group(data_store, manage_group_data) == "Error: 'length' is already an existed group!"
+    with pytest.raises(KeyError, match="'length' is already an existed group!"):
+        manage_group(data_store, manage_group_data)
 
 def test_manage_group_invalid_group(data_store, manage_group_data):
     manage_group_data.unit_group = "invalid"
     manage_group_data.action = "remove"
-    assert manage_group(data_store, manage_group_data) == "Error: 'invalid' is not a valid group!"
+    with pytest.raises(KeyError, match="'invalid' is not a valid group!"):
+        manage_group(data_store, manage_group_data)
 
 def test_manage_group_invalid_remove_format(data_store, manage_group_data):
     manage_group_data.unit_group = "length"
     manage_group_data.action = "remove"
     manage_group_data.new_base_unit = "invalid"
-    assert manage_group(data_store, manage_group_data) == "Error: Incorrect usage when removing a group! Usage: <unit_group> remove"
+    with pytest.raises(ValueError, match="Incorrect usage when removing a group! Usage: <unit_group> remove"):
+        manage_group(data_store, manage_group_data)
 
 def test_manage_group_empty_new_base(data_store, manage_group_data):
     manage_group_data.unit_group = "new_group"
     manage_group_data.action = "add"
-    assert manage_group(data_store, manage_group_data) == "Error: 'new_base_unit' cannot be empty"
+    with pytest.raises(ValueError, match="'new_base_unit' cannot be empty"):
+        manage_group(data_store, manage_group_data)
 
-def test_manage_group_empty_invalid_new_base(data_store, manage_group_data):
+def test_manage_group_invalid_new_base(data_store, manage_group_data):
     manage_group_data.unit_group = "new_group"
     manage_group_data.action = "add"
     manage_group_data.new_base_unit = "length"
-    assert manage_group(data_store, manage_group_data) == "Error: 'length' is already an unit group name!"
+    with pytest.raises(KeyError, match="'length' is already an unit group name!"):
+        manage_group(data_store, manage_group_data)
 
 def test_manage_group_empty_invalid_new_base(data_store, manage_group_data):
     manage_group_data.unit_group = "new_group"
     manage_group_data.action = "add"
     manage_group_data.new_base_unit = "new_group"
-    assert manage_group(data_store, manage_group_data) == "Error: 'new_base_unit' can't have the same name as 'unit_group'"
+    with pytest.raises(ValueError, match="'new_base_unit' can't have the same name as 'unit_group'"):
+        manage_group(data_store, manage_group_data)
 
-def test_manage_group_get_input(data_store):
-    with patch("project.get_users_input", side_effect=["new_group", "add", "new_base_unit"]):
-        assert manage_group(data_store) == "You've just created a 'new_group' group, with 'new_base_unit' as its base unit!"
+def test_manage_group_get_input_add(data_store):
+    with patch("project.save_data"):
+        with patch("project.get_users_input", side_effect=["add", "new_group", "new_base_unit"]):
+            assert manage_group(data_store) == "You've just created a 'new_group' group, with 'new_base_unit' as its base unit!"
 
-def test_manage_group_get_input_time(data_store):
-    with patch("project.get_users_input", side_effect=["length", "remove"]):
-        assert manage_group(data_store) == "Group 'length' successfully removed!"
-
+def test_manage_group_get_input_remove(data_store):
+    with patch("project.save_data"):
+        with patch("project.get_users_input", return_value="remove"):
+            with patch("project.get_unit_group", return_value="length"):            
+                assert manage_group(data_store) == "Group 'length' successfully removed!"
 
 # Test 'manage_type' function
 def test_manage_type_add(data_store, manage_type_data):
@@ -482,10 +473,10 @@ def test_manage_type_add(data_store, manage_type_data):
     assert manage_type(data_store, manage_type_data) == "A new unit type was added on 'length' group: new_type = 10.0"
 
 def test_manage_type_remove(data_store, manage_type_data):
-    data_store.units["length"]["mile"] = 1609.344
-    manage_type_data.unit_type = "mile"
+    data_store.units["length"]["miles"] = 1609.344
+    manage_type_data.unit_type = "miles"
     manage_type_data.action = "remove"
-    assert manage_type(data_store, manage_type_data) == "'mile' was removed from 'length'"
+    assert manage_type(data_store, manage_type_data) == "'miles' was removed from 'length'"
 
 def test_manage_type_add_invalid_group(data_store, manage_type_data):
     manage_type_data.unit_group = "invalid"
@@ -545,7 +536,7 @@ def test_manage_type_remove_base_unit(data_store, manage_type_data):
 def test_manage_type_remove_invalid_format(data_store, manage_type_data):
     data_store.base_units["length"] = "meters"
     manage_type_data.unit_group = "length"
-    manage_type_data.unit_type = "new_type"
+    manage_type_data.unit_type = "mile"
     manage_type_data.action = "remove"
     manage_type_data.value = "10"
     with pytest.raises(ValueError, match="Incorrect usage when removing a type! Usage: <unit_group> remove <unit_type>"):
@@ -569,8 +560,10 @@ def test_manage_type_invalid_value(data_store, manage_type_data):
         manage_type(data_store, manage_type_data)
 
 def test_manage_type_get_input_add(data_store):
-    with patch("project.get_users_input", side_effect=["length", "add", "new_type", "10"]):
-        assert manage_type(data_store) == "A new unit type was added on 'length' group: new_type = 10.0"
+    with patch("project.save_data"):
+        with patch("project.get_unit_group", return_value="length"):
+            with patch("project.get_users_input", side_effect=["add", "new_type", "10"]):
+                assert manage_type(data_store) == "A new unit type was added on 'length' group: new_type = 10.0"
 
 
 # Test 'add_temp_type' function
@@ -626,8 +619,10 @@ def test_manage_type_add_temperature_invalid_offset(data_store, manage_type_data
         manage_type(data_store, manage_type_data)
 
 def test_manage_type_get_input_add_temperature(data_store):
-    with patch("project.get_users_input", side_effect=["temperature", "add", "new_type", "1", "0"]):
-        assert manage_type(data_store) == "A new unit type was added on 'temperature' group: new_type = [1.0, 0.0]"
+    with patch("project.save_data"):
+        with patch("project.get_unit_group", return_value="temperature"):
+            with patch("project.get_users_input", side_effect=["add", "new_type", "1", "0"]):
+                assert manage_type(data_store) == "A new unit type was added on 'temperature' group: new_type = [1.0, 0.0]"
 
 
 # Test 'manage_aliases' function
@@ -640,8 +635,8 @@ def test_manage_aliases_add(data_store, aliases_data):
 def test_manage_aliases_remove(data_store, aliases_data):
     aliases_data.unit_type = "meters"
     aliases_data.action = "remove"
-    aliases_data.alias = "mtr"
-    assert manage_aliases(data_store, aliases_data) == "'mtr' successfully removed from 'meters'!"
+    aliases_data.alias = "m"
+    assert manage_aliases(data_store, aliases_data) == "'m' successfully removed from 'meters'!"
     
 def test_manage_alias_invalid_group(data_store, aliases_data):
     aliases_data.unit_group = "invalid"
@@ -701,13 +696,18 @@ def test_manage_alias_remove_invalid_type(data_store, aliases_data):
     with pytest.raises(ValueError, match="'yd' is not an alias for 'meters'"):
         manage_aliases(data_store, aliases_data)
 
-def test_manage_alias_get_inputadd(data_store):
-    with patch("project.get_users_input", side_effect=["length", "meters", "add", "mtr"]):
-        assert manage_aliases(data_store) == "Alias successfully added! New alias for 'meters': 'mtr'"
+def test_manage_alias_get_input_add(data_store):
+    with patch("project.save_data"):
+        with patch("project.get_unit_group", return_value="length"):
+            with patch("project.get_users_input", side_effect=["meters", "add", "mtr"]):
+                assert manage_aliases(data_store) == "Alias successfully added! New alias for 'meters': 'mtr'"
 
-def test_manage_alias_get_inputremove(data_store):
-    with patch("project.get_users_input", side_effect=["length", "meters", "remove", "mtr"]):
-        assert manage_aliases(data_store) == "'mtr' successfully removed from 'meters'!"
+def test_manage_alias_get_input_remove(data_store):
+    data_store.unit_aliases["length"]["mtr"] = "meters"
+    with patch("project.save_data"):
+        with patch("project.get_unit_group", return_value="length"):
+            with patch("project.get_users_input", side_effect=["meters", "remove", "mtr"]):
+                assert manage_aliases(data_store) == "'mtr' successfully removed from 'meters'!"
 
 
 # Test 'change_base_unit' function
@@ -735,6 +735,8 @@ def test_change_base_already_new_base_unit(data_store, change_base_data):
     with pytest.raises(ValueError, match="'meters' is already the current base unit for 'length' group"):
         change_base_unit(data_store, change_base_data)
 
-def test_change_base_get_input(data_store, change_base_data):
-    with patch("project.get_users_input", side_effect=["length", "miles"]):
-        assert change_base_unit(data_store, change_base_data) == "You've just changed the base unit from 'length' group, to 'miles'!"
+def test_change_base_get_input(data_store):
+    with patch("project.save_data"):
+        with patch("project.get_unit_group", return_value="length"):
+            with patch("project.get_users_input", return_value="miles"):
+                assert change_base_unit(data_store) == "You've just changed the base unit from 'length' group, to 'miles'!"

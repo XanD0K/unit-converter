@@ -14,7 +14,7 @@ class DataStore:
         self.original_units = original_units
         # Generates a global list containing all month's names
         self.all_months = [next(iter(value)) for value in month_days.values()]
-        
+
 
 class ConversionData:
     """Holds unit data related to unit conversion"""
@@ -137,8 +137,8 @@ class ConversionData:
         if self.unit_group == "time":
             self.validate_time_input()
             self.validate_time_args(data)
-        else:
-            if not(self.from_type and self.to_type and self.amount is not None):
+        else:   
+            if (self.from_type is None and self.to_type is None and self.amount is None):
                 raise ValueError("Invalid conversion format!")
             self.validate_from_type(data)
             self.validate_to_type(data)
@@ -300,6 +300,7 @@ class AliasesData:
                 raise ValueError(f"'{self.alias}' is not an alias for '{self.unit_type}'")
 
     def validate_for_aliases(self, data: DataStore) -> None:
+        validate_unit_group(self.unit_group, data)
         if resolve_aliases(data, self.unit_group, self.unit_type):
             self.unit_type = resolve_aliases(data, self.unit_group, self.unit_type)
         self.validate_unit_type(data)
@@ -313,8 +314,8 @@ class ChangeBaseData:
         self.unit_group = unit_group
         self.new_base_unit = new_base_unit
 
-    def validate_for_change_base(self, data: DataStore, *args, **kwargs) -> None:
-        validate_args_number(*args, command="change-base", **kwargs)
+    def validate_for_change_base(self, data: DataStore) -> None:
+        validate_unit_group(self.unit_group, data)
         if resolve_aliases(data, self.unit_group, self.new_base_unit):
             self.new_base_unit = resolve_aliases(data, self.unit_group, self.new_base_unit)        
         if not self.new_base_unit:

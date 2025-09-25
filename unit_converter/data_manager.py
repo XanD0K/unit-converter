@@ -93,15 +93,15 @@ def validate_data(units: dict, base_units: dict, conversion_log: list, unit_alia
                 raise KeyError(f"The unit_type '{unit_type}' should also be an unit_type in 'units.json'!")
  
 
-def add_to_log(data: DataStore, unit_data: ConversionData, is_time_convertion: bool=False) -> None:
+def add_to_log(data: DataStore, conversion_data: ConversionData, is_time_convertion: bool=False) -> None:
     """Adds successfully converted value to log file (conversion_log.json)"""
-    unit_group: str = unit_data.unit_group
+    unit_group: str = conversion_data.unit_group
 
     if is_time_convertion:
-        from_time = unit_data.from_time
-        to_time = unit_data.to_time
-        factor_time = unit_data.factor_time
-        new_time = unit_data.new_time
+        from_time = conversion_data.from_time
+        to_time = conversion_data.to_time
+        factor_time = conversion_data.factor_time
+        new_time = conversion_data.new_time
         if all(x is None for x in (from_time, to_time, factor_time, new_time)):
             raise ValueError("Missing required arguments!")
         entry = {
@@ -113,10 +113,10 @@ def add_to_log(data: DataStore, unit_data: ConversionData, is_time_convertion: b
             "result": float(new_time)
         }
     else:
-        from_type = unit_data.from_type
-        to_type = unit_data.to_type
-        amount = unit_data.amount
-        new_value = unit_data.new_value
+        from_type = conversion_data.from_type
+        to_type = conversion_data.to_type
+        amount = conversion_data.amount
+        new_value = conversion_data.new_value
         if all(x is None for x in (from_type, to_type, amount, new_value)):
             raise ValueError("Missing required arguments!")
         entry = {

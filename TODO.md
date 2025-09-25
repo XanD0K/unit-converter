@@ -14,7 +14,6 @@
 
 
 ## Testing
-- [ ] Implement a test suite (`test_project.py`)
 - [ ] Validade type checking (by using `mypy`)
 - [ ] Test corner cases (e.g. lower/uper case, invalid values, empty values)
 
@@ -73,3 +72,5 @@
 - [x] Add remmaining comments throughout the codebase
 - [x] Add remmaining type hints throughout the codebase
 - [x] Clean program by removing multiple repetitive logic throught the codebase and transforming it into a single function
+- [x] Implement a test suite (`test_project.py`)
+- [x] Implement test files for all other files (`test_utils.py`, `test_data_models.py`, `test_data_manager.py` and `test_api.py`)

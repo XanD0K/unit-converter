@@ -11,9 +11,20 @@
 ### Removed
 
 
+## [0.9.16] - 2025-09-25
+### Changed
+- Renamed `unit_data` variable in `project.py` to reflect its respective class (`conversion_data`, `manage_group_data`, `manage_type_data`, `aliases_data` and `change_base_data`) assuring consistency throughout all files
+- Renamed `convert_data` and `alias_data` in `api.py` file to `conversion_data` and `aliases_data`, respectively, assuring consistency throughout all files
+- Renamed `unit_data` in `data_manager.py` to `conversion_data`, assuring consistency throughout all files
+
+### Fixed
+- Fixed and tested functions in `test_project.py` test file
+- Fixed and improved functions in `project.py` file
+
+
 ## [0.9.15] - 2025-09-24
 ### Fixed
-- Fixed and tested all test files (`test_utils.py`, `test_data_models.py`, `test_data_manager.py`, `test_api.py` and `test_project.py`)
+- Fixed and tested `test_utils.py`, `test_data_models.py`, `test_data_manager.py` and `test_api.py` test files
 - Fixed and improved functions in `utils.py`, `data_models.py`, `data_manager.py`, `api.py` and `project.py` files
 
 

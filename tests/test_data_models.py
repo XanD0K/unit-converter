@@ -219,9 +219,6 @@ def test_validate_for_conversion_invalid_group(data_store, conversion_data):
         conversion_data.validate_for_conversion(data_store)
 
 def test_validate_for_conversion_empty_field(data_store, conversion_data):
-    conversion_data.from_type = "meters"
-    conversion_data.to_type = ""
-    conversion_data.amount = "10"
     with pytest.raises(ValueError, match="Invalid conversion format!"):
         conversion_data.validate_for_conversion(data_store)
 

@@ -48,21 +48,21 @@ class Converter:
         """Handles all conversion logic"""
         try:
             validate_args_number(*args, command="convert", **kwargs)
-            convert_data = ConversionData(
+            conversion_data = ConversionData(
                 unit_group = unit_group.lower()
             )
             if unit_group == "time":
-                convert_data.time_input = user_input.lower()
+                conversion_data.time_input = user_input.lower()
             else:
                 input_args = user_input.split()
                 if len(input_args) != 3:
                     raise ValueError("Incorrect format! Usage: <unit_group> <from_type> <to_type> <amount>")
-                convert_data.from_type, convert_data.to_type, convert_data.amount = input_args
-            message = conversion_logic(self, convert_data)
+                conversion_data.from_type, conversion_data.to_type, conversion_data.amount = input_args
+            message = conversion_logic(self, conversion_data)
             if print_message:
                 print(message)
                 return message
-            return convert_data.new_time if unit_group == "time" else convert_data.new_value
+            return conversion_data.new_time if unit_group == "time" else conversion_data.new_value
         except (ValueError, KeyError, ZeroDivisionError, AttributeError, TypeError) as e:
             return f"Error: {e.args[0] if e.args else str(e)}"
 
@@ -124,13 +124,13 @@ class Converter:
             if len(args) != 3:
                 raise ValueError("Incorrect format! Usage: <unit_group> <unit_type> <alias> <action>")
             action, unit_type, alias = args
-            alias_data = AliasesData(
+            aliases_data = AliasesData(
                 unit_group = unit_group.lower(),
                 unit_type = unit_type.lower(),
                 action = action.lower(),
                 alias = alias.lower()
             )
-            return self._check_for_print(manage_aliases, alias_data, print_message)
+            return self._check_for_print(manage_aliases, aliases_data, print_message)
         except (ValueError, KeyError, TypeError) as e:
             return f"Error: {e.args[0] if e.args else str(e)}"
 

@@ -101,30 +101,30 @@ def handle_cli(data: DataStore, args: list[str]) -> None:
     # 'convert' command
     elif parsed_args.command in ["convert", "c"]:
         validate_unit_group(parsed_args.unit_group.lower(), data)
-        unit_data: ConversionData = ConversionData(unit_group=parsed_args.unit_group.lower())
-        if unit_data.unit_group == "time":
-            unit_data.time_input = " ".join(arg.lower() for arg in parsed_args.args)
+        conversion_data: ConversionData = ConversionData(unit_group=parsed_args.unit_group.lower())
+        if conversion_data.unit_group == "time":
+            conversion_data.time_input = " ".join(arg.lower() for arg in parsed_args.args)
         else:
             if len(parsed_args.args) not in [2, 3]:
                 raise ValueError("Invalid format for non-time conversion! Usage: <from_type> <to_type> [amount]")
-            unit_data.from_type = parsed_args.args[0].lower()
-            unit_data.to_type = parsed_args.args[1].lower()
-            unit_data.amount = float(parsed_args.args[2]) if len(parsed_args.args) == 3 else 1.0
-        message = conversion_logic(data, unit_data)
+            conversion_data.from_type = parsed_args.args[0].lower()
+            conversion_data.to_type = parsed_args.args[1].lower()
+            conversion_data.amount = float(parsed_args.args[2]) if len(parsed_args.args) == 3 else 1.0
+        message = conversion_logic(data, conversion_data)
         print(message)
     # 'manage-group' command
     elif parsed_args.command in ["manage-group", "mg"]:
-        unit_data: ManageGroupData = ManageGroupData(
+        manage_group_data: ManageGroupData = ManageGroupData(
             unit_group = parsed_args.unit_group.lower(),
             action = parsed_args.action.lower(),
             new_base_unit = parsed_args.new_base_unit.lower() if parsed_args.new_base_unit else None
         )
-        message = manage_group(data, unit_data)
+        message = manage_group(data, manage_group_data)
         print(message)
     # 'manage-type' command
     elif parsed_args.command in ["manage-type", "mt"]:
         validate_unit_group(parsed_args.unit_group.lower(), data)
-        unit_data: ManageTypeData = ManageTypeData(
+        manage_type_data: ManageTypeData = ManageTypeData(
             unit_group = parsed_args.unit_group.lower(),
             unit_type = parsed_args.unit_type.lower(),
             action = parsed_args.action.lower(),
@@ -133,30 +133,30 @@ def handle_cli(data: DataStore, args: list[str]) -> None:
             offset = parsed_args.offset
         )
         # Adds temperature type
-        if unit_data.action == "add" and unit_data.unit_group == "temperature":
-            message = add_temp_type(data, unit_data)
+        if manage_type_data.action == "add" and manage_type_data.unit_group == "temperature":
+            message = add_temp_type(data, manage_type_data)
         else:
-            message = manage_type(data, unit_data)
+            message = manage_type(data, manage_type_data)
         print(message)
     # 'aliases' command
     elif parsed_args.command in ["aliases", "a"]:
         validate_unit_group(parsed_args.unit_group.lower(), data)
-        unit_data: AliasesData = AliasesData(
+        aliases_data: AliasesData = AliasesData(
             unit_group = parsed_args.unit_group.lower(),
             unit_type = parsed_args.unit_type.lower(),
             action = parsed_args.action.lower(),
             alias = parsed_args.alias.lower()
         )
-        message = manage_aliases(data, unit_data)
+        message = manage_aliases(data, aliases_data)
         print(message)
     # 'change-base' command
     elif parsed_args.command in ["change-base", "cb"]:
         validate_unit_group(parsed_args.unit_group.lower(), data)
-        unit_data: ChangeBaseData = ChangeBaseData(
+        change_base_data: ChangeBaseData = ChangeBaseData(
             unit_group=parsed_args.unit_group.lower(),
             new_base_unit = parsed_args.new_base_unit.lower()
         )
-        message = change_base_unit(data, unit_data)
+        message = change_base_unit(data, change_base_data)
         print(message)
 
 
@@ -256,112 +256,114 @@ def print_types(data: DataStore, unit_group: Optional[str]=None) -> str:
         return f"Error: {e.args[0] if e.args else str(e)}"
 
 
-def conversion_logic(data: DataStore, unit_data: Optional[ConversionData]=None) -> str:
+def conversion_logic(data: DataStore, conversion_data: Optional[ConversionData]=None) -> str:
     """Handles all logic of unit conversion"""
     try:
-        if unit_data is None:  # Accessing through interactive mode
-            unit_data = ConversionData(unit_group = get_unit_group(data))
-            if unit_data.unit_group == "time":
+        if conversion_data is None:  # Accessing through interactive mode
+            conversion_data = ConversionData(unit_group = get_unit_group(data))
+            if conversion_data.unit_group == "time":
                 print_time_instructions()
-                unit_data.time_input = get_users_input("Enter time conversion: ").strip().lower()
+                conversion_data.time_input = get_users_input("Enter time conversion: ").strip().lower()
             else:
-                unit_data.from_type, unit_data.to_type = get_converter_units(data, unit_data)
-                unit_data.amount = get_amount(unit_data)
+                conversion_data.from_type, conversion_data.to_type = get_converter_units(data, conversion_data)
+                conversion_data.amount = get_amount(conversion_data)
         # Validates all variables and values
-        unit_data.validate_for_conversion(data)
+        conversion_data.validate_for_conversion(data)
         # Specific logic for time conversions
-        if unit_data.unit_group == "time":
-            return converter_time(data, unit_data)
-        unit_data.new_value = converter(data, unit_data)
-        return f"{format_value(unit_data.amount)} {unit_data.from_type} = {format_value(unit_data.new_value)} {unit_data.to_type}"
+        if conversion_data.unit_group == "time":
+            return converter_time(data, conversion_data)
+        conversion_data.new_value = converter(data, conversion_data)
+        return f"{format_value(conversion_data.amount)} {conversion_data.from_type} = {format_value(conversion_data.new_value)} {conversion_data.to_type}"
     except (ValueError, KeyError, ZeroDivisionError, AttributeError) as e:
         raise
 
 
-def converter(data: DataStore, unit_data:ConversionData) -> float:
+def converter(data: DataStore, conversion_data:ConversionData) -> float:
     """Hangles conversions for non-time units"""
     # Specific logic com temperature conversions
-    if unit_data.unit_group == "temperature":
-        unit_data.new_value = converter_temp(data, unit_data)
+    if conversion_data.unit_group == "temperature":
+        conversion_data.new_value = converter_temp(data, conversion_data)
     else:
-        zero_division_checker(float(data.units[unit_data.unit_group][unit_data.to_type]))
-        unit_data.new_value = unit_data.amount * (data.units[unit_data.unit_group][unit_data.from_type]/data.units[unit_data.unit_group][unit_data.to_type])
+        zero_division_checker(float(data.units[conversion_data.unit_group][conversion_data.to_type]))
+        conversion_data.new_value = conversion_data.amount * (data.units[conversion_data.unit_group][conversion_data.from_type]/data.units[conversion_data.unit_group][conversion_data.to_type])
     # Adds to log file
-    add_to_log(data, unit_data)
-    return unit_data.new_value
+    add_to_log(data, conversion_data)
+    return conversion_data.new_value
 
 
-def converter_temp(data: DataStore, unit_data: ConversionData) -> float:
+def converter_temp(data: DataStore, conversion_data: ConversionData) -> float:
     """Handles conversion for temperature units"""
     # Gets factor and offset values for temperature conversions
-    factor_from, offset_from = data.units[unit_data.unit_group][unit_data.from_type]
-    factor_to, offset_to = data.units[unit_data.unit_group][unit_data.to_type]
-    if unit_data.from_type == "celsius":
-        return (unit_data.amount * factor_to) + offset_to
+    factor_from, offset_from = data.units[conversion_data.unit_group][conversion_data.from_type]
+    factor_to, offset_to = data.units[conversion_data.unit_group][conversion_data.to_type]
     zero_division_checker(factor_from)
-    temp_in_celsius: float = (unit_data.amount - offset_from) / factor_from
-    if unit_data.to_type == "celsius":
+    if conversion_data.from_type == "celsius":
+        return (conversion_data.amount * factor_to) + offset_to    
+    temp_in_celsius: float = (conversion_data.amount - offset_from) / factor_from
+    if conversion_data.to_type == "celsius":
         return temp_in_celsius
     return (temp_in_celsius * factor_to) + offset_to
 
 
-def converter_time(data: DataStore, unit_data: ConversionData) -> str:
+def converter_time(data: DataStore, conversion_data: ConversionData) -> str:
     """Handles conversion for time units"""
     # Segregates user's input
-    args: list[str] = unit_data.time_input.split()
+    args: list[str] = conversion_data.time_input.split()
     # Specific logic based on user's input
     if len(args) == 2:
-        return converter_time_2args(data, unit_data)
+        return converter_time_2args(data, conversion_data)
     elif len(args) == 3:
-        return converter_time_3args(data, unit_data)
+        return converter_time_3args(data, conversion_data)
     # E.g. 5 years 10 months 10 days 8 hours 56 minutes seconds
     elif len(args) % 2 != 0 and len(args) > 3:
-        unit_data.to_time = args[-1]
-        zero_division_checker(data.units[unit_data.unit_group][unit_data.to_time])
+        conversion_data.to_time = args[-1]
+        zero_division_checker(data.units[conversion_data.unit_group][conversion_data.to_time])
         # Keeps track of every block of (value, unit_type)
         formatted_value: list[tuple[str, str]] = []
         total_seconds: int = 0
         for number, unit in zip(args[0::2], args[1::2]):
             number: float = float(number)
-            unit: str = resolve_aliases(data, unit_data.unit_group, unit)
-            total_seconds: float =  total_seconds + (number * data.units[unit_data.unit_group][unit])
+            unit: str = resolve_aliases(data, conversion_data.unit_group, unit)
+            total_seconds: float =  total_seconds + (number * data.units[conversion_data.unit_group][unit])
             formatted_value.append((format_value(number), unit))
 
-        unit_data.from_time = " ".join(f"{num} {unit}" for num, unit in formatted_value)
-        unit_data.new_time = total_seconds / data.units[unit_data.unit_group][unit_data.to_time]
+        conversion_data.from_time = " ".join(f"{num} {unit}" for num, unit in formatted_value)
+        conversion_data.new_time = total_seconds / data.units[conversion_data.unit_group][conversion_data.to_time]
 
-        add_to_log(data, unit_data, is_time_convertion=True)
-        return f"{' '.join(f'{num} {unit}' for num, unit in formatted_value)} = {format_value(unit_data.new_time)} {unit_data.to_time}"
+        add_to_log(data, conversion_data, is_time_convertion=True)
+        return f"{' '.join(f'{num} {unit}' for num, unit in formatted_value)} = {format_value(conversion_data.new_time)} {conversion_data.to_time}"
+    else:
+        raise ValueError("Invalid format for date and time conversion!")
 
 
-def converter_time_3args(data: DataStore, unit_data: ConversionData) -> str:
+def converter_time_3args(data: DataStore, conversion_data: ConversionData) -> str:
     """User's input is consisted of exactly 3 arguments"""
     # Declare variables to reduce code's verbosity
-    unit_group = unit_data.unit_group
-    from_time = unit_data.from_time
-    to_time = unit_data.to_time
-    factor_time = unit_data.factor_time
+    unit_group = conversion_data.unit_group
+    from_time = conversion_data.from_time
+    to_time = conversion_data.to_time
+    factor_time = conversion_data.factor_time
 
     # E.g. minutes seconds 1
     if from_time in data.units[unit_group] and to_time in data.units[unit_group]:
         total_seconds: float = factor_time * data.units[unit_group][from_time]
         zero_division_checker(data.units[unit_group][to_time])
-        unit_data.new_time = total_seconds / data.units[unit_group][to_time]
-        message = f"{format_value(factor_time)} {from_time} = {format_value(unit_data.new_time)} {to_time}"
+        conversion_data.new_time = total_seconds / data.units[unit_group][to_time]
+        message = f"{format_value(factor_time)} {from_time} = {format_value(conversion_data.new_time)} {to_time}"
 
     else:
-        unit_data.validate_factor_time(data)
+        conversion_data.validate_factor_time(data)
         zero_division_checker(data.units[unit_group][factor_time])
 
         # E.g. 17h:28m:36s 04h:15m:22s seconds
         if parse_time_input(from_time) is not None and parse_time_input(to_time) is not None:
             new_from_time: int = parse_time_input(from_time)
             new_to_time: int = parse_time_input(to_time)
-            unit_data.new_time = fabs((new_from_time - new_to_time) / data.units[unit_group][factor_time])
-            message = f"There are {format_value(unit_data.new_time)} {factor_time} between {from_time} and {to_time}"
+            conversion_data.new_time = fabs((new_from_time - new_to_time) / data.units[unit_group][factor_time])
+            message = f"There are {format_value(conversion_data.new_time)} {factor_time} between {from_time} and {to_time}"
 
         # E.g. JAN DEC days
-        elif from_time in data.all_months and to_time in data.all_months:
+        elif from_time.lower() in data.all_months and to_time.lower() in data.all_months:
             from_datetime: datetime = datetime(2023, get_index_from_month(data, from_time), 1)
             if get_index_from_month(data, to_time) > get_index_from_month(data, from_time):
                 to_datetime: datetime = datetime(2023, get_index_from_month(data, to_time), get_days_from_month(data, to_time))
@@ -371,12 +373,12 @@ def converter_time_3args(data: DataStore, unit_data: ConversionData) -> str:
                 to_datetime: datetime = datetime(2023, get_index_from_month(data, to_time), get_days_from_month(data, to_time))
             days: float = abs((from_datetime - to_datetime)).days + 1
             if factor_time == "days":
-                unit_data.new_time = days
+                conversion_data.new_time = days
             else:
                 total_seconds: float = (timedelta(seconds=days * data.units[unit_group]["days"])).total_seconds()
                 zero_division_checker(data.units[unit_group][factor_time])
-                unit_data.new_time = total_seconds / data.units[unit_group][factor_time]
-            message = f"Between {from_time} and {to_time} there are {format_value(unit_data.new_time)} {factor_time}"
+                conversion_data.new_time = total_seconds / data.units[unit_group][factor_time]
+            message = f"Between {from_time.lower()} and {to_time.lower()} there are {format_value(conversion_data.new_time)} {factor_time}"
 
         # E.g. 2019-11-04 2056-04-28 days
         elif parse_date_input(from_time) is not None and parse_date_input(to_time) is not None:
@@ -400,87 +402,87 @@ def converter_time_3args(data: DataStore, unit_data: ConversionData) -> str:
             leap_years: int = calculate_leap_years(from_years, from_months, to_years, to_months, to_days)
             total_days: int = abs((from_total_days - to_total_days)) + 1 + leap_years
             total_seconds: float = total_days * data.units[unit_group]["days"]
-            unit_data.new_time = total_seconds / data.units[unit_group][factor_time]        
-            message = f"Between {from_time} and {to_time} there are {format_value(unit_data.new_time)} {factor_time}"
+            conversion_data.new_time = total_seconds / data.units[unit_group][factor_time]        
+            message = f"Between {from_time} and {to_time} there are {format_value(conversion_data.new_time)} {factor_time}"
 
     # Assigns modified values back to its class object
-    unit_data.unit_group = unit_group
-    unit_data.from_time=from_time
-    unit_data.to_time=to_time
-    unit_data.factor_time=factor_time
+    conversion_data.unit_group = unit_group
+    conversion_data.from_time=from_time
+    conversion_data.to_time=to_time
+    conversion_data.factor_time=factor_time
 
-    add_to_log(data, unit_data, is_time_convertion=True)
+    add_to_log(data, conversion_data, is_time_convertion=True)
     return message
 
 
-def converter_time_2args(data: DataStore, unit_data: ConversionData) -> str:
+def converter_time_2args(data: DataStore, conversion_data: ConversionData) -> str:
     """User's input is consisted of exactly 2 arguments"""
     # Declare variables to reduce code's verbosity
-    unit_group = unit_data.unit_group
-    from_time = unit_data.from_time
-    factor_time = unit_data.factor_time
+    unit_group = conversion_data.unit_group
+    from_time = conversion_data.from_time
+    factor_time = conversion_data.factor_time
     zero_division_checker(data.units[unit_group][factor_time])
 
     # E.g. 17h:28m:36s seconds
     if parse_time_input(from_time) is not None:
         total_seconds: int = parse_time_input(from_time)
-        unit_data.new_time = (total_seconds / data.units[unit_group][factor_time])
-        message = f"There are {format_value(unit_data.new_time)} {factor_time} in {from_time}"
+        conversion_data.new_time = (total_seconds / data.units[unit_group][factor_time])
+        message = f"There are {format_value(conversion_data.new_time)} {factor_time} in {from_time}"
 
     # E.g. JAN minutes
-    elif from_time in data.all_months:
+    elif from_time.lower() in data.all_months:
         days: int = get_days_from_month(data, from_time)
         total_seconds: float = days * data.units[unit_group]["days"]
-        unit_data.new_time = total_seconds / data.units[unit_group][factor_time]
-        message = f"There are {format_value(unit_data.new_time)} {factor_time} in {from_time}"
+        conversion_data.new_time = total_seconds / data.units[unit_group][factor_time]
+        message = f"There are {format_value(conversion_data.new_time)} {factor_time} in {from_time.lower()}"
 
     # E.g. 2019-11-04 days
     elif parse_date_input(from_time) is not None:
         years, months, days = parse_date_input(from_time)
         total_seconds: float = get_seconds(data, unit_group, years, months, days)
-        unit_data.new_time = total_seconds / data.units[unit_group][factor_time]
-        message = f"There are {format_value(unit_data.new_time)} {factor_time} in {years} years, {months} months, {days} days"
+        conversion_data.new_time = total_seconds / data.units[unit_group][factor_time]
+        message = f"There are {format_value(conversion_data.new_time)} {factor_time} in {years} years, {months} months, {days} days"
 
     # Assigns modified values back to its class object
-    unit_data.unit_group = unit_group
-    unit_data.from_time=from_time
-    unit_data.factor_time=factor_time
+    conversion_data.unit_group = unit_group
+    conversion_data.from_time=from_time
+    conversion_data.factor_time=factor_time
 
-    add_to_log(data, unit_data, is_time_convertion=True)
+    add_to_log(data, conversion_data, is_time_convertion=True)
     return message
 
 
-def manage_group(data: DataStore, unit_data: Optional[ManageGroupData]=None) -> str:
+def manage_group(data: DataStore, manage_group_data: Optional[ManageGroupData]=None) -> str:
     """Handles all logic of adding and removing unit groups"""
     try:
-        if unit_data is None:  # Accessing through interactive mode
-            unit_data = ManageGroupData(unit_group = None)
-            unit_data.action = get_users_input(f"Existed groups: {", ".join(data.units.keys())}. What do you want to do? (enter 'add' or 'remove') ").strip().lower()
-            unit_data.validate_action()
-            if unit_data.action == "add":
-                unit_data.unit_group = get_users_input(f"Unit group: ").strip().lower()
-                unit_data.validate_add_action(data)
-                unit_data.new_base_unit = get_users_input(f"You are creating '{unit_data.unit_group}' group. Enter the base unit for that group: ").strip().lower()
-            elif unit_data.action == "remove":
-                unit_data.unit_group = get_unit_group(data)
+        if manage_group_data is None:  # Accessing through interactive mode
+            manage_group_data = ManageGroupData(unit_group = None)
+            manage_group_data.action = get_users_input(f"Existed groups: {", ".join(data.units.keys())}. What do you want to do? (enter 'add' or 'remove') ").strip().lower()
+            manage_group_data.validate_action()
+            if manage_group_data.action == "add":
+                manage_group_data.unit_group = get_users_input(f"Unit group: ").strip().lower()
+                manage_group_data.validate_add_action(data)
+                manage_group_data.new_base_unit = get_users_input(f"You are creating '{manage_group_data.unit_group}' group. Enter the base unit for that group: ").strip().lower()
+            elif manage_group_data.action == "remove":
+                manage_group_data.unit_group = get_unit_group(data)
         # Validates all variables and values    
-        unit_data.validate_for_manage_group(data)
+        manage_group_data.validate_for_manage_group(data)
 
         # Changes respective '.json' files
-        if unit_data.action == "add":
-            data.units[unit_data.unit_group] = {}
-            data.units[unit_data.unit_group][unit_data.new_base_unit] = 1.0
-            data.original_units[unit_data.unit_group] = {}
-            data.original_units[unit_data.unit_group][unit_data.new_base_unit] = 1.0
-            data.base_units[unit_data.unit_group] = unit_data.new_base_unit
-            data.unit_aliases[unit_data.unit_group] = {}
-            message = f"You've just created a '{unit_data.unit_group}' group, with '{unit_data.new_base_unit}' as its base unit!"
-        elif unit_data.action == "remove":
-            data.units.pop(unit_data.unit_group)
-            data.original_units.pop(unit_data.unit_group)
-            data.base_units.pop(unit_data.unit_group)
-            data.unit_aliases.pop(unit_data.unit_group)
-            message = f"Group '{unit_data.unit_group}' successfully removed!"
+        if manage_group_data.action == "add":
+            data.units[manage_group_data.unit_group] = {}
+            data.units[manage_group_data.unit_group][manage_group_data.new_base_unit] = 1.0
+            data.original_units[manage_group_data.unit_group] = {}
+            data.original_units[manage_group_data.unit_group][manage_group_data.new_base_unit] = 1.0
+            data.base_units[manage_group_data.unit_group] = manage_group_data.new_base_unit
+            data.unit_aliases[manage_group_data.unit_group] = {}
+            message = f"You've just created a '{manage_group_data.unit_group}' group, with '{manage_group_data.new_base_unit}' as its base unit!"
+        elif manage_group_data.action == "remove":
+            data.units.pop(manage_group_data.unit_group)
+            data.original_units.pop(manage_group_data.unit_group)
+            data.base_units.pop(manage_group_data.unit_group)
+            data.unit_aliases.pop(manage_group_data.unit_group)
+            message = f"Group '{manage_group_data.unit_group}' successfully removed!"
 
         # Save changes, making them permanent throughout sessions
         save_data(data.units, "units")
@@ -493,36 +495,40 @@ def manage_group(data: DataStore, unit_data: Optional[ManageGroupData]=None) -> 
         raise
 
 
-def manage_type(data: DataStore, unit_data:Optional[ManageTypeData]=None) -> str:
+def manage_type(data: DataStore, manage_type_data:Optional[ManageTypeData]=None) -> str:
     """Handles all logic of adding and removing unit types"""
     try:
-        if unit_data is None:  # Accessing through interactive mode
-            unit_data = ManageTypeData(unit_group = get_unit_group(data))
-            unit_data.action = get_users_input(f"Existed types for '{unit_data.unit_group}' group: {data.units[unit_data.unit_group]}. What do you want to do? (enter 'add' or 'remove') ").strip().lower()
-            unit_data.validate_action()
-            if unit_data.action == "add":
-                unit_data.unit_type = get_users_input(f"Enter new type for '{unit_data.unit_group}' group: ").strip().lower()
-                unit_data.validate_add_action(data)
-                unit_data.value = get_users_input(f"Enter conversion factor to base unit '{data.base_units[unit_data.unit_group]}' of '{unit_data.unit_group}' group: ").strip().lower()
-            elif unit_data.action == "remove":
-                unit_data.unit_type = get_users_input(f"Enter type to remove from '{unit_data.unit_group}' group: ").strip().lower()
+        if manage_type_data is None:  # Accessing through interactive mode
+            manage_type_data = ManageTypeData(unit_group = get_unit_group(data))
+            manage_type_data.action = get_users_input(f"Existed types for '{manage_type_data.unit_group}' group: {data.units[manage_type_data.unit_group]}. What do you want to do? (enter 'add' or 'remove') ").strip().lower()
+            manage_type_data.validate_action()
+            if manage_type_data.action == "add":
+                manage_type_data.unit_type = get_users_input(f"Enter new type for '{manage_type_data.unit_group}' group: ").strip().lower()
+                manage_type_data.validate_add_action(data)
+                if manage_type_data.unit_group == "temperature":
+                    manage_type_data.factor = get_users_input(f"Enter conversion factor for '{manage_type_data.unit_type}': ").strip().lower()
+                    manage_type_data.offset = get_users_input(f"Enter conversion offset for '{manage_type_data.unit_type}': ").strip().lower()
+                else:
+                    manage_type_data.value = get_users_input(f"Enter conversion factor to base unit '{data.base_units[manage_type_data.unit_group]}' of '{manage_type_data.unit_group}' group: ").strip().lower()
+            elif manage_type_data.action == "remove":
+                manage_type_data.unit_type = get_users_input(f"Enter type to remove from '{manage_type_data.unit_group}' group: ").strip().lower()
         # Validates all variables and values
-        unit_data.validate_for_manage_type(data)
+        manage_type_data.validate_for_manage_type(data)
 
         # Changes respective '.json' files
-        if unit_data.action == "add":
-            if unit_data.unit_group == "temperature":
-                return add_temp_type(data, unit_data)
-            data.units[unit_data.unit_group][unit_data.unit_type] = unit_data.value
-            data.original_units[unit_data.unit_group][unit_data.unit_type] = unit_data.value
-            message = f"A new unit type was added on '{unit_data.unit_group}' group: {unit_data.unit_type} = {unit_data.value}"
-        elif unit_data.action == "remove":
-            data.units[unit_data.unit_group].pop(unit_data.unit_type)
-            data.original_units[unit_data.unit_group].pop(unit_data.unit_type)
-            aliases_to_remove = [alias for alias, unit in data.unit_aliases[unit_data.unit_group].items() if unit == unit_data.unit_type]
+        if manage_type_data.action == "add":
+            if manage_type_data.unit_group == "temperature":
+                return add_temp_type(data, manage_type_data)
+            data.units[manage_type_data.unit_group][manage_type_data.unit_type] = manage_type_data.value
+            data.original_units[manage_type_data.unit_group][manage_type_data.unit_type] = manage_type_data.value
+            message = f"A new unit type was added on '{manage_type_data.unit_group}' group: {manage_type_data.unit_type} = {manage_type_data.value}"
+        elif manage_type_data.action == "remove":
+            data.units[manage_type_data.unit_group].pop(manage_type_data.unit_type)
+            data.original_units[manage_type_data.unit_group].pop(manage_type_data.unit_type)
+            aliases_to_remove = [alias for alias, unit in data.unit_aliases[manage_type_data.unit_group].items() if unit == manage_type_data.unit_type]
             for alias in aliases_to_remove:
-                data.unit_aliases[unit_data.unit_group].pop(alias)
-            message = f"'{unit_data.unit_type}' was removed from '{unit_data.unit_group}'"
+                data.unit_aliases[manage_type_data.unit_group].pop(alias)
+            message = f"'{manage_type_data.unit_type}' was removed from '{manage_type_data.unit_group}'"
 
         # Save changes, making them permanent throughout sessions
         save_data(data.units, "units")
@@ -534,48 +540,48 @@ def manage_type(data: DataStore, unit_data:Optional[ManageTypeData]=None) -> str
             raise
 
 
-def add_temp_type(data: DataStore, unit_data: Optional[ManageTypeData]=None) -> None:
+def add_temp_type(data: DataStore, manage_type_data: Optional[ManageTypeData]=None) -> None:
     """Handles all logic for adding temperature units"""
-    if unit_data is None:  # Accessing through interactive mode
-        unit_data.factor = get_users_input(f"Enter conversion factor to base unit '{data.base_units[unit_data.unit_group]}' of 'temperature' group: ").strip().lower()
-        unit_data.validate_factor()
-        unit_data.offset = get_users_input(f"Enter offset value to base unit '{data.base_units[unit_data.unit_group]}' of 'temperature' group: ").strip().lower()
-        unit_data.validate_offset()
-    unit_data.validate_for_manage_type(data)
+    if manage_type_data is None:  # Accessing through interactive mode
+        manage_type_data.factor = get_users_input(f"Enter conversion factor to base unit '{data.base_units[manage_type_data.unit_group]}' of 'temperature' group: ").strip().lower()
+        manage_type_data.validate_factor()
+        manage_type_data.offset = get_users_input(f"Enter offset value to base unit '{data.base_units[manage_type_data.unit_group]}' of 'temperature' group: ").strip().lower()
+        manage_type_data.validate_offset()
+        manage_type_data.validate_for_manage_type(data)
 
     # Changes respective '.json' files
-    data.units[unit_data.unit_group][unit_data.unit_type] = [unit_data.factor, unit_data.offset]
-    data.original_units[unit_data.unit_group][unit_data.unit_type] = [unit_data.factor, unit_data.offset]
+    data.units[manage_type_data.unit_group][manage_type_data.unit_type] = [manage_type_data.factor, manage_type_data.offset]
+    data.original_units[manage_type_data.unit_group][manage_type_data.unit_type] = [manage_type_data.factor, manage_type_data.offset]
 
     # Save changes, making them permanent throughout sessions
     save_data(data.units, "units")
     save_data(data.original_units, "original_units")
 
-    return f"A new unit type was added on 'temperature' group: {unit_data.unit_type} = [{unit_data.factor}, {unit_data.offset}]"
+    return f"A new unit type was added on 'temperature' group: {manage_type_data.unit_type} = [{manage_type_data.factor}, {manage_type_data.offset}]"
 
 
 
-def manage_aliases(data: DataStore, unit_data: Optional[AliasesData]=None):
+def manage_aliases(data: DataStore, aliases_data: Optional[AliasesData]=None):
     """Handles aliases, allowing users to add or remove aliases to/from an unit type"""
     try:
-        if unit_data is None:  # Accessing through interactive mode
-            unit_data = AliasesData(unit_group = get_unit_group(data))
-            unit_data.unit_type = get_users_input(f"Enter unit type for '{unit_data.unit_group}' group: ").strip().lower()
-            unit_data.validate_unit_type(data)
-            all_aliases = [alias for alias in data.unit_aliases[unit_data.unit_group] if unit_data.unit_type == data.unit_aliases[unit_data.unit_group].get(alias)]
-            unit_data.action = get_users_input(f"Existed aliases for '{unit_data.unit_type}': {all_aliases}. What do you want to do? (enter 'add' or 'remove') ").strip().lower()
-            unit_data.validate_action()
-            unit_data.alias = get_users_input(f"Which alias do you want to {unit_data.action} {"to" if unit_data.action == "add" else "from"} '{unit_data.unit_type}'? ").strip().lower()
+        if aliases_data is None:  # Accessing through interactive mode
+            aliases_data = AliasesData(unit_group = get_unit_group(data))
+            aliases_data.unit_type = get_users_input(f"Enter unit type for '{aliases_data.unit_group}' group: ").strip().lower()
+            aliases_data.validate_unit_type(data)
+            all_aliases = [alias for alias in data.unit_aliases[aliases_data.unit_group] if aliases_data.unit_type == data.unit_aliases[aliases_data.unit_group].get(alias)]
+            aliases_data.action = get_users_input(f"Existed aliases for '{aliases_data.unit_type}': {all_aliases}. What do you want to do? (enter 'add' or 'remove') ").strip().lower()
+            aliases_data.validate_action()
+            aliases_data.alias = get_users_input(f"Which alias do you want to {aliases_data.action} {"to" if aliases_data.action == "add" else "from"} '{aliases_data.unit_type}'? ").strip().lower()
         # Validates all variables and values
-        unit_data.validate_for_aliases(data)
+        aliases_data.validate_for_aliases(data)
 
         # Changes respective '.json' files
-        if unit_data.action == "add":
-            data.unit_aliases[unit_data.unit_group][unit_data.alias] = unit_data.unit_type
-            message = f"Alias successfully added! New alias for '{unit_data.unit_type}': '{unit_data.alias}'"
-        elif unit_data.action == "remove":
-            data.unit_aliases[unit_data.unit_group].pop(unit_data.alias) 
-            message = f"'{unit_data.alias}' successfully removed from '{unit_data.unit_type}'!"
+        if aliases_data.action == "add":
+            data.unit_aliases[aliases_data.unit_group][aliases_data.alias] = aliases_data.unit_type
+            message = f"Alias successfully added! New alias for '{aliases_data.unit_type}': '{aliases_data.alias}'"
+        elif aliases_data.action == "remove":
+            data.unit_aliases[aliases_data.unit_group].pop(aliases_data.alias) 
+            message = f"'{aliases_data.alias}' successfully removed from '{aliases_data.unit_type}'!"
 
         # Save changes, making them permanent throughout sessions
         save_data(data.unit_aliases, "unit_aliases")
@@ -585,27 +591,27 @@ def manage_aliases(data: DataStore, unit_data: Optional[AliasesData]=None):
         raise
 
 
-def change_base_unit(data: DataStore, unit_data: Optional[ChangeBaseData]=None):
+def change_base_unit(data: DataStore, change_base_data: Optional[ChangeBaseData]=None):
     """Allows change of base unit for a specific unit group"""
     try:
-        if unit_data is None:  # Accessing through interactive mode
-            unit_data = ChangeBaseData(unit_group = get_unit_group(data))
-            print(f"All unit types for '{unit_data.unit_group}' group: " + ", ".join(data.units[unit_data.unit_group].keys()))
-            unit_data.new_base_unit = get_users_input(f"Enter new base unit for '{unit_data.unit_group}' group: ").strip().lower()
+        if change_base_data is None:  # Accessing through interactive mode
+            change_base_data = ChangeBaseData(unit_group = get_unit_group(data))
+            print(f"All unit types for '{change_base_data.unit_group}' group: " + ", ".join(data.units[change_base_data.unit_group].keys()))
+            change_base_data.new_base_unit = get_users_input(f"Enter new base unit for '{change_base_data.unit_group}' group: ").strip().lower()
         # Validates all variables and values
-        unit_data.validate_for_change_base(data)
+        change_base_data.validate_for_change_base(data)
 
         # Refactor all values in 'units.json' based on new base unit
-        refactor_value(data, unit_data.unit_group, unit_data.new_base_unit)
+        refactor_value(data, change_base_data.unit_group, change_base_data.new_base_unit)
         # Update 'base_units.json' with new base unit
-        data.base_units[unit_data.unit_group] = unit_data.new_base_unit
+        data.base_units[change_base_data.unit_group] = change_base_data.new_base_unit
 
         # Save changes, making them permanent throughout sessions
         save_data(data.units, "units")
         save_data(data.original_units, "original_units")
         save_data(data.base_units, "base_units")
 
-        return f"You've just changed the base unit from '{unit_data.unit_group}' group, to '{unit_data.new_base_unit}'!"
+        return f"You've just changed the base unit from '{change_base_data.unit_group}' group, to '{change_base_data.new_base_unit}'!"
     except (ValueError, KeyError) as e:
         raise
 
