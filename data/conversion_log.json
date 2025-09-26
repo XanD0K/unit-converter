@@ -1038,5 +1038,21 @@
         "to_time": "seconds",
         "factor_time": 1.0,
         "result": 60.0
+    },
+    {
+        "date": "2025-09-25T15:25:58.898582",
+        "unit_group": "time",
+        "from_time": "minutes",
+        "to_time": "seconds",
+        "factor_time": 1.0,
+        "result": 60.0
+    },
+    {
+        "date": "2025-09-25T16:02:02.565671",
+        "unit_group": "time",
+        "from_time": "1.0 decades 1.0 centuries 1.0 months 1.0 hours",
+        "to_time": "seconds",
+        "factor_time": null,
+        "result": 3473931600.0
     }
 ]

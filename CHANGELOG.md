@@ -10,12 +10,20 @@
 
 ### Removed
 
+## [0.9.17] - 2025-09-26
+### Changed
+- Continue the development of `README.md` file
+
 
 ## [0.9.16] - 2025-09-25
+### Added
+- Customized messages in `print_introductory_messages` and `print_time_instructions` functions, by using `shutil` module, improving UX
+
 ### Changed
 - Renamed `unit_data` variable in `project.py` to reflect its respective class (`conversion_data`, `manage_group_data`, `manage_type_data`, `aliases_data` and `change_base_data`) assuring consistency throughout all files
 - Renamed `convert_data` and `alias_data` in `api.py` file to `conversion_data` and `aliases_data`, respectively, assuring consistency throughout all files
 - Renamed `unit_data` in `data_manager.py` to `conversion_data`, assuring consistency throughout all files
+- Updated messages in `print_introductory_messages` and `print_time_instructions` functions
 
 ### Fixed
 - Fixed and tested functions in `test_project.py` test file

@@ -59,6 +59,7 @@
         "cs": "centuries",
         "cent": "centuries",
         "cen": "centuries",
+        "century": "centuries",
         "ms": "milliseconds",
         "msec": "milliseconds",
         "millisecond": "milliseconds",

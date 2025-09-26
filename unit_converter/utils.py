@@ -1,5 +1,6 @@
 import calendar
 import re
+import shutil
 import sys
 
 from typing import TYPE_CHECKING
@@ -7,35 +8,38 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .data_models import DataStore, ConversionData
 
+# Retrives terminal's size to customize messages:
+columns, rows = shutil.get_terminal_size()
 
 def print_introductory_messages() -> None:
     """Prints introductory messages and instructions"""
-    print("Welcome to unit converter!")
-    print("To print conversion history, enter 'history'")
-    print("To check all group of units available, enter 'groups'")
-    print("To check all types for a specific group, enter 'types'")
-    print("To convert an unit, enter 'convert'")
-    print("To manage unit groups, enter 'manage-group'")
-    print("To manage unit types, enter 'manage-types'")
-    print("To manage aliases, enter 'aliases'")
-    print("To change base unit for a group, enter 'change-base'")
-    print("Quit anytime by entering 'quit' or by pressing ctrl+d or ctrl+c", end="\n\n")
-    
+    print(print_divider("-"))
+    print("Welcome to UnitConverter!")
+    print(print_divider("="))
+    print("Commands:")
+    print("- 'history' or 'h' → prints conversion history")
+    print("- 'groups' or 'g' → checks all group of units available")
+    print("- 'types' or 't' → checks all types for a specific group available")
+    print("- 'convert' or 'c' → converts units")
+    print("- 'manage-group' or 'mg' → add/remove unit groups")
+    print("- 'manage-types' or 'mt' → add/remove unit types")
+    print("- 'aliases' or 'a' → add/remove aliases")
+    print("- 'change-base' or 'cb' → changes conversion base unit")
+    print("Quit anytime by entering 'quit' or by pressing ctrl+d or ctrl+c")
+
     
 def print_time_instructions() -> None:
     """Prints instructions for converting date and time units"""
-    print("For date-time conversion, you can choose from different formats for conversion:")
-    print(" - From a specific unit to another. Usage: <unit_type> <unit_type> [amount]")
-    print(" - From a more complex time to another. Usage: HH:MM:SS HH:MM:SS <unit_type>")
-    print(" - From one month to another. Usage: <month_name> <month_name> <unit_type>")
-    print(" - From a date to another. Usage: YYYY-MM-DD YYYY-MM-DD <unit_type>")
+    print("For date-time conversions, choose from different formats:")
+    print(" - <unit_type> [unit_type] <amount> → E.g. 'minutes [seconds] 10")
+    print(" - HH:MM:SS [HH:MM:SS] <unit_type> → E.g. '17h:28m:36s [04h:15m:22s] seconds'")
+    print(" - <month_name> [month_name] <unit_type> →E.g. 'JAN [DEC] days'")
+    print(" - YYYY-MM-DD [YYYY-MM-DD] <unit_type> → E.g. 2019-11-04 [2056-04-28] days")
+    print(" - <amount> <unit_type> <amount> <unit_type> [<amount> <unit_type>] <unit_type> → E.g. 1 century 1 decade 1 month 1 hour seconds")
 
 
 def get_users_input(prompt: str) -> str:
-    """
-    Allows users to exit the program anytime by entering 'quit' on input
-    It is used throughout codebase instead of 'input()'
-    """
+    """Allows users to exit the program anytime by entering 'quit' on input"""
     value: str = input(prompt).strip().lower()
     if value == "quit":
         print("Bye!")
@@ -182,3 +186,9 @@ def get_index_from_month(data: "DataStore", month: str) -> int | None:
 def gets_days_from_index(data: "DataStore", month_index: str) -> int | None:
     """Gets days for a specificed month's index"""
     return next(iter(data.month_days[month_index].values()), None)
+
+
+def print_divider(symbol="-"):
+    """Print symbols to custom messages in interactive mode"""
+    columns, _ = shutil.get_terminal_size()
+    return(symbol * columns)

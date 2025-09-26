@@ -8,7 +8,7 @@ from typing import Optional
 
 from unit_converter.data_manager import load_data, add_to_log, refactor_value, save_data, zero_division_checker
 from unit_converter.data_models import DataStore, ConversionData, ManageGroupData, ManageTypeData, AliasesData, ChangeBaseData, validate_for_history
-from unit_converter.utils import print_introductory_messages, print_time_instructions, get_users_input, get_unit_group, validate_unit_group, get_converter_units, get_amount, resolve_aliases, parse_time_input, parse_date_input, get_seconds, format_value, calculate_leap_years, validate_date, get_days_from_month, get_index_from_month, gets_days_from_index
+from unit_converter.utils import print_introductory_messages, print_time_instructions, get_users_input, get_unit_group, validate_unit_group, get_converter_units, get_amount, resolve_aliases, parse_time_input, parse_date_input, get_seconds, format_value, calculate_leap_years, validate_date, get_days_from_month, get_index_from_month, gets_days_from_index, print_divider
 
 
 def main() -> None:
@@ -165,6 +165,7 @@ def get_action(data: DataStore) -> None:
     """Handles user's action and redirects to its respective function"""
     while True:
         try:
+            print(print_divider("="))
             action = get_users_input("Let's begin! What do you want to do? ").strip().lower()
             # Checks action validity
             if action in ["groups", "g"]:

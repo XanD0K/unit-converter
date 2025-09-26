@@ -2,8 +2,6 @@
 
 
 ## New features
-- [ ] Add style to introductory messages and instruction messages and add separator (e.g. with `-`, `=` or `_`)
-- [ ] Use `inflect` library to output singular/plural unit group/type
 
 
 ## Refactoring tasks
@@ -74,3 +72,5 @@
 - [x] Clean program by removing multiple repetitive logic throught the codebase and transforming it into a single function
 - [x] Implement a test suite (`test_project.py`)
 - [x] Implement test files for all other files (`test_utils.py`, `test_data_models.py`, `test_data_manager.py` and `test_api.py`)
+- [-] Use `inflect` library to customize output message
+- [x] Add style to introductory messages and instruction messages and add separator (e.g. with `-`, `=` or `_`)
