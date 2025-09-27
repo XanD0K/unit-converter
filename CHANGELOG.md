@@ -14,6 +14,9 @@
 ### Changed
 - Continue the development of `README.md` file
 
+### Fixed
+- Fixed "manage-type" action for `temperature` group
+- Fixed output message in "convert" action in `api.py` file
 
 ## [0.9.16] - 2025-09-25
 ### Added

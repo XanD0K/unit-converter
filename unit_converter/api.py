@@ -60,7 +60,6 @@ class Converter:
                 conversion_data.from_type, conversion_data.to_type, conversion_data.amount = input_args
             message = conversion_logic(self, conversion_data)
             if print_message:
-                print(message)
                 return message
             return conversion_data.new_time if unit_group == "time" else conversion_data.new_value
         except (ValueError, KeyError, ZeroDivisionError, AttributeError, TypeError) as e:

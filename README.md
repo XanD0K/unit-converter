@@ -38,10 +38,289 @@ This program was created to test and apply all knowledge acquired in "[CS50’s 
 - [Contributing](#contributing)
 - [Future Plans](#future-plans)
 
+
 ## Installation
 
 
 ## Usage
+UnitConverter supports three modes: command-line (CLI), interactive, and API. On all approaches, users will have 8 actions available, each of which with its respective alias. Bellow I'll describe all modes available, and how to use each command on that mode, with its alias and usage example:
+
+### Interactive Mode
+Enter `python project.py` to launch the interactive menu with a guided experience. You just need to follow the instructions:
+- **Groups** (`groups` or `g`)
+  - Output: `Groups: length, time, mass, temperature, volume, area, speed`
+- **Types** (`types` or `t`)
+  - Enter: `length`
+  - Output: 
+  ```
+  'length' units: meters ('m', 'meter', 'metre', 'metres'), centimeters ('cm', 'centimeter', 'centimetre', 'cetimetres'), millimeters ('mm', 'millimeter', 'millimetre', 'millimetres'), kilometers ('km', 'kilometer', 'kilometre', 'kilometres'), feet ('ft', 'foot'), inches ('in', 'inch'), yards ('yd', 'yds', 'yard'), miles ('mi', 'mile'), nautical_miles ('nmi', 'nm', 'nautical_mile')
+  ```
+- **History** (`history` or `h`)
+
+  On interactive mode, it will always prints up to 10 entries, without option to limit this number 
+  - Output: 
+  ```
+  10.0 meters = 10.93613 yards (Group: length)
+  365.0 days between jan dec (Group: time)
+  10.0 meters = 10.93613 yards (Group: length)
+  1.0 minutes = 60.0 seconds (Group: time)
+  1.0 decades 1.0 centuries 1.0 months 1.0 hours = 3,473,931,600.0 seconds (Group: time)
+  5.0 meters = 16.4042 feet (Group: length)
+  5.0 years 10.0 months 10.0 days 8.0 hours 56.0 minutes = 184,604,160.0 seconds (Group: time)
+  ```
+- **Convert** (`convert` or `c`)
+  - Enter: `length`, `meters`, `feet`, `5`
+  - Output: `5.0 meters = 16.4042 feet`
+- **Manage Groups** (`manage-group` or `mg`)
+  - Enter: `add`, `new_group`, `new_base_unit`
+  - Output: `You've just created a 'new_group' group, with 'new_base_unit' as its base unit!`
+- **Manage Types** (`manage-type` or `mt`)
+  - Enter: `length`, `add`, `new_type`, `2.4`
+  - Output: `A new unit type was added on 'length' group: new_type = 2.4`
+- **Aliases** (`aliases` or `a`)
+  - Enter: `length`, `meters`, `add`, `mtr`
+  - Output: `Alias successfully added! New alias for 'meters': 'mtr'`
+- **Change Base** (`change-base` or `cb`)
+  - Enter: `length`, `miles`
+  - Output: `You've just changed the base unit from 'length' group, to 'miles'!`
+
+
+### Command-Line Interface (CLI)
+Enter `python project.py` to launch the interactive menu with a guided experience. You just need to follow the instructions:
+- **Groups** (`groups`, `g`)
+  - Enter: `python .\project.py groups` or `python .\project.py g`
+  - Output: `Groups: length, time, mass, temperature, volume, area, speed`
+
+- **Types** (`types`, `t`)
+  - Enter`python .\project.py types length` or `tpython .\project.py t length`
+  - Output: 
+  ```
+  'length' units: meters ('m', 'meter', 'metre', 'metres'), centimeters ('cm', 'centimeter', 'centimetre', 'cetimetres'), millimeters ('mm', 'millimeter', 'millimetre', 'millimetres'), kilometers ('km', 'kilometer', 'kilometre', 'kilometres'), feet ('ft', 'foot'), inches ('in', 'inch'), yards ('yd', 'yds', 'yard'), miles ('mi', 'mile'), nautical_miles ('nmi', 'nm', 'nautical_mile')
+  ```
+
+- **History** (`history`, `h`)
+
+  On CLI mode, user can specify a limit(`--limit` or `-l`), changing the default limit of 10 entries to whatever limit he wants.
+  - Enter: `python .\project.py history` or `python .\project.py h`
+  - Output: 
+  ```
+  36.5 celsius = 97.7 fahrenheit (Group: temperature)
+  5.0 kilograms = 0.005 tonne (Group: mass)
+  10.0 liters = 42.26766 cup (Group: volume)
+  10.0 meters = 10.93613 yards (Group: length)
+  365.0 days between jan dec (Group: time)
+  10.0 meters = 10.93613 yards (Group: length)
+  1.0 minutes = 60.0 seconds (Group: time)
+  1.0 decades 1.0 centuries 1.0 months 1.0 hours = 3,473,931,600.0 seconds (Group: time)
+  5.0 meters = 16.4042 feet (Group: length)
+  5.0 years 10.0 months 10.0 days 8.0 hours 56.0 minutes = 184,604,160.0 seconds (Group: time)
+  ```
+
+  - Enter: `python .\project.py history --limit 3` or `python .\project.py h --limit 3`
+  - Output: 
+  ```
+  1.0 decades 1.0 centuries 1.0 months 1.0 hours = 3,473,931,600.0 seconds (Group: time)
+  5.0 meters = 16.4042 feet (Group: length)
+  5.0 years 10.0 months 10.0 days 8.0 hours 56.0 minutes = 184,604,160.0 seconds (Group: time)
+  ```
+
+  - Enter: `python .\project.py history -l 3` or `python .\project.py h -l 3`
+  - Output: 
+  ```
+  1.0 decades 1.0 centuries 1.0 months 1.0 hours = 3,473,931,600.0 seconds (Group: time)
+  5.0 meters = 16.4042 feet (Group: length)
+  5.0 years 10.0 months 10.0 days 8.0 hours 56.0 minutes = 184,604,160.0 seconds (Group: time)
+  ```
+
+- **Convert** (`convert`, `c`)
+  - Enter: `python .\project.py convert length meters feet 5` or `python .\project.py c length meters feet 5`
+  - Output: `5.0 meters = 16.4042 feet`
+
+- **Manage Groups** (`manage-group` or `mg`)
+  - Enter: `python .\project.py manage-group add new_group new_base_unit` or `python .\project.py mg add new_group new_base_unit`
+  - Output: `You've just created a 'new_group' group, with 'new_base_unit' as its base unit!`
+  - Enter: `python .\project.py manage-group remove new_group` or `python .\project.py mg remove new_group`
+  - Output: `Group 'new_group' successfully removed!`
+
+- **Manage Types** (`manage-type` or `mt`)
+  - Enter: `python .\project.py manage-type length add new_type 2.4` or `python .\project.py mt length add new_type 2.4`
+  - Output: `A new unit type was added on 'length' group: new_type = 2.4`
+  - Enter: `python .\project.py manage-type length remove new_type` or `python .\project.py mt length remove new_type`
+  - Output: `'new_type' was removed from 'length'`
+
+  When adding a new type in the `temperature` group, user needs to insert a factor (`--factor`) and an offset (`--offset`)
+  - Enter: `python .\project.py manage-type temperature add new_type --factor 1 --offset 1` or `python .\project.py mt temperature add new_type --factor 1 --offset 1`
+  - Output: `A new unit type was added on 'temperature' group: new_type = [1, 1]`
+  - Enter: `python .\project.py manage-type temperature remove new_type` or `python .\project.py mt temperature remove new_type`
+  - Output: `'new_type' was removed from 'temperature'`
+  
+- **Aliases** (`aliases` or `a`)
+  - Enter: `python .\project.py aliases length meters add mtr` or `python .\project.py a length meters add mtr`
+  - Output: `Alias successfully added! New alias for 'meters': 'mtr'`
+  - Enter: `python .\project.py aliases length meters remove mtr` or `python .\project.py a length meters remove mtr`
+  - Outpur: `'mtr' successfully removed from 'meters'!`
+
+- **Change Base** (`change-base` or `cb`)
+  - Enter: `python .\project.py change-base length miles` or `python .\project.py cb length miles`
+  - Output: `You've just changed the base unit from 'length' group, to 'miles'!`
+
+
+### API
+When accessing the program through API, users will first need to declare a class object, which will allow to call that class' methods: 
+```
+from unit_converter.api import Converter
+converter = Converter()
+```
+
+The `convert`, `manage-group`, `manage-type`, `aliases` and `change-base` methods have a `print_message` attribute which is set to `False` by default. It means that those actions won't print any message when called. To get the output message, users have 2 options:
+1. Call the method with `print_message` set to `True`, which will output the message where it was called.
+2. Assign the method to a variable, with `print_message` attribue set to `False`. It allows users to choose where to print the output message.
+
+Also, if users don't want the output message, just let `print_message` set to `False` and don't assign it to any variable. THe method will be triggered, but no message will be displayed. Wherease, if users set `print_message` set to `True` and also assign it to a variable, it will print the message where it was called, and users will also have that same message stored in a variable, with the possibility to call it wherever they want.
+
+The `groups`, `types` and `history` methods don't have that `print_message` attribute. Those commands always need the result to be assigned to a variable so that the output message can be displayed.
+
+- **Groups** (`groups`, `g`)
+  - Enter:
+  ```
+  message = converter.groups()
+  print(message)
+  ```
+  - Output: `Groups: length, time, mass, temperature, volume, area, speed`
+
+- **Types** (`types`, `t`)
+  - Enter:
+  ```
+  message = converter.types("length")
+  print(message)
+  ```
+  - Output: 
+  ```
+  'length' units: meters ('m', 'meter', 'metre', 'metres'), centimeters ('cm', 'centimeter', 'centimetre', 'cetimetres'), millimeters ('mm', 'millimeter', 'millimetre', 'millimetres'), kilometers ('km', 'kilometer', 'kilometre', 'kilometres'), feet ('ft', 'foot'), inches ('in', 'inch'), yards ('yd', 'yds', 'yard'), miles ('mi', 'mile'), nautical_miles ('nmi', 'nm', 'nautical_mile')
+  ```
+
+- **History** (`history`, `h`)
+
+  On API mode, user can specify a limit(`limit=`), changing the default limit of 10 entries to whatever limit he wants.
+  - Enter: 
+  ```
+  message = converter.history()
+  print(message)
+  ```
+  - Output: 
+  ```
+  36.5 celsius = 97.7 fahrenheit (Group: temperature)
+  5.0 kilograms = 0.005 tonne (Group: mass)
+  10.0 liters = 42.26766 cup (Group: volume)
+  10.0 meters = 10.93613 yards (Group: length)
+  365.0 days between jan dec (Group: time)
+  10.0 meters = 10.93613 yards (Group: length)
+  1.0 minutes = 60.0 seconds (Group: time)
+  1.0 decades 1.0 centuries 1.0 months 1.0 hours = 3,473,931,600.0 seconds (Group: time)
+  5.0 meters = 16.4042 feet (Group: length)
+  5.0 years 10.0 months 10.0 days 8.0 hours 56.0 minutes = 184,604,160.0 seconds (Group: time)
+  ```
+
+  - Enter: 
+  ```
+  message = converter.history(limit=3)
+  print(message)
+  ```
+  - Output: 
+  ```
+  1.0 decades 1.0 centuries 1.0 months 1.0 hours = 3,473,931,600.0 seconds (Group: time)
+  5.0 meters = 16.4042 feet (Group: length)
+  5.0 years 10.0 months 10.0 days 8.0 hours 56.0 minutes = 184,604,160.0 seconds (Group: time)
+  ```
+
+- **Convert** (`convert`, `c`)
+
+  On API mode, user can choose if the `convert` method will output only the result of the conversion, or the output message. It is set by the value of the `print_message` attribute.
+  - Enter: 
+  ```
+  message = converter.convert("length", "meters feet 5")
+  print(message)
+  ```
+  - Output: `16.4042 feet`
+
+  - Enter: 
+  ```
+  message = converter.convert("length", "meters feet 5", print_message=True)
+  print(message)
+  ```
+  - Output: `5.0 meters = 16.4042 feet`
+
+- **Manage Groups** (`manage-group` or `mg`)
+  - Enter: `message = converter.manage_group("new_group", "add new_base_unit", print_message=True)` or 
+  ```
+  message = converter.manage_group("new_group", "add new_base_unit")
+  print(message)
+  ```
+  - Output: `You've just created a 'new_group' group, with 'new_base_unit' as its base unit!`
+  - Enter: `converter.manage_group("new_group", "remove", print_message=True)` or
+  ```
+  message = converter.manage_group("new_group", "remove")
+  print(message)
+  ```
+  - Output: `Group 'new_group' successfully removed!`
+
+  
+- **Manage Types** (`manage-type` or `mt`)
+  - Enter: `converter.manage_type("length", "add new_type 2.4", print_message=True)` or
+  ```
+  message = converter.manage_type("length", "add new_type 2.4")
+  print(message)
+  ```
+  - Output: `A new unit type was added on 'length' group: new_type = 2.4`
+  - Enter: `converter.manage_type("length", "remove new_type", print_message=True)` or 
+  ```
+  message = converter.manage_type("length", "remove new_type")
+  print(message)
+  ```
+  - Output: `'new_type' was removed from 'length'`
+
+  When adding a new type in the `temperature` group, user needs to insert a factor (`--factor`) and an offset (`--offset`)
+  - Enter: `converter.manage_type("temperature", "add new_type 1 1", print_message=True)` or
+  ```
+  message = converter.manage_type("temperature", "add new_type 1 1")
+  print("message")
+  ```
+  - Output: `A new unit type was added on 'temperature' group: new_type = [1.0, 1.0]`
+  - Enter: `converter.manage_type("temperature", "remove new_type", print_message=True)` or
+  ```
+  message = converter.manage_type("temperature", "remove new_type")
+  print(message)
+  ```
+  - Output: `'new_type' was removed from 'temperature'`
+  
+- **Aliases** (`aliases` or `a`)
+  - Enter: `converter.aliases("length", "add meters mtr", print_message=True)` or
+  ```
+  message = converter.aliases("length", "add meters mtr")
+  print(message)
+  ```
+  - Output: `Alias successfully added! New alias for 'meters': 'mtr'`
+  - Enter: `converter.aliases("length", "remove meters mtr", print_message=True)` or
+  ```
+  message = converter.aliases("length", "remove meters mtr")
+  print(message)
+  ```
+  - Outpur: `'mtr' successfully removed from 'meters'!`
+
+- **Change Base** (`change-base` or `cb`)
+  - Enter: `converter.change_base("length", "mile", print_message=True)`
+  ```
+  message = converter.change_base("length", "mile")
+  print(message)
+  ```
+  - Output: `You've just changed the base unit from 'length' group, to 'miles'!`
+
+
+
+
+
+
+
 
 
 ## Files Overview
@@ -80,7 +359,7 @@ This program is organized into a `final-project` directory with `data`, `tests` 
 - Created `DataStore` class to globally access all data from those JSON files, instead of manually declaring and accessing them on each file. It kept code cleaner, and improved readability and maintainability.
 - Created multiple classes (located in `data_models.py`) to store data and values related to each action. It allowed to centralize all validation logic for each of those values, keeping all other files cleaner with their specific logic.
 - Created an unique logic for time conversion, segregated from the default conversion logic, because I wanted to allow multiple input formats. Despite that, I kept all under the same "convert" command so that it doesn't get too segregated, allowing users to focus on which command they want to use, whithout getting overcomplicated.
-
+- In API mode, all actions return the output message, without displaying it! It means that when a class method is called, the action is triggered, but is up to the users to decide if they want to print it. By assigning that method call to a variable, they can also decide where they want to print that message.
 
 ## Development Docs
 - [CHANGELOG.md](CHANGELOG.md): Versions and updates

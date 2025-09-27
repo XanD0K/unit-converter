@@ -58,8 +58,8 @@ def handle_cli(data: DataStore, args: list[str]) -> None:
     convert_parser.add_argument("args", nargs="+", help="Source unit type")
     # 'manage-group' command
     manage_group_parser = subparser.add_parser("manage-group", aliases=["mg"], help="Add new unit group")
-    manage_group_parser.add_argument("unit_group", help="Unit group")
     manage_group_parser.add_argument("action", help="Action to perform")
+    manage_group_parser.add_argument("unit_group", help="Unit group")    
     manage_group_parser.add_argument("new_base_unit", nargs="?", help="New base unit")
     # 'manage-type' command
     manage_type_parser = subparser.add_parser("manage-type", aliases=["mt"], help="Add new unit type")
@@ -132,11 +132,7 @@ def handle_cli(data: DataStore, args: list[str]) -> None:
             factor = parsed_args.factor,
             offset = parsed_args.offset
         )
-        # Adds temperature type
-        if manage_type_data.action == "add" and manage_type_data.unit_group == "temperature":
-            message = add_temp_type(data, manage_type_data)
-        else:
-            message = manage_type(data, manage_type_data)
+        message = manage_type(data, manage_type_data)
         print(message)
     # 'aliases' command
     elif parsed_args.command in ["aliases", "a"]:
@@ -224,11 +220,11 @@ def print_history(data: DataStore, limit: int = 10) -> str:
             # Generates specific messages based on 'unit_group'
             if entry["unit_group"] == "time":
                 if entry["from_time"] in data.units["time"]:
-                    entries.append(f"{format_value(entry['factor_time'])} {entry['from_time']} = {format_value(entry['result'])} {entry['to_time']} (Group: {entry['unit_group']})")
+                    entries.append(f"{format_value(entry['factor_time'])} {entry['from_time']} = {format_value(entry['result'])} {entry['to_time']} (Group: time)")
                 elif ":" in entry["from_time"] or entry["from_time"] in data.all_months or "-" in entry["from_time"]:
-                    entries.append(f"{format_value(entry['result'])} {entry['factor_time']} between {entry['from_time']} {entry['to_time']} (Group: {entry['unit_group']})")
+                    entries.append(f"{format_value(entry['result'])} {entry['factor_time']} between {entry['from_time']} {entry['to_time']} (Group: time)")
                 elif len(entry["from_time"].split()) > 1:
-                    entries.append(f"{entry['from_time']} = {format_value(entry['result'])} {entry['to_time']}")
+                    entries.append(f"{entry['from_time']} = {format_value(entry['result'])} {entry['to_time']} (Group: time)")
             else:
                 entries.append(f"{format_value(entry['amount'])} {entry['from_type']} = {format_value(entry['result'])} {entry['to_type']} (Group: {entry['unit_group']})")
         return "\n".join(entries)
