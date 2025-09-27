@@ -2,9 +2,13 @@
 #### Video Demo:  <URL HERE>
 
 
+## Motivation & Purpose
+This program was created to test and apply all knowledge acquired in "[CS50’s Introduction to Programming with Python](https://pll.harvard.edu/course/cs50s-introduction-programming-python)" course, from Harvard University.
+
+
 ## Description
 This program has the purpose of converting units from different groups: "length", "time", "mass", "temperature", "volume", "area" and "speed".
-In addition to that, users can create and to remove groups and types of units, as well as aliases for any unit type.
+In addition to that, users can create and remove groups and types of units, as well as aliases for any unit type.
 Users also have the ability to change the base unit of any group, which changes the conversion factor of all unit types in that specific group.
 Lastly, he can also access the history log, which contains all previous conversions from the last 3 days.
 The program uses JSON files to store unit data, which are lightweight and user-friendly, reducing the complexity on file manipulation.
@@ -14,16 +18,12 @@ This program supports interactive, command-line and API modes.
 ## Features
 - Convert units across different groups
 - Add and remove group of units
-- Add and remove types of units for an specific group
-- Create and remove aliases for an unit type
-- Change base unit conversion of an unit group
-- Print conversion history log from the previous 3 days
+- Add and remove types of units from a specific group
+- Create and remove aliases from an unit type
+- Change conversion base unit of an unit group
+- Print conversion history log from the previous 3 days (default, 10 entries)
 - Print all groups available
-- Print all unit types of an specific group, with their respective aliases
-
-
-## Motivation & Purpose
-This program was created to test and apply all knowledge acquired in "[CS50’s Introduction to Programming with Python](https://pll.harvard.edu/course/cs50s-introduction-programming-python)" course, from Harvard University.
+- Print all unit types from an specific group, with their respective aliases
 
 
 ## Table of Contents
@@ -43,7 +43,7 @@ This program was created to test and apply all knowledge acquired in "[CS50’s 
 
 
 ## Usage
-UnitConverter supports three modes: command-line (CLI), interactive, and API. On all approaches, users will have 8 actions available, each of which with its respective alias. Bellow I'll describe all modes available, and how to use each command on that mode, with its alias and usage example:
+UnitConverter supports three modes: command-line (CLI), interactive, and API. On all approaches, users will have 8 actions available, each of which with its respective aliases. Bellow I'll describe all modes available, and how to use each command on that mode, with its alias and usage example:
 
 ### Interactive Mode
 Enter `python project.py` to launch the interactive menu with a guided experience. You just need to follow the instructions:
@@ -57,9 +57,12 @@ Enter `python project.py` to launch the interactive menu with a guided experienc
   ```
 - **History** (`history` or `h`)
 
-  On interactive mode, it will always prints up to 10 entries, without option to limit this number 
+  On interactive mode, it will always prints up to 10 entries, with no option to limit this number 
   - Output: 
   ```
+  36.5 celsius = 97.7 fahrenheit (Group: temperature)
+  5.0 kilograms = 0.005 tonne (Group: mass)
+  10.0 liters = 42.26766 cup (Group: volume)
   10.0 meters = 10.93613 yards (Group: length)
   365.0 days between jan dec (Group: time)
   10.0 meters = 10.93613 yards (Group: length)
@@ -86,7 +89,7 @@ Enter `python project.py` to launch the interactive menu with a guided experienc
 
 
 ### Command-Line Interface (CLI)
-Enter `python project.py` to launch the interactive menu with a guided experience. You just need to follow the instructions:
+On CLI approach, follow the usage examples bellow to understand how to use each action. Follow the instructions and the position of each argument to prevent triggering any error.
 - **Groups** (`groups`, `g`)
   - Enter: `python .\project.py groups` or `python .\project.py g`
   - Output: `Groups: length, time, mass, temperature, volume, area, speed`
@@ -100,7 +103,7 @@ Enter `python project.py` to launch the interactive menu with a guided experienc
 
 - **History** (`history`, `h`)
 
-  On CLI mode, user can specify a limit(`--limit` or `-l`), changing the default limit of 10 entries to whatever limit he wants.
+  On CLI mode, users can specify a limit(`--limit` or `-l`), changing the default limit of 10 entries to any limit they want.
   - Enter: `python .\project.py history` or `python .\project.py h`
   - Output: 
   ```
@@ -166,7 +169,7 @@ Enter `python project.py` to launch the interactive menu with a guided experienc
 
 
 ### API
-When accessing the program through API, users will first need to declare a class object, which will allow to call that class' methods: 
+When accessing the program through API, first users will need to declare a class object, which will allow to call `Converter` class' methods: 
 ```
 from unit_converter.api import Converter
 converter = Converter()
@@ -316,7 +319,43 @@ The `groups`, `types` and `history` methods don't have that `print_message` attr
   - Output: `You've just changed the base unit from 'length' group, to 'miles'!`
 
 
+#### Date & Time Conversion
+This program handles date and time conversion in a more robust way, so I'll devote a specific section on this `README.md` file just to explain all possibilites users have available. On Interactive mode, enter `convert` or `c` and then `time` as the unit group, and follow the guided instructions. For API approach, I'll give examples that will display the full output message, but keep in mind that you can directly call the `convert` class method with `print_message` set to `False`, which will jsut print the result.
 
+- **Simple Unit Type Conversion**
+  Users can convert from different unit types. 
+  Usage: `<unit_type> <unit_type> <amount>`
+  - Enter: `minutes seconds 1` or `python .\project.py convert time minutes seconds 1` or 
+  ```
+  message = converter.convert("time", "minutes seconds 1", print_message=True)
+  print(message)
+  ```
+  - Output: `1.0 minutes = 60.0 seconds`
+
+- **Complex Unit Type Conversion**
+
+  Users can input multiple unit types to convert to a specific unit type. That approach demmands taht users inputs at least 2 `(<amount> <unit_type>)` blocks to convert from. If input format consists only of one unit type, use previous approach! 
+
+  Usage: `<amount> <unit_type> (<amount> <unit_type>) <unit_type>`
+  - Enter: `5 years 10 months 10 days 8 hours 56 minutes seconds` or `python .\project.py convert time 5 years 10 months 10 days 8 hours 56 minutes seconds` or 
+  ```
+  message = converter.convert("time", "5 years 10 months 10 days 8 hours 56 minutes seconds", print_message=True)
+  print(message)
+  ```
+  - Output: `5.0 years 10.0 months 10.0 days 8.0 hours 56.0 minutes = 184,604,160.0 seconds`
+
+- **Simple Time Conversion**
+
+  User can convert a specific time to a specific unit type. For that conversion, users aren't limit in the 24h pattern. They can use any value they want.
+
+  The time input need to follow that pattern: `HH:MM:SS`. If no group of units, its `:` sign is still need. User either declare the empty value as zeroes, or leave the initial `:` sign to declare the empty value.
+  Usage: `<TIME> <TIME> <unit_type>`
+  - Enter: `17h:28m:36s seconds` or `python .\project.py convert time 17h:28m:36s seconds` or 
+  ```
+  message = converter.convert("time", "17h:28m:36s seconds", print_message=True)
+  print(message)
+  ```
+  - Output: `There are 62,916.0 seconds in 17h:28m:36s`
 
 
 
@@ -324,7 +363,7 @@ The `groups`, `types` and `history` methods don't have that `print_message` attr
 
 
 ## Files Overview
-This program is organized into a `final-project` directory with `data`, `tests` and `unit_converter` subdirectories. The root directory also contains core files and development docs.
+This program is organized into a `unit-converter` directory with `data`, `tests` and `unit_converter` subdirectories. The root directory also contains core files and development docs.
 
 - **DATA FILES** (`data/`)
   - [base_units.json](data/base_units.json): contains a relationship between an unit_group and the base unit for that group.

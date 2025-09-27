@@ -10,13 +10,23 @@
 
 ### Removed
 
-## [0.9.17] - 2025-09-26
-### Changed
-- Continue the development of `README.md` file
 
+## [0.9.18] - 2025-09-27
+### Added
+- Concluded the development of `README.md` file
+
+### Changed
+- Moved `final-project` directory (the root directory) out of `cs50p` repository, indo a brand new `unit-converter` repository, dedicated exclusively to this program
+
+### Removed
+- Removed `test_classes.py`, used for manually testing `Converter` class
+
+
+## [0.9.17] - 2025-09-26
 ### Fixed
 - Fixed "manage-type" action for `temperature` group
 - Fixed output message in "convert" action in `api.py` file
+
 
 ## [0.9.16] - 2025-09-25
 ### Added

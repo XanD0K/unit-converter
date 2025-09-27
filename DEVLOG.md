@@ -8,7 +8,15 @@
 **Progress**
 
 
-## [2025-09-23] - Version 0.9.14
+## [2025-09-27] - Version 0.9.18
+**Plans**
+Give visibility to this program on GitHub
+
+**Progress**
+- Created a `unit-converter` repository, and moved all files used on this program, previously on `final-project` directory, into that new repository. It allows to show this program directly on my profile on GitHub.
+
+
+## [2025-09-20] - Version 0.9.11
 **Plans**
 - Implement test files to test all functions and methods in my program
 
@@ -17,10 +25,10 @@
 
 **Progress**
 - Created `test_utils.py` file to test functions in `utils.py`
-- Created `test_data_manager.py` file to test functions on `data_manager.py`. Skipped `validate_data`, `add_to_log`, `clean_history` and `save_data` functions due to their complexity, leaving as TODO's as a post-course activity
-- Created `test_data_models.py` file to test all methods of all classes in `data_models.py`, except `DataStore` class which is just a data class
-- Created `test_api.py` file to test `Converter` class methods
-- Created `test_project.py` file to test all functions on my `project.py` file, which is the core file of my program. It was easier since I already had all tests for almost all functions in taht file from previous test files that were already being implemented
+- [2025-09-21] Created `test_data_manager.py` file to test functions on `data_manager.py`. Skipped `validate_data`, `add_to_log`, `clean_history` and `save_data` functions due to their complexity, leaving as TODO's as a post-course activity
+- [2025-09-21] Created `test_data_models.py` file to test all methods of all classes in `data_models.py`, except `DataStore` class which is just a data class
+- [2025-09-22] Created `test_api.py` file to test `Converter` class methods
+- [2025-09-23] Created `test_project.py` file to test all functions on my `project.py` file, which is the core file of my program. It was easier since I already had all tests for almost all functions in taht file from previous test files that were already being implemented
 
 
 ## [2025-09-19] - Version 0.9.10

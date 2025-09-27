@@ -950,5 +950,53 @@
         "to_type": "feet",
         "amount": 5.0,
         "result": 16.404199475065614
+    },
+    {
+        "date": "2025-09-27T19:51:00.823034",
+        "unit_group": "time",
+        "from_time": "minutes",
+        "to_time": "seconds",
+        "factor_time": 1.0,
+        "result": 60.0
+    },
+    {
+        "date": "2025-09-27T19:55:06.180899",
+        "unit_group": "time",
+        "from_time": "5.0 years 10.0 months 10.0 days 8.0 hours 56.0 minutes",
+        "to_time": "seconds",
+        "factor_time": null,
+        "result": 184604160.0
+    },
+    {
+        "date": "2025-09-27T20:01:14.061756",
+        "unit_group": "time",
+        "from_time": "17h:28m:36s",
+        "to_time": null,
+        "factor_time": "seconds",
+        "result": 62916.0
+    },
+    {
+        "date": "2025-09-27T20:01:19.294569",
+        "unit_group": "time",
+        "from_time": "127h:28m:36s",
+        "to_time": null,
+        "factor_time": "seconds",
+        "result": 458916.0
+    },
+    {
+        "date": "2025-09-27T20:01:44.862424",
+        "unit_group": "time",
+        "from_time": ":28m:36s",
+        "to_time": null,
+        "factor_time": "seconds",
+        "result": 1716.0
+    },
+    {
+        "date": "2025-09-27T20:02:44.561703",
+        "unit_group": "time",
+        "from_time": "00h:28m:36s",
+        "to_time": null,
+        "factor_time": "seconds",
+        "result": 1716.0
     }
 ]
