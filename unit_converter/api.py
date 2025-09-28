@@ -10,9 +10,7 @@ class Converter:
     def __init__(self):
         try:
             # Initiates data variables related to all '.json' files
-            self.units, self.base_units, self.conversion_log, self.unit_aliases, self.month_days, self.original_units = load_data()
-            # Generates a global list containing all month's names
-            self.all_months = [next(iter(value)) for value in self.month_days.values()]
+            self.units, self.base_units, self.conversion_log, self.unit_aliases, self.month_days, self.original_units, self.month_aliases = load_data()
         except (ValueError, FileNotFoundError, json.JSONDecodeError, KeyError) as e:
             print(f"Error: {str(e)}")
             raise

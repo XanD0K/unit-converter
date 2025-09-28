@@ -91,6 +91,14 @@ def resolve_aliases(data: "DataStore", unit_group: str, unit_type: str) -> str |
         return False
 
 
+def resolve_month_aliases(data: "DataStore", month: str) -> str | None:
+    """Checks user's input for month's name"""
+    # Checks for literal name
+    if month in data.month_aliases:
+        return data.month_aliases[month]
+    return False
+
+
 def parse_time_input(time_str: str) -> int | None:
     """Gets user's input of a time and outputs that correspondent value in seconds"""
     if matches := re.search(r"^(?:(\d+)h)?(?:\:(\d+)m)?(?:\:(\d+)s)?$", time_str):
@@ -172,14 +180,12 @@ def validate_date(year: int, month: int, day: int) -> bool:
 
 def get_days_from_month(data: "DataStore", month: str) -> int | None:
     """Gets days for a specificed month's name"""
-    month = month.lower()
     return next((value[month] for value in data.month_days.values() if month in value), None)
     # return next((days for value in month_days.values() for name, days in value.items() if name==month), None)
 
 
 def get_index_from_month(data: "DataStore", month: str) -> int | None:
     """Gets month's index given its name"""
-    month = month.lower()
     return next((int(index) for index, value in data.month_days.items() if month in value), None)
 
 

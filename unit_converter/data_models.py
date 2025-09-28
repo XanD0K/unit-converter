@@ -1,19 +1,18 @@
 from typing import Optional
 
-from .utils import validate_unit_group, resolve_aliases, parse_time_input, parse_date_input, validate_date
+from .utils import validate_unit_group, resolve_aliases, parse_time_input, parse_date_input, validate_date, resolve_month_aliases
 
 
 class DataStore:
     """Holds data from all '.json' files"""
-    def __init__(self, units: dict, base_units: dict, conversion_log: list, unit_aliases: dict, month_days: dict, original_units: dict):
+    def __init__(self, units: dict, base_units: dict, conversion_log: list, unit_aliases: dict, month_days: dict, original_units: dict, month_aliases: dict):
         self.units = units
         self.base_units = base_units
         self.conversion_log = conversion_log
         self.unit_aliases = unit_aliases
         self.month_days = month_days
         self.original_units = original_units
-        # Generates a global list containing all month's names
-        self.all_months = [next(iter(value)) for value in month_days.values()]
+        self.month_aliases = month_aliases
 
 
 class ConversionData:
@@ -71,7 +70,7 @@ class ConversionData:
             self.from_time = resolve_aliases(data, self.unit_group, self.from_time)
         elif parse_time_input(self.from_time) is not None:
             pass
-        elif self.from_time in data.all_months:
+        elif self.from_time in data.month_aliases:
             pass
         elif parse_date_input(self.from_time) is not None:
             years, months, days = parse_date_input(self.from_time) 
@@ -87,7 +86,7 @@ class ConversionData:
             self.to_time = resolve_aliases(data, self.unit_group, self.to_time)
         elif parse_time_input(self.to_time) is not None:
             pass
-        elif self.to_time in data.all_months:
+        elif self.to_time in data.month_aliases:
             pass
         elif parse_date_input(self.to_time) is not None:
             years, months, days = parse_date_input(self.to_time)

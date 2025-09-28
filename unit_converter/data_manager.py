@@ -29,12 +29,14 @@ def load_data() -> tuple[dict, dict, list, dict, dict, dict]:
     # Dictionary with the original conversion factor for all unit_types
     with open(BASE_DIR / "data" / "original_units.json", "r") as file:
         original_units = json.load(file)
+    with open(BASE_DIR / "data" / "month_aliases.json", "r") as file:
+        month_aliases = json.load(file)
     # Validates all thos files
-    validate_data(units, base_units, conversion_log, unit_aliases, month_days, original_units)
-    return units, base_units, conversion_log, unit_aliases, month_days, original_units 
+    validate_data(units, base_units, conversion_log, unit_aliases, month_days, original_units, month_aliases)
+    return units, base_units, conversion_log, unit_aliases, month_days, original_units, month_aliases 
 
 
-def validate_data(units: dict, base_units: dict, conversion_log: list, unit_aliases: dict, month_days: dict, original_units: dict) -> None:
+def validate_data(units: dict, base_units: dict, conversion_log: list, unit_aliases: dict, month_days: dict, original_units: dict, month_aliases: dict) -> None:
     """Validates dictionaries before entering the program"""
     # Ensures 'units.json' is a dictionary and it's not empty
     if not isinstance(units, dict) or not units:
@@ -91,6 +93,9 @@ def validate_data(units: dict, base_units: dict, conversion_log: list, unit_alia
         for unit_type in original_units[unit_group]:
             if unit_type not in units[unit_group]:
                 raise KeyError(f"The unit_type '{unit_type}' should also be an unit_type in 'units.json'!")
+    # Ensures 'month_aliases' is a dictionary and it's not empty
+    if not isinstance(month_aliases, dict) or not month_aliases:
+        raise ValueError("'month_aliases.json' structure is corrupted!")
  
 
 def add_to_log(data: DataStore, conversion_data: ConversionData, is_time_convertion: bool=False) -> None:
