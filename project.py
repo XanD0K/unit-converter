@@ -8,7 +8,7 @@ from typing import Optional
 
 from unit_converter.data_manager import load_data, add_to_log, refactor_value, save_data, zero_division_checker
 from unit_converter.data_models import DataStore, ConversionData, ManageGroupData, ManageTypeData, AliasesData, ChangeBaseData, validate_for_history
-from unit_converter.utils import print_introductory_messages, print_time_instructions, get_users_input, get_unit_group, validate_unit_group, get_converter_units, get_amount, resolve_aliases, parse_time_input, parse_date_input, get_seconds, format_value, calculate_leap_years, validate_date, get_days_from_month, get_index_from_month, gets_days_from_index, print_divider
+from unit_converter.utils import print_introductory_messages, print_time_instructions, get_users_input, get_unit_group, validate_unit_group, get_converter_units, get_amount, resolve_aliases, parse_time_input, parse_date_input, get_seconds, format_value, calculate_leap_years, validate_date, get_days_from_month, get_index_from_month, gets_days_from_index, print_divider, resolve_month_aliases
 
 
 def main() -> None:
@@ -221,7 +221,7 @@ def print_history(data: DataStore, limit: int = 10) -> str:
             if entry["unit_group"] == "time":
                 if entry["from_time"] in data.units["time"]:
                     entries.append(f"{format_value(entry['factor_time'])} {entry['from_time']} = {format_value(entry['result'])} {entry['to_time']} (Group: time)")
-                elif ":" in entry["from_time"] or entry["from_time"] in data.all_months or "-" in entry["from_time"]:
+                elif ":" in entry["from_time"] or entry["from_time"].lower() in data.month_aliases or "-" in entry["from_time"]:
                     entries.append(f"{format_value(entry['result'])} {entry['factor_time']} between {entry['from_time']} {entry['to_time']} (Group: time)")
                 elif len(entry["from_time"].split()) > 1:
                     entries.append(f"{entry['from_time']} = {format_value(entry['result'])} {entry['to_time']} (Group: time)")
@@ -356,11 +356,15 @@ def converter_time_3args(data: DataStore, conversion_data: ConversionData) -> st
         if parse_time_input(from_time) is not None and parse_time_input(to_time) is not None:
             new_from_time: int = parse_time_input(from_time)
             new_to_time: int = parse_time_input(to_time)
+            if new_from_time < 24 * 3600 and new_to_time < new_from_time:
+                new_to_time += 24 * 3600
             conversion_data.new_time = fabs((new_from_time - new_to_time) / data.units[unit_group][factor_time])
             message = f"There are {format_value(conversion_data.new_time)} {factor_time} between {from_time} and {to_time}"
 
         # E.g. JAN DEC days
-        elif from_time.lower() in data.all_months and to_time.lower() in data.all_months:
+        elif from_time in data.month_aliases and to_time in data.month_aliases:
+            from_time = resolve_month_aliases(data, from_time)
+            to_time = resolve_month_aliases(data, to_time)
             from_datetime: datetime = datetime(2023, get_index_from_month(data, from_time), 1)
             if get_index_from_month(data, to_time) > get_index_from_month(data, from_time):
                 to_datetime: datetime = datetime(2023, get_index_from_month(data, to_time), get_days_from_month(data, to_time))
@@ -375,7 +379,7 @@ def converter_time_3args(data: DataStore, conversion_data: ConversionData) -> st
                 total_seconds: float = (timedelta(seconds=days * data.units[unit_group]["days"])).total_seconds()
                 zero_division_checker(data.units[unit_group][factor_time])
                 conversion_data.new_time = total_seconds / data.units[unit_group][factor_time]
-            message = f"Between {from_time.lower()} and {to_time.lower()} there are {format_value(conversion_data.new_time)} {factor_time}"
+            message = f"Between {from_time} and {to_time} there are {format_value(conversion_data.new_time)} {factor_time}"
 
         # E.g. 2019-11-04 2056-04-28 days
         elif parse_date_input(from_time) is not None and parse_date_input(to_time) is not None:
@@ -427,11 +431,12 @@ def converter_time_2args(data: DataStore, conversion_data: ConversionData) -> st
         message = f"There are {format_value(conversion_data.new_time)} {factor_time} in {from_time}"
 
     # E.g. JAN minutes
-    elif from_time.lower() in data.all_months:
+    elif from_time in data.month_aliases:
+        from_time = resolve_month_aliases(data, from_time)
         days: int = get_days_from_month(data, from_time)
         total_seconds: float = days * data.units[unit_group]["days"]
         conversion_data.new_time = total_seconds / data.units[unit_group][factor_time]
-        message = f"There are {format_value(conversion_data.new_time)} {factor_time} in {from_time.lower()}"
+        message = f"There are {format_value(conversion_data.new_time)} {factor_time} in {from_time}"
 
     # E.g. 2019-11-04 days
     elif parse_date_input(from_time) is not None:
