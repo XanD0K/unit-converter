@@ -8,6 +8,10 @@
 **Progress**
 
 
+## [2025-09-28] - Version 0.9.19
+
+
+
 ## [2025-09-27] - Version 0.9.18
 **Plans**
 Give visibility to this program on GitHub

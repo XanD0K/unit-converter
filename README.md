@@ -2,28 +2,26 @@
 #### Video Demo:  <URL HERE>
 
 
-## Motivation & Purpose
-This program was created to test and apply all knowledge acquired in "[CS50’s Introduction to Programming with Python](https://pll.harvard.edu/course/cs50s-introduction-programming-python)" course, from Harvard University.
-
-
 ## Description
-This program has the purpose of converting units from different groups: "length", "time", "mass", "temperature", "volume", "area" and "speed".
-In addition to that, users can create and remove groups and types of units, as well as aliases for any unit type.
-Users also have the ability to change the base unit of any group, which changes the conversion factor of all unit types in that specific group.
-Lastly, he can also access the history log, which contains all previous conversions from the last 3 days.
-The program uses JSON files to store unit data, which are lightweight and user-friendly, reducing the complexity on file manipulation.
-This program supports interactive, command-line and API modes.
+This program is my final project for "[CS50’s Introduction to Programming with Python](https://pll.harvard.edu/course/cs50s-introduction-programming-python)" course, from Harvard University. It applies skills learned in the course. 
+This program has the purpose of converting units from different groups: "length", "time", "mass", "temperature", "volume", "area" and "speed".  
+In addition to that, users can create and remove groups and types of units, as well as aliases for any unit type.  
+Users also have the ability to change the base unit of any group, which changes the conversion factor of all unit types in that specific group.  
+Lastly, users can also access the history log, which stores conversion history for the last 3 days.  
+The program uses JSON files to store unit data, which are lightweight, dependency-free and user-friendly, reducing complexity in file manipulation.  
+This program supports interactive, command-line and API modes.  
 
 
 ## Features
 - Convert units across different groups
+  - Handles complex date and time conversion with flexible input formats
 - Add and remove group of units
 - Add and remove types of units from a specific group
 - Create and remove aliases from an unit type
 - Change conversion base unit of an unit group
-- Print conversion history log from the previous 3 days (default, 10 entries)
-- Print all groups available
-- Print all unit types from an specific group, with their respective aliases
+- View conversion history for the last 3 days (default: 10 entries)
+- View all available groups
+- View all unit types from an specific group, with their respective aliases
 
 
 ## Table of Contents
@@ -32,19 +30,24 @@ This program supports interactive, command-line and API modes.
 - [Motivation & Purpose](#motivation--purpose)
 - [Installation](#installation)
 - [Usage](#usage)
+  - [Date & Time Conversion](#date--time-conversion)
 - [Files Overview](#files-overview)
 - [Design Choices](#design-choices)
 - [Development Docs](#development-docs)
+- [Acknowledgments](#acknowledgments)
+- [License](#license)
 - [Contributing](#contributing)
 - [Future Plans](#future-plans)
 
 
+
 ## Installation
+This program uses only Python's standard libraries.  
+TBD
 
 
 ## Usage
-UnitConverter supports three modes: command-line (CLI), interactive, and API. On all approaches, users will have 8 actions available, each of which with its respective aliases. Bellow I'll describe all modes available, and how to use each command on that mode, with its alias and usage example:
-
+UnitConverter supports three modes: command-line (CLI), interactive, and API, and all those modes suport 8 actions, each of which with its respective aliases. Below, I'll describe all modes available, and how to use each command on that mode, with its alias and usage example. If a user's input differs from these examples (e.g. extra arguments, different order, invalid values), the user will be prompted with an error message.
 ### Interactive Mode
 Enter `python project.py` to launch the interactive menu with a guided experience. You just need to follow the instructions:
 - **Groups** (`groups` or `g`)
@@ -55,9 +58,8 @@ Enter `python project.py` to launch the interactive menu with a guided experienc
   ```
   'length' units: meters ('m', 'meter', 'metre', 'metres'), centimeters ('cm', 'centimeter', 'centimetre', 'cetimetres'), millimeters ('mm', 'millimeter', 'millimetre', 'millimetres'), kilometers ('km', 'kilometer', 'kilometre', 'kilometres'), feet ('ft', 'foot'), inches ('in', 'inch'), yards ('yd', 'yds', 'yard'), miles ('mi', 'mile'), nautical_miles ('nmi', 'nm', 'nautical_mile')
   ```
-- **History** (`history` or `h`)
-
-  On interactive mode, it will always prints up to 10 entries, with no option to limit this number 
+- **History** (`history` or `h`)  
+  On interactive mode, it always prints up to 10 entries, with no option to limit this number 
   - Output: 
   ```
   36.5 celsius = 97.7 fahrenheit (Group: temperature)
@@ -88,21 +90,20 @@ Enter `python project.py` to launch the interactive menu with a guided experienc
   - Output: `You've just changed the base unit from 'length' group, to 'miles'!`
 
 
-### Command-Line Interface (CLI)
+### Command-Line Interface (CLI)  
 On CLI approach, follow the usage examples bellow to understand how to use each action. Follow the instructions and the position of each argument to prevent triggering any error.
 - **Groups** (`groups`, `g`)
   - Enter: `python .\project.py groups` or `python .\project.py g`
   - Output: `Groups: length, time, mass, temperature, volume, area, speed`
 
 - **Types** (`types`, `t`)
-  - Enter`python .\project.py types length` or `tpython .\project.py t length`
+  - Enter`python .\project.py types length` or `python .\project.py t length`
   - Output: 
   ```
   'length' units: meters ('m', 'meter', 'metre', 'metres'), centimeters ('cm', 'centimeter', 'centimetre', 'cetimetres'), millimeters ('mm', 'millimeter', 'millimetre', 'millimetres'), kilometers ('km', 'kilometer', 'kilometre', 'kilometres'), feet ('ft', 'foot'), inches ('in', 'inch'), yards ('yd', 'yds', 'yard'), miles ('mi', 'mile'), nautical_miles ('nmi', 'nm', 'nautical_mile')
   ```
 
-- **History** (`history`, `h`)
-
+- **History** (`history`, `h`)  
   On CLI mode, users can specify a limit(`--limit` or `-l`), changing the default limit of 10 entries to any limit they want.
   - Enter: `python .\project.py history` or `python .\project.py h`
   - Output: 
@@ -118,7 +119,6 @@ On CLI approach, follow the usage examples bellow to understand how to use each 
   5.0 meters = 16.4042 feet (Group: length)
   5.0 years 10.0 months 10.0 days 8.0 hours 56.0 minutes = 184,604,160.0 seconds (Group: time)
   ```
-
   - Enter: `python .\project.py history --limit 3` or `python .\project.py h --limit 3`
   - Output: 
   ```
@@ -126,7 +126,6 @@ On CLI approach, follow the usage examples bellow to understand how to use each 
   5.0 meters = 16.4042 feet (Group: length)
   5.0 years 10.0 months 10.0 days 8.0 hours 56.0 minutes = 184,604,160.0 seconds (Group: time)
   ```
-
   - Enter: `python .\project.py history -l 3` or `python .\project.py h -l 3`
   - Output: 
   ```
@@ -134,7 +133,6 @@ On CLI approach, follow the usage examples bellow to understand how to use each 
   5.0 meters = 16.4042 feet (Group: length)
   5.0 years 10.0 months 10.0 days 8.0 hours 56.0 minutes = 184,604,160.0 seconds (Group: time)
   ```
-
 - **Convert** (`convert`, `c`)
   - Enter: `python .\project.py convert length meters feet 5` or `python .\project.py c length meters feet 5`
   - Output: `5.0 meters = 16.4042 feet`
@@ -161,7 +159,7 @@ On CLI approach, follow the usage examples bellow to understand how to use each 
   - Enter: `python .\project.py aliases length meters add mtr` or `python .\project.py a length meters add mtr`
   - Output: `Alias successfully added! New alias for 'meters': 'mtr'`
   - Enter: `python .\project.py aliases length meters remove mtr` or `python .\project.py a length meters remove mtr`
-  - Outpur: `'mtr' successfully removed from 'meters'!`
+  - Output: `'mtr' successfully removed from 'meters'!`
 
 - **Change Base** (`change-base` or `cb`)
   - Enter: `python .\project.py change-base length miles` or `python .\project.py cb length miles`
@@ -169,18 +167,16 @@ On CLI approach, follow the usage examples bellow to understand how to use each 
 
 
 ### API
-When accessing the program through API, first users will need to declare a class object, which will allow to call `Converter` class' methods: 
+When accessing the program through API, first users will need to declare a class object, which allows to call `Converter` class' methods: 
 ```
 from unit_converter.api import Converter
 converter = Converter()
 ```
+The `convert`, `manage-group`, `manage-type`, `aliases` and `change-base` methods have a `print_message` attribute which is set to `False` by default. It means that those actions won't display any message when called. If users want to get the output message, they have 2 options:
+1. Call the method with `print_message` attribute set to `True`, which will directly output the message where it was called.
+2. Call the method with `print_message` attribute set to `False` and assign that to a variable, allowing users to choose where to display that message.
 
-The `convert`, `manage-group`, `manage-type`, `aliases` and `change-base` methods have a `print_message` attribute which is set to `False` by default. It means that those actions won't print any message when called. To get the output message, users have 2 options:
-1. Call the method with `print_message` set to `True`, which will output the message where it was called.
-2. Assign the method to a variable, with `print_message` attribue set to `False`. It allows users to choose where to print the output message.
-
-Also, if users don't want the output message, just let `print_message` set to `False` and don't assign it to any variable. THe method will be triggered, but no message will be displayed. Wherease, if users set `print_message` set to `True` and also assign it to a variable, it will print the message where it was called, and users will also have that same message stored in a variable, with the possibility to call it wherever they want.
-
+Also, if users don't want the output message, just let `print_message` set to `False` and don't assign it to any variable. The method will be triggered, but no message will be displayed. Whereas, if users set `print_message` set to `True` and also assign it to a variable, it will print the message where it was called, and users will also have that same message stored in a variable, with the possibility to call it wherever they want.  
 The `groups`, `types` and `history` methods don't have that `print_message` attribute. Those commands always need the result to be assigned to a variable so that the output message can be displayed.
 
 - **Groups** (`groups`, `g`)
@@ -202,8 +198,7 @@ The `groups`, `types` and `history` methods don't have that `print_message` attr
   'length' units: meters ('m', 'meter', 'metre', 'metres'), centimeters ('cm', 'centimeter', 'centimetre', 'cetimetres'), millimeters ('mm', 'millimeter', 'millimetre', 'millimetres'), kilometers ('km', 'kilometer', 'kilometre', 'kilometres'), feet ('ft', 'foot'), inches ('in', 'inch'), yards ('yd', 'yds', 'yard'), miles ('mi', 'mile'), nautical_miles ('nmi', 'nm', 'nautical_mile')
   ```
 
-- **History** (`history`, `h`)
-
+- **History** (`history`, `h`)  
   On API mode, user can specify a limit(`limit=`), changing the default limit of 10 entries to whatever limit he wants.
   - Enter: 
   ```
@@ -236,8 +231,7 @@ The `groups`, `types` and `history` methods don't have that `print_message` attr
   5.0 years 10.0 months 10.0 days 8.0 hours 56.0 minutes = 184,604,160.0 seconds (Group: time)
   ```
 
-- **Convert** (`convert`, `c`)
-
+- **Convert** (`convert`, `c`)  
   On API mode, user can choose if the `convert` method will output only the result of the conversion, or the output message. It is set by the value of the `print_message` attribute.
   - Enter: 
   ```
@@ -286,7 +280,7 @@ The `groups`, `types` and `history` methods don't have that `print_message` attr
   - Enter: `converter.manage_type("temperature", "add new_type 1 1", print_message=True)` or
   ```
   message = converter.manage_type("temperature", "add new_type 1 1")
-  print("message")
+  print(message)
   ```
   - Output: `A new unit type was added on 'temperature' group: new_type = [1.0, 1.0]`
   - Enter: `converter.manage_type("temperature", "remove new_type", print_message=True)` or
@@ -308,7 +302,7 @@ The `groups`, `types` and `history` methods don't have that `print_message` attr
   message = converter.aliases("length", "remove meters mtr")
   print(message)
   ```
-  - Outpur: `'mtr' successfully removed from 'meters'!`
+  - Output: `'mtr' successfully removed from 'meters'!`
 
 - **Change Base** (`change-base` or `cb`)
   - Enter: `converter.change_base("length", "mile", print_message=True)`
@@ -320,9 +314,10 @@ The `groups`, `types` and `history` methods don't have that `print_message` attr
 
 
 #### Date & Time Conversion
-This program handles date and time conversion in a more robust way, so I'll devote a specific section on this `README.md` file just to explain all possibilites users have available. On Interactive mode, enter `convert` or `c` and then `time` as the unit group, and follow the guided instructions. For API approach, I'll give examples that will display the full output message, but keep in mind that you can directly call the `convert` class method with `print_message` set to `False`, which will jsut print the result.
+This program handles date and time conversion in a more robust way, so I'll devote a specific section on this `README.md` file just to explain all possibilites users have available.  
+On Interactive mode, enter `convert` or `c` and then `time` as the unit group, and follow the guided instructions. For API approach, I'll give examples that will display the full output message, but keep in mind that you can directly call the `convert` class method with `print_message` set to `False`, which will just print the result.
 
-- **Simple Unit Type Conversion**
+- **Simple Unit Type Conversion**  
   Users can convert from different unit types. 
   Usage: `<unit_type> <unit_type> <amount>`
   - Enter: `minutes seconds 1` or `python .\project.py convert time minutes seconds 1` or 
@@ -332,9 +327,8 @@ This program handles date and time conversion in a more robust way, so I'll devo
   ```
   - Output: `1.0 minutes = 60.0 seconds`
 
-- **Complex Unit Type Conversion**
-
-  Users can input multiple unit types to convert to a specific unit type. That approach demmands taht users inputs at least 2 `(<amount> <unit_type>)` blocks to convert from. If input format consists only of one unit type, use previous approach! 
+- **Complex Unit Type Conversion**  
+  Users can input multiple unit types to convert to a specific unit type. That approach demands that users inputs at least 2 `(<amount> <unit_type>)` blocks to convert from. If input format consists only of one unit type, use previous approach! 
 
   Usage: `<amount> <unit_type> (<amount> <unit_type>) <unit_type>`
   - Enter: `5 years 10 months 10 days 8 hours 56 minutes seconds` or `python .\project.py convert time 5 years 10 months 10 days 8 hours 56 minutes seconds` or 
@@ -344,34 +338,135 @@ This program handles date and time conversion in a more robust way, so I'll devo
   ```
   - Output: `5.0 years 10.0 months 10.0 days 8.0 hours 56.0 minutes = 184,604,160.0 seconds`
 
-- **Simple Time Conversion**
-
-  User can convert a specific time to a specific unit type. For that conversion, users aren't limit in the 24h pattern. They can use any value they want.
-
+- **Simple Time Conversion**  
+  User can convert a specific time to a specific unit type. For that conversion, users aren't limited to the 24h pattern. They can use any value they want.  
   The time input need to follow that pattern: `HH:MM:SS`. If no group of units, its `:` sign is still need. User either declare the empty value as zeroes, or leave the initial `:` sign to declare the empty value.
-  Usage: `<TIME> <TIME> <unit_type>`
-  - Enter: `17h:28m:36s seconds` or `python .\project.py convert time 17h:28m:36s seconds` or 
+
+  Usage: `<TIME> <unit_type>`
+  - Enter: `30h:500m:75s seconds` or `python .\project.py convert time 30h:500m:75s seconds` or 
   ```
-  message = converter.convert("time", "17h:28m:36s seconds", print_message=True)
+  message = converter.convert("time", "30h:500m:75s seconds", print_message=True)
   print(message)
   ```
-  - Output: `There are 62,916.0 seconds in 17h:28m:36s`
+  - Output: `There are 138,075.0 seconds in 30h:500m:75s`
+
+  - Enter: `:50m:80s seconds` or `python .\project.py convert time :50m:80s seconds` or 
+  ```
+  message = converter.convert("time", ":50m:80s seconds", print_message=True)
+  print(message)
+  ```
+  - Output: `There are 3,080.0 seconds in :50m:80s`
+
+  - Enter: `20h:25s days` or `python .\project.py convert time 20h:25s days` or 
+  ```
+  message = converter.convert("time", "20h:25s days", print_message=True)
+  print(message)
+  ```
+  - Output: `There are 0.83362 days in 20h:25s`
+
+- **Complex Time Conversion**  
+  Users can calculate the difference between two given times. In that format, users can also insert times that out off the 24h pattern. If the first value is inside the 24h pattern, and the second value is smaller than the first one, the program will understand that the second one is from the next day. If the intention is calculate the difference from 2 times from the same date, use the smaller value first.
+
+  Usage: `<TIME> <TIME> <unit_type>`
+  - Enter: `23h:20m:20s 0h:21m:21s minutes` or `python .\project.py convert time 23h:20m:20s 0h:21m:21s minutes` or 
+  ```
+  message = converter.convert("time", "23h:20m:20s 0h:21m:21s minutes", print_message=True)
+  print(message)
+  ```
+  - Output: `There are 61.01667 minutes between 23h:20m:20s and 0h:21m:21s`
+
+  - Enter: `0h:21m:21s 23h:20m:20s minutes ` or `python .\project.py convert time 0h:21m:21s 23h:20m:20s minutes ` or 
+  ```
+  message = converter.convert("time", "0h:21m:21s 23h:20m:20s minutes ", print_message=True)
+  print(message)
+  ```
+  - Output: `There are 1,378.98333 minutes between 0h:21m:21s and 23h:20m:20s`
+
+- **Simple Month Conversion**  
+  Users can calculate the amount of a specific unit type in a given month. You can input the month abbreviation or its full name (e.g. jan or January), in both lower or uppercase
+
+  Usage: `<MONTH> <unit_type>`
+  - Enter: `JAN days` or `python .\project.py convert time JAN days` or 
+  ```
+  message = converter.convert("time", "JAN days", print_message=True)
+  print(message)
+  ```
+  - Output: `There are 31.0 days in January`
+
+  - Enter: `January seconds` or `python .\project.py convert time January seconds` or 
+  ```
+  message = converter.convert("time", "January seconds", print_message=True)
+  print(message)
+  ```
+  - Output: `There are 2,678,400.0 seconds in January`
+
+- **Complex Month Conversion**  
+  Users can calculate the difference between two given months. If the second month comes first than the second one, the program will understand that the second one is from the next year. If the intention is calculate the difference from 2 times from the same year, use the smaller value first. It will include the days of both months!
+
+  Usage: `<MONTH> <MONTH> <unit_type>`
+  - Enter: `January DECEMBER days` or `python .\project.py convert time January DECEMBER days` or 
+  ```
+  message = converter.convert("time", "January DECEMBER days", print_message=True)
+  print(message)
+  ```
+  - Output: `Between January and December there are 365.0 days`
+
+  - Enter: `dec jan days` or `python .\project.py convert time dec jan days` or 
+  ```
+  message = converter.convert("time", "dec jan days", print_message=True)
+  print(message)
+  ```
+  - Output: `Between December and January there are 62.0 days`
+
+- **Simple Date Conversion**  
+  Users can calculate the amount of a specific unit type in a given date. On that approach, users can input arbitrary years, months and days, but they must follow the `YYYY-MM-DD` format.
+
+  That approach uses an approximate yeard and month duration on all calculations. year is considered to have 365.2425 days, and a month 30.436875 days.
+  Usage: `<DATE> <unit_type>`
+  - Enter: `2019-11-04 days` or `python .\project.py convert time 2019-11-04 days` or 
+  ```
+  message = converter.convert("time", "2019-11-04 days", print_message=True)
+  print(message)
+  ```
+  - Output: `There are 737,763.41312 days in 2019 years, 11 months, 4 days`
+
+  - Enter: `2050-30-20 days` or `python .\project.py convert time 2050-30-20 days` or 
+  ```
+  message = converter.convert("time", "2050-30-20 days", print_message=True)
+  print(message)
+  ```
+  - Output: `There are 749,680.23125 days in 2050 years, 30 months, 20 days`
+
+- **Complex Date Conversion**  
+  Users can calculate the difference between two given dates. On that approach users must provide valid dates (e.g. February has 28 days, or 29 days on leap years). Don't worry about the order of the dates, the result will be the same. Also, don't worry about leap years, because the program automatically calculates that!
+
+  Usage: `<DATE> <DATE> <unit_type>`
+  - Enter: `2019-11-04 2056-04-28 days` or `python .\project.py convert time 2019-11-04 2056-04-28 days` or 
+  ```
+  message = converter.convert("time", "2019-11-04 2056-04-28 days", print_message=True)
+  print(message)
+  ```
+  - Output: `Between 2019-11-04 and 2056-04-28 there are 13,326.0 days`
+
+  - Enter: `2056-04-28 2019-11-04 days` or `python .\project.py convert time 2056-04-28 2019-11-04 days` or 
+  ```
+  message = converter.convert("time", "2056-04-28 2019-11-04 days", print_message=True)
+  print(message)
+  ```
+  - Output: `Between 2056-04-28 and 2019-11-04 there are 13,306.0 days`
 
 
-
-
-
-
-## Files Overview
-This program is organized into a `unit-converter` directory with `data`, `tests` and `unit_converter` subdirectories. The root directory also contains core files and development docs.
+## Files Overview  
+This program is organized into a `unit-converter` repository, which is also the core directory of the program.  
+ It's composed with `data`, `tests` and `unit_converter` subdirectories, and core files and development docs.
 
 - **DATA FILES** (`data/`)
   - [base_units.json](data/base_units.json): contains a relationship between an unit_group and the base unit for that group.
-  - [conversion_log.json](data/conversion_log.json): stores all successfull conversions done in the previous 3 days.
+  - [conversion_log.json](data/conversion_log.json): stores all successful conversions done in the previous 3 days.
   - [month_days.json](data/month_days.json): relates a month's index to its respective name, as well as the number of days in that respective month.
-  - [original_units.json](data/original_units.json): contains all unit groups with all unit types for each group and their respective values. Those values don't change, so it's used to refactor all values when users trigger "change-base" action, avoiding precision loss.
+  - [original_units.json](data/original_units.json): contains all unit groups with all unit types for each group and their respective values. Those values don't change, so it's used to recalculate all values when users trigger "change-base" action, avoiding precision loss.
   - [unit_aliases.json](data/unit_aliases.json): contains all aliases available for every unit type.
-  - [units.json](units.json): contains all unit groups with all unit types for each group and their respective values. Those values change when users trigger "change-base" action, so it's used for conversions.
+  - [units.json](data/units.json): contains all unit groups with all unit types for each group and their respective values. Those values change when users trigger "change-base" action, so it's used for conversions.
 
 
 - **TEST FILES** (`tests/`)
@@ -389,20 +484,22 @@ This program is organized into a `unit-converter` directory with `data`, `tests`
 
 - [project.py](project.py): core file of the program, containing the logic to handle CLI approach, for users that want to use the program through command-line arguments, as well as the logic for an interactive approach. It also contains all files that handles all actions available in the program
 - [test_project.py](test_project.py): tests all functions in `project.py` file
+- [requirements.txt](requirements.txt): empty as only standard libraries are used
 
 
 ## Design Choices
-- Using JSON files to manage all data kepts program simple and fast, reducing external dependencies and allowing simplicity on data manipulation. Chose that approach instead of hard-coding in other `.py` files or using databases.
-- Chose a modular structure over a single file to improve readability (previous version had `project.py` with over 1000 lines), and to better handling multiple approaches, removing repetitions.
+- I used JSON files to manage all data kept the program simple and fast, reducing external dependencies and allowing simplicity on data manipulation. I chose that approach instead of hard-coding in other `.py` files or using databases.
+- I chose a modular structure over a single file to improve readability (previous version had `project.py` with over 1000 lines), and to better handle multiple approaches, removing repetitions.
 - Besides the interactive mode, which was the first approach that I developed, I also wanted to allow users to access the program through command-line arguments and through API. I decided to keep all three access modes on my final version of the program, giving flexibility and improving UX.
-- Created `DataStore` class to globally access all data from those JSON files, instead of manually declaring and accessing them on each file. It kept code cleaner, and improved readability and maintainability.
-- Created multiple classes (located in `data_models.py`) to store data and values related to each action. It allowed to centralize all validation logic for each of those values, keeping all other files cleaner with their specific logic.
-- Created an unique logic for time conversion, segregated from the default conversion logic, because I wanted to allow multiple input formats. Despite that, I kept all under the same "convert" command so that it doesn't get too segregated, allowing users to focus on which command they want to use, whithout getting overcomplicated.
+- I created `DataStore` class to globally access all data from those JSON files, instead of manually declaring and accessing them on each file. It kept code cleaner, and improved readability and maintainability.
+- I created multiple classes (located in `data_models.py`) to store data and values related to each action. It allowed to centralize all validation logic for each of those values, keeping all other files cleaner with their specific logic.
+- I created a unique logic for time conversion, segregated from the default conversion logic, because I wanted to allow multiple input formats. Despite that, I kept all under the same "convert" command so that it doesn't get too segregated, allowing users to focus on which command they want to use, without getting overcomplicated.
 - In API mode, all actions return the output message, without displaying it! It means that when a class method is called, the action is triggered, but is up to the users to decide if they want to print it. By assigning that method call to a variable, they can also decide where they want to print that message.
 
+
 ## Development Docs
-- [CHANGELOG.md](CHANGELOG.md): Versions and updates
-- [DEVLOG.md](DEVLOG.md): Development  process
+- [CHANGELOG.md](CHANGELOG.md): Versions and Updates
+- [DEVLOG.md](DEVLOG.md): Development Process
 - [TODO.md](TODO.md): Features and Goals
 
 
@@ -410,10 +507,20 @@ This program is organized into a `unit-converter` directory with `data`, `tests`
 Contributions are welcomed! Follow those steps:
 1. Fork the repository
 2. Create a feature branch
-3. Submit a pull request with clear description
+3. Submit a pull request with a clear description
+
+Report bugs or suggest features via GitHub Issues
+
+
+## Acknowledgments
+  Special thanks to the CS50P team, including Professor David Malan and the course staff, for their excellent instructions and support throughout "[CS50’s Introduction to Programming with Python](https://pll.harvard.edu/course/cs50s-introduction-programming-python)" course.
 
 
 ## Future Plans
-- Publish as a PyPI library
+- Publish the program as a PyPI library
 - Refactor `project.py` into modular files
-- Add support for more unit groups (e.g. money)
+- Add support for more unit groups (e.g. money with real-time exchange rates)
+
+
+## License
+TBD

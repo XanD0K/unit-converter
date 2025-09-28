@@ -11,10 +11,28 @@
 ### Removed
 
 
-## [0.9.18] - 2025-09-27
+## [0.9.19] - 2025-09-28
 ### Added
+- Created `month_aliases.json` file to allow users input the full month name or it's respective aliases
+- Created `resolve_month_aliases` helper function to convert a month input to its full name
 - Concluded the development of `README.md` file
 
+### Changed
+- Changed `load_data` and `validate_data` functions to load and validate that new JSON file
+- Changed `Converter` and `DataStore` classes to also load that new JSON file
+- Changed `month_days.json` to use the full month's name as the dictionary key, instead of it's alias
+- Changed `converter_time_3args` and `converter_time_2args` to also use `month_aliases.json` data
+- Updated `validate_from_time` and `validate_to_time` to use `month_aliases.json` data
+
+### Removed
+- Removed `all_months` data from `Converter` and `DataStore` classes
+
+### Fixed
+- Fixed time conversion in `converter_time_3args` function
+- Fixed `get_days_from_month` and `get_index_from_month` functions by removing `.lower()`, which was inconsistent with `month_aliases.json` file
+
+
+## [0.9.18] - 2025-09-27
 ### Changed
 - Moved `final-project` directory (the root directory) out of `cs50p` repository, indo a brand new `unit-converter` repository, dedicated exclusively to this program
 
@@ -181,7 +199,7 @@
 
 ## [0.9.1] - 2025-09-10
 ### Added
-- Created `ConversionData` data class to hold all data from `.json` files, as well as `ALL_MONTHS` variable, keeping code cleaner
+- Created `ConversionData` data class to hold all data from JSON files, as well as `ALL_MONTHS` variable, keeping code cleaner
 
 ### Changed
 - Restructured all code, removing `units`, `base_units`, `conversion_log`, `unit_aliases` and `month_days` variables, changing them to be just a call to that new `ConversionData` object
@@ -190,11 +208,11 @@
 ## [0.9.0] - 2025-09-09
 ### Added
 - Created `unit_converter` directory which will contain all new files generated from `project.py` segmentation
-- Created `data_manager.py` file to hold all functions that open/modify/save `.json` files
+- Created `data_manager.py` file to hold all functions that open/modify/save JSON files
 - Created `utils.py` file to hold all helper functions
 
 ### Changed
-- Moved all `.json` files to `data` directory
+- Moved all JSON files to `data` directory
 - Changed `validate_dictionaries` function's name to `validate_data`
 
 
@@ -249,7 +267,7 @@
 - Created `resolve_aliases` function to handle unit types and unit's aliases throughout codebase
 - Created `manage_aliases` function to allow users adding and removing aliases to/from `unit_alises.json` file
 - Added logic to `handle_cli` function that allows users to manage aliases, by adding/removing them to/from an unit type
-- Added backup logic if modifying `.json` files failes
+- Added backup logic if modifying JSON files failes
 
 ### Changed
 - Changed "types" action to act like all other functions, keep consistency throughout codebase
@@ -283,7 +301,7 @@
 ## [0.5.0] - 2025-08-31
 ### Added
 - Created `conversion_log.json` file to keep track of user's previous conversions
-- Added `history` command and logic to fill the new `.json` file and to print 
+- Added `history` command and logic to fill the new JSON file and to print 
 
 ### Changed
 - Changed argument's name `group` to `unit_group`, to keep consistency throughout codebase
