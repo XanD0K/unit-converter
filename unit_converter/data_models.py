@@ -66,7 +66,7 @@ class ConversionData:
     def validate_from_time(self, data: DataStore) -> None:
         if not self.from_time:
             raise ValueError("Enter a value to convert from!")
-        elif self.from_time in data.units[self.unit_group]:
+        elif self.from_time in data.units[self.unit_group] or self.from_time in data.unit_aliases[self.unit_group]:
             self.from_time = resolve_aliases(data, self.unit_group, self.from_time)
         elif any(char in self.from_time for char in (":", "h", "m", "s")):
             pass
@@ -82,7 +82,7 @@ class ConversionData:
     def validate_to_time(self, data: DataStore) -> None:
         if not self.to_time:
             raise ValueError("Enter a value to convert to!")
-        elif self.to_time in data.units[self.unit_group]:
+        elif self.to_time in data.units[self.unit_group] or self.to_time in data.unit_aliases[self.unit_group]:
             self.to_time = resolve_aliases(data, self.unit_group, self.to_time)
         elif any(char in self.to_time for char in (":", "h", "m", "s")):
             pass
@@ -100,7 +100,7 @@ class ConversionData:
         try:
             self.factor_time = float(self.factor_time)
         except ValueError:
-            if self.factor_time in data.unit_aliases[self.unit_group]:
+            if self.factor_time in data.unit_aliases[self.unit_group] or self.factor_time in data.units[self.unit_group]:
                 self.factor_time = resolve_aliases(data, self.unit_group, str(self.factor_time))
             if self.factor_time not in data.units[self.unit_group]:
                 raise KeyError(f"Factor time '{self.factor_time}' not found in '{self.unit_group}' group!")
@@ -277,10 +277,10 @@ class AliasesData:
     def validate_unit_type(self, data: DataStore) -> None:
         if not self.unit_type:
             raise ValueError("Unit type cannot be empty!")
-        if self.unit_type not in data.units[self.unit_group]:
-            raise KeyError(f"'{self.unit_type}' is not a valid unit type for '{self.unit_group}' group!")
         if self.unit_type in data.unit_aliases[self.unit_group]:
             self.unit_type = resolve_aliases(data, self.unit_group, self.unit_type)
+        if self.unit_type not in data.units[self.unit_group]:
+            raise KeyError(f"'{self.unit_type}' is not a valid unit type for '{self.unit_group}' group!")
     def validate_action(self) -> None:
         if not self.action:
             raise ValueError("'action' cannot be empty!")
@@ -323,7 +323,7 @@ class ChangeBaseData:
             raise ValueError("Unit type cannot be empty!")
         if self.new_base_unit in data.unit_aliases[self.unit_group]:
             self.new_base_unit = resolve_aliases(data, self.unit_group, self.new_base_unit)
-        elif self.new_base_unit not in data.units[self.unit_group] or self.new_base_unit is False:
+        elif self.new_base_unit not in data.units[self.unit_group]:
             raise KeyError(f"'{self.new_base_unit}' is not an unit type for '{self.unit_group}' group")
         elif self.new_base_unit == data.base_units[self.unit_group]:
             raise ValueError(f"'{self.new_base_unit}' is already the current base unit for '{self.unit_group}' group")   
