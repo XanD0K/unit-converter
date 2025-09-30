@@ -1,6 +1,6 @@
 from typing import Optional
 
-from .utils import validate_unit_group, resolve_aliases, parse_time_input, parse_date_input, validate_date, resolve_month_aliases
+from .utils import validate_unit_group, resolve_aliases, parse_date_input, validate_date
 
 
 class DataStore:
@@ -17,7 +17,7 @@ class DataStore:
 
 class ConversionData:
     """Holds unit data related to unit conversion"""
-    def __init__(self, unit_group: str, from_type: Optional[str]=None, to_type: Optional[str]=None, amount: Optional[str]=None, new_value: Optional[str]=None, time_input: Optional[str]=None, from_time: Optional[str]=None, to_time: Optional[str]=None, factor_time: Optional[str]=None, new_time: Optional[str]=None):
+    def __init__(self, unit_group: str, from_type: str=None, to_type: str=None, amount: float | str=None, new_value: float=None, time_input: str=None, from_time: str=None, to_time: str=None, factor_time: str | float=None, new_time: float=None): # type: ignore [assignment]
         self.unit_group = unit_group
         self.from_type = from_type
         self.to_type = to_type
@@ -30,18 +30,18 @@ class ConversionData:
         self.new_time = new_time
 
     def validate_from_type(self, data: DataStore) -> None:
-        if(resolve_aliases(data, self.unit_group, self.from_type)):
-            self.from_type = resolve_aliases(data, self.unit_group, self.from_type)
         if not self.from_type:
             raise ValueError("'unit_type' cannot be empty!")
+        if self.from_type in data.unit_aliases[self.unit_group]:
+           self.from_type = resolve_aliases(data, self.unit_group, self.from_type)
         if self.from_type not in data.units[self.unit_group]:
             raise KeyError("Invalid unit type!")
 
     def validate_to_type(self, data: DataStore) -> None:
-        if(resolve_aliases(data, self.unit_group, self.to_type)):
-            self.to_type = resolve_aliases(data, self.unit_group, self.to_type)
         if not self.to_type:
             raise ValueError("'unit_type' cannot be empty!")
+        if self.to_type in data.unit_aliases[self.unit_group]:
+            self.to_type = resolve_aliases(data, self.unit_group, self.to_type)
         if self.to_type not in data.units[self.unit_group]:
             raise KeyError("Invalid unit type!")
 
@@ -52,7 +52,7 @@ class ConversionData:
         try:
             self.amount = float(self.amount)
         except:
-            raise ValueError("Invalid amount!")
+            raise ValueError("Invalid amount!")        
         # Prevents negative value for "Kelvin"
         if self.amount < 0 and self.unit_group == "temperature" and self.from_type == "kelvin":
             raise ValueError("Kelvin temperature cannot be negative!")
@@ -66,13 +66,13 @@ class ConversionData:
     def validate_from_time(self, data: DataStore) -> None:
         if not self.from_time:
             raise ValueError("Enter a value to convert from!")
-        elif resolve_aliases(data, self.unit_group, self.from_time) in data.units[self.unit_group]:
+        elif self.from_time in data.units[self.unit_group]:
             self.from_time = resolve_aliases(data, self.unit_group, self.from_time)
-        elif parse_time_input(self.from_time) is not None:
+        elif any(char in self.from_time for char in (":", "h", "m", "s")):
             pass
         elif self.from_time in data.month_aliases:
             pass
-        elif parse_date_input(self.from_time) is not None:
+        elif "-" in self.from_time:
             years, months, days = parse_date_input(self.from_time) 
             if self.to_time:
                 validate_date(years, months, days)
@@ -82,13 +82,13 @@ class ConversionData:
     def validate_to_time(self, data: DataStore) -> None:
         if not self.to_time:
             raise ValueError("Enter a value to convert to!")
-        elif resolve_aliases(data, self.unit_group, self.to_time) in data.units[self.unit_group]:
+        elif self.to_time in data.units[self.unit_group]:
             self.to_time = resolve_aliases(data, self.unit_group, self.to_time)
-        elif parse_time_input(self.to_time) is not None:
+        elif any(char in self.to_time for char in (":", "h", "m", "s")):
             pass
         elif self.to_time in data.month_aliases:
             pass
-        elif parse_date_input(self.to_time) is not None:
+        elif "-" in self.to_time:
             years, months, days = parse_date_input(self.to_time)
             validate_date(years, months, days)
         else:
@@ -100,10 +100,11 @@ class ConversionData:
         try:
             self.factor_time = float(self.factor_time)
         except ValueError:
-            factor_time = resolve_aliases(data, self.unit_group, self.factor_time)
-            if factor_time  is False or factor_time not in data.units[self.unit_group]:
+            if self.factor_time in data.unit_aliases[self.unit_group]:
+                self.factor_time = resolve_aliases(data, self.unit_group, str(self.factor_time))
+            if self.factor_time not in data.units[self.unit_group]:
                 raise KeyError(f"Factor time '{self.factor_time}' not found in '{self.unit_group}' group!")
-            self.factor_time = factor_time
+            self.factor_time = self.factor_time
 
     def validate_time_args(self, data: DataStore) -> None:
         args: list[str] = self.time_input.split()
@@ -124,9 +125,11 @@ class ConversionData:
                     float(number)
                 except:
                     raise ValueError(f"'{number}' is an invalid amount!")
-                if resolve_aliases(data, self.unit_group, unit):
-                    unit: str = resolve_aliases(data, self.unit_group, unit)
-                if unit is False or unit not in data.units[self.unit_group]:
+                try:
+                    unit = resolve_aliases(data, self.unit_group, unit)
+                except:
+                    raise ValueError(f"'{unit}' is an invalid unit type!")
+                if not unit or unit not in data.units[self.unit_group]:
                     raise ValueError(f"'{unit}' is not a type for '{self.unit_group}' group!")
         else:
             raise ValueError("Invalid format for date and time conversion!")
@@ -146,7 +149,7 @@ class ConversionData:
 
 class ManageGroupData:
     """Holds unit data related to creation/deletion of unit groups"""
-    def __init__(self, unit_group: str, action: Optional[str]=None, new_base_unit: Optional[str]=None):
+    def __init__(self, unit_group: str|None, action: Optional[str]=None, new_base_unit: Optional[str]=None):
         self.unit_group = unit_group
         self.action = action
         self.new_base_unit = new_base_unit
@@ -187,7 +190,7 @@ class ManageGroupData:
 
 class ManageTypeData:
     """Holds unit data related to creation/deletion of unit types"""
-    def __init__(self, unit_group: str, unit_type: Optional[str]=None, action: Optional[str]=None, value: Optional[str]=None, factor: Optional[str]=None, offset: Optional[str]=None):
+    def __init__(self, unit_group: str, unit_type: Optional[str]=None, action: Optional[str]=None, value: Optional[str|float]=None, factor: Optional[str|float]=None, offset: Optional[str|float]=None):
         self.unit_group = unit_group
         self.unit_type = unit_type
         self.action = action
@@ -212,10 +215,10 @@ class ManageTypeData:
             raise ValueError(f"'{self.unit_type}' is already being used as an alias in '{self.unit_group}' group")
 
     def validate_remove_action(self, data: DataStore) -> None:
-        if resolve_aliases(data, self.unit_group, self.unit_type):
-            self.unit_type = resolve_aliases(data, self.unit_group, self.unit_type)
         if not self.unit_type:
             raise ValueError("You can't leave that field empty!")
+        if self.unit_type in data.unit_aliases[self.unit_group]:
+            self.unit_type = resolve_aliases(data, self.unit_group, self.unit_type)        
         elif self.unit_type not in data.units[self.unit_group]:
             raise ValueError(f"'{self.unit_type}' is not an unit type in '{self.unit_group}' group!")
         elif self.unit_type == data.base_units[self.unit_group]:
@@ -235,11 +238,11 @@ class ManageTypeData:
         if not self.factor:
             raise ValueError("'factor' cannot be empty!")
         try:
-            self.factor = float(self.factor)
+            self.factor = float(self.factor)            
         except:
             raise ValueError("Invalid conversion factor!")
         if self.factor <= 0:
-            raise ValueError("Conversion factor must be positive!")
+                raise ValueError("Conversion factor must be positive!")        
 
     def validate_offset(self) -> None:
         if not self.offset:
@@ -272,9 +275,12 @@ class AliasesData:
         self.alias = alias
 
     def validate_unit_type(self, data: DataStore) -> None:
+        if not self.unit_type:
+            raise ValueError("Unit type cannot be empty!")
         if self.unit_type not in data.units[self.unit_group]:
             raise KeyError(f"'{self.unit_type}' is not a valid unit type for '{self.unit_group}' group!")
-
+        if self.unit_type in data.unit_aliases[self.unit_group]:
+            self.unit_type = resolve_aliases(data, self.unit_group, self.unit_type)
     def validate_action(self) -> None:
         if not self.action:
             raise ValueError("'action' cannot be empty!")
@@ -300,25 +306,23 @@ class AliasesData:
 
     def validate_for_aliases(self, data: DataStore) -> None:
         validate_unit_group(self.unit_group, data)
-        if resolve_aliases(data, self.unit_group, self.unit_type):
-            self.unit_type = resolve_aliases(data, self.unit_group, self.unit_type)
-        self.validate_unit_type(data)
+        self.validate_unit_type(data)                
         self.validate_action()
         self.validate_alias(data)
 
 
 class ChangeBaseData:
     """Holds unit data related to changing base unit"""
-    def __init__(self, unit_group: str, new_base_unit: Optional[str]=None):
+    def __init__(self, unit_group: str, new_base_unit:str | None):
         self.unit_group = unit_group
         self.new_base_unit = new_base_unit
 
     def validate_for_change_base(self, data: DataStore) -> None:
         validate_unit_group(self.unit_group, data)
-        if resolve_aliases(data, self.unit_group, self.new_base_unit):
-            self.new_base_unit = resolve_aliases(data, self.unit_group, self.new_base_unit)        
         if not self.new_base_unit:
             raise ValueError("Unit type cannot be empty!")
+        if self.new_base_unit in data.unit_aliases[self.unit_group]:
+            self.new_base_unit = resolve_aliases(data, self.unit_group, self.new_base_unit)
         elif self.new_base_unit not in data.units[self.unit_group] or self.new_base_unit is False:
             raise KeyError(f"'{self.new_base_unit}' is not an unit type for '{self.unit_group}' group")
         elif self.new_base_unit == data.base_units[self.unit_group]:
@@ -330,11 +334,12 @@ def validate_for_history(data: DataStore, limit):
     if not data.conversion_log:
         raise ValueError("Conversion history is empty!")
     try:
-        limit = int(limit)
+        limit = int(limit)        
     except:
         raise ValueError("'limit' must be a number!")
-    if int(limit) < 0:
-        raise ValueError("'limit' must be a positive number!")
+    if limit < 0:
+            raise ValueError("'limit' must be a positive number!")
+    
 
 
 def validate_args_number(*args, command: str, **kwargs) -> None:

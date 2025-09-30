@@ -1,16 +1,18 @@
 import json
 
-from unit_converter.data_manager import load_data
-from unit_converter.data_models import ConversionData, ManageGroupData, ManageTypeData, AliasesData, ChangeBaseData, validate_args_number
-from unit_converter.utils import validate_unit_group
+from .data_manager import load_data
+from .data_models import DataStore, ConversionData, ManageGroupData, ManageTypeData, AliasesData, ChangeBaseData, validate_args_number
+from .utils import validate_unit_group
 from project import print_groups, print_history, print_types, conversion_logic, manage_group, manage_type, manage_aliases, change_base_unit
 
 
-class Converter:
+class Converter(DataStore):
     def __init__(self):
         try:
             # Initiates data variables related to all '.json' files
-            self.units, self.base_units, self.conversion_log, self.unit_aliases, self.month_days, self.original_units, self.month_aliases = load_data()
+            units, base_units, conversion_log, unit_aliases, month_days, original_units, month_aliases = load_data()
+            # Used to call the constructor from the parent class
+            super().__init__(units, base_units,conversion_log,unit_aliases, month_days, original_units, month_aliases)
         except (ValueError, FileNotFoundError, json.JSONDecodeError, KeyError) as e:
             print(f"Error: {str(e)}")
             raise
@@ -88,16 +90,16 @@ class Converter:
         try:
             validate_args_number(*args, command="manage-type", **kwargs)
             validate_unit_group(unit_group.lower(), self)
-            args = user_input.split()
-            if len(args) not in [2, 3, 4]:
+            input_args = user_input.split()
+            if len(input_args) not in [2, 3, 4]:
                 raise ValueError("Incorrect format! Usage: <unit_group> <unit_type> <action> <value> [factor] [offset]")
-            if len(args) == 4 and unit_group != "temperature":
+            if len(input_args) == 4 and unit_group != "temperature":
                 raise ValueError("Incorrect format! Usage: <unit_group> <unit_type> <action> <value> [factor] [offset]")
 
-            action, unit_type = args[:2]
-            value = args[2] if len(args) >= 3 else None
-            factor = args[2] if len(args) >= 3 else None
-            offset = args[3] if len(args) == 4 else None
+            action, unit_type = input_args[:2]
+            value = input_args[2] if len(input_args) >= 3 else None
+            factor = input_args[2] if len(input_args) >= 3 else None
+            offset = input_args[3] if len(input_args) == 4 else None
 
             manage_type_data = ManageTypeData(
                 unit_group = unit_group.lower(),
@@ -117,10 +119,10 @@ class Converter:
         try:
             validate_args_number(*args, command="aliases", **kwargs)
             validate_unit_group(unit_group.lower(), self)
-            args = user_input.split()
-            if len(args) != 3:
+            input_args = user_input.split()
+            if len(input_args) != 3:
                 raise ValueError("Incorrect format! Usage: <unit_group> <unit_type> <alias> <action>")
-            action, unit_type, alias = args
+            action, unit_type, alias = input_args
             aliases_data = AliasesData(
                 unit_group = unit_group.lower(),
                 unit_type = unit_type.lower(),

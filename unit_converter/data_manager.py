@@ -3,13 +3,15 @@ import json
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from typing import Any, Union
+
 from .data_models import DataStore, ConversionData
 
 
 # Creates path to "final-project" directory
 BASE_DIR = Path(__file__).parent.parent
 
-def load_data() -> tuple[dict, dict, list, dict, dict, dict]:
+def load_data() -> tuple[dict, dict, list, dict, dict, dict, dict]:
     """Imports all '.json' files which handles data management"""
     # Dictionary with all units available
     with open(BASE_DIR / "data" / "units.json", "r") as file:
@@ -146,19 +148,19 @@ def clean_history(data: DataStore) -> list[dict]:
     return [entry for entry in data.conversion_log if "date" in entry and datetime.now() - datetime.fromisoformat(entry["date"]) <= timedelta(days=3)]
 
 
-def save_data(data: DataStore, file_name: str) -> DataStore:
+def save_data(data: Union[dict[Any, Any], list[dict[str, Any]]], file_name: str) -> Union[dict[Any, Any], list[dict[str, Any]]]:
     """Tries saving the modifications in the '.json' file, or return its backup"""
     try:
         backup = data.copy()  # Backup is used in case of error
         with open(BASE_DIR / "data" / f"{file_name}.json", "w") as file:
             json.dump(data, file, indent=4)
     except PermissionError:
-        print(f"Error! You don't have permition to write to {file_name}!")
+        print(f"Error! You don't have permission to write to {file_name}!")
         return backup
     return data
 
 
-def refactor_value(data: DataStore, unit_group: str, new_base_unit: str) -> None:
+def refactor_value(data: DataStore, unit_group: str, new_base_unit: str|None) -> None:
     """Refactor all values for 'chage-base' action"""
     if unit_group == "temperature":
         new_base_factor, new_base_offset = data.original_units[unit_group][new_base_unit]

@@ -41,7 +41,7 @@ def handle_cli(data: DataStore, args: list[str]) -> None:
 
     # Adds description to program
     parser = argparse.ArgumentParser(prog="Unit Converter", description="Convert multiple types of units")
-    
+
     # Defines subparser to handle multiple commands
     subparser = parser.add_subparsers(dest="command", help="Available commands")
     # 'groups' command
@@ -88,7 +88,7 @@ def handle_cli(data: DataStore, args: list[str]) -> None:
         print(message)
     # 'history command
     elif parsed_args.command in ["history", "h"]:
-        limit: str = parsed_args.limit
+        limit: int = parsed_args.limit
         validate_for_history(data, limit)
         message = print_history(data, limit)
         print(message)
@@ -319,9 +319,9 @@ def converter_time(data: DataStore, conversion_data: ConversionData) -> str:
         formatted_value: list[tuple[str, str]] = []
         total_seconds: int = 0
         for number, unit in zip(args[0::2], args[1::2]):
-            number: float = float(number)
-            unit: str = resolve_aliases(data, conversion_data.unit_group, unit)
-            total_seconds: float =  total_seconds + (number * data.units[conversion_data.unit_group][unit])
+            number = float(number) # type: ignore[assignment]
+            unit = resolve_aliases(data, conversion_data.unit_group, unit)
+            total_seconds =  total_seconds + (number * data.units[conversion_data.unit_group][unit])
             formatted_value.append((format_value(number), unit))
 
         conversion_data.from_time = " ".join(f"{num} {unit}" for num, unit in formatted_value)
@@ -353,7 +353,7 @@ def converter_time_3args(data: DataStore, conversion_data: ConversionData) -> st
         zero_division_checker(data.units[unit_group][factor_time])
 
         # E.g. 17h:28m:36s 04h:15m:22s seconds
-        if parse_time_input(from_time) is not None and parse_time_input(to_time) is not None:
+        if any(char in from_time for char in (":", "h", "m", "s")) and any(char in to_time for char in (":", "h", "m", "s")):
             new_from_time: int = parse_time_input(from_time)
             new_to_time: int = parse_time_input(to_time)
             if new_from_time < 24 * 3600 and new_to_time < new_from_time:
@@ -369,20 +369,20 @@ def converter_time_3args(data: DataStore, conversion_data: ConversionData) -> st
             if get_index_from_month(data, to_time) > get_index_from_month(data, from_time):
                 to_datetime: datetime = datetime(2023, get_index_from_month(data, to_time), get_days_from_month(data, to_time))
             elif get_index_from_month(data, to_time) < get_index_from_month(data, from_time):
-                to_datetime: datetime = datetime(2024, get_index_from_month(data, to_time), get_days_from_month(data, to_time))
+                to_datetime = datetime(2024, get_index_from_month(data, to_time), get_days_from_month(data, to_time))
             else:
-                to_datetime: datetime = datetime(2023, get_index_from_month(data, to_time), get_days_from_month(data, to_time))
+                to_datetime = datetime(2023, get_index_from_month(data, to_time), get_days_from_month(data, to_time))
             days: float = abs((from_datetime - to_datetime)).days + 1
             if factor_time == "days":
                 conversion_data.new_time = days
             else:
-                total_seconds: float = (timedelta(seconds=days * data.units[unit_group]["days"])).total_seconds()
+                total_seconds = (timedelta(seconds=days * data.units[unit_group]["days"])).total_seconds()
                 zero_division_checker(data.units[unit_group][factor_time])
                 conversion_data.new_time = total_seconds / data.units[unit_group][factor_time]
             message = f"Between {from_time} and {to_time} there are {format_value(conversion_data.new_time)} {factor_time}"
 
         # E.g. 2019-11-04 2056-04-28 days
-        elif parse_date_input(from_time) is not None and parse_date_input(to_time) is not None:
+        elif "-" in from_time and "-" in to_time:
             year_duration: int = 365
             try:
                 from_years, from_months, from_days = parse_date_input(from_time)
@@ -402,7 +402,7 @@ def converter_time_3args(data: DataStore, conversion_data: ConversionData) -> st
             
             leap_years: int = calculate_leap_years(from_years, from_months, to_years, to_months, to_days)
             total_days: int = abs((from_total_days - to_total_days)) + 1 + leap_years
-            total_seconds: float = total_days * data.units[unit_group]["days"]
+            total_seconds = total_days * data.units[unit_group]["days"]
             conversion_data.new_time = total_seconds / data.units[unit_group][factor_time]        
             message = f"Between {from_time} and {to_time} there are {format_value(conversion_data.new_time)} {factor_time}"
 
@@ -425,8 +425,8 @@ def converter_time_2args(data: DataStore, conversion_data: ConversionData) -> st
     zero_division_checker(data.units[unit_group][factor_time])
 
     # E.g. 17h:28m:36s seconds
-    if parse_time_input(from_time) is not None:
-        total_seconds: int = parse_time_input(from_time)
+    if any(char in from_time for char in (":", "h", "m", "s")):
+        total_seconds: float = parse_time_input(from_time)
         conversion_data.new_time = (total_seconds / data.units[unit_group][factor_time])
         message = f"There are {format_value(conversion_data.new_time)} {factor_time} in {from_time}"
 
@@ -434,14 +434,14 @@ def converter_time_2args(data: DataStore, conversion_data: ConversionData) -> st
     elif from_time in data.month_aliases:
         from_time = resolve_month_aliases(data, from_time)
         days: int = get_days_from_month(data, from_time)
-        total_seconds: float = days * data.units[unit_group]["days"]
+        total_seconds = days * data.units[unit_group]["days"]
         conversion_data.new_time = total_seconds / data.units[unit_group][factor_time]
         message = f"There are {format_value(conversion_data.new_time)} {factor_time} in {from_time}"
 
     # E.g. 2019-11-04 days
-    elif parse_date_input(from_time) is not None:
+    elif "-" in from_time:
         years, months, days = parse_date_input(from_time)
-        total_seconds: float = get_seconds(data, unit_group, years, months, days)
+        total_seconds = get_seconds(data, unit_group, years, months, days)        
         conversion_data.new_time = total_seconds / data.units[unit_group][factor_time]
         message = f"There are {format_value(conversion_data.new_time)} {factor_time} in {years} years, {months} months, {days} days"
 
@@ -497,7 +497,7 @@ def manage_group(data: DataStore, manage_group_data: Optional[ManageGroupData]=N
         raise
 
 
-def manage_type(data: DataStore, manage_type_data:Optional[ManageTypeData]=None) -> str:
+def manage_type(data: DataStore, manage_type_data: Optional[ManageTypeData]=None) -> str:
     """Handles all logic of adding and removing unit types"""
     try:
         if manage_type_data is None:  # Accessing through interactive mode
@@ -542,9 +542,9 @@ def manage_type(data: DataStore, manage_type_data:Optional[ManageTypeData]=None)
             raise
 
 
-def add_temp_type(data: DataStore, manage_type_data: Optional[ManageTypeData]=None) -> None:
+def add_temp_type(data: DataStore, manage_type_data: ManageTypeData) -> str:
     """Handles all logic for adding temperature units"""
-    if manage_type_data is None:  # Accessing through interactive mode
+    if not manage_type_data.factor and not manage_type_data.offset:  # Accessing through interactive mode
         manage_type_data.factor = get_users_input(f"Enter conversion factor to base unit '{data.base_units[manage_type_data.unit_group]}' of 'temperature' group: ").strip().lower()
         manage_type_data.validate_factor()
         manage_type_data.offset = get_users_input(f"Enter offset value to base unit '{data.base_units[manage_type_data.unit_group]}' of 'temperature' group: ").strip().lower()
@@ -562,8 +562,7 @@ def add_temp_type(data: DataStore, manage_type_data: Optional[ManageTypeData]=No
     return f"A new unit type was added on 'temperature' group: {manage_type_data.unit_type} = [{manage_type_data.factor}, {manage_type_data.offset}]"
 
 
-
-def manage_aliases(data: DataStore, aliases_data: Optional[AliasesData]=None):
+def manage_aliases(data: DataStore, aliases_data: Optional[AliasesData]=None) -> str:
     """Handles aliases, allowing users to add or remove aliases to/from an unit type"""
     try:
         if aliases_data is None:  # Accessing through interactive mode
@@ -593,11 +592,11 @@ def manage_aliases(data: DataStore, aliases_data: Optional[AliasesData]=None):
         raise
 
 
-def change_base_unit(data: DataStore, change_base_data: Optional[ChangeBaseData]=None):
+def change_base_unit(data: DataStore, change_base_data: Optional[ChangeBaseData]=None) -> str:
     """Allows change of base unit for a specific unit group"""
     try:
-        if change_base_data is None:  # Accessing through interactive mode
-            change_base_data = ChangeBaseData(unit_group = get_unit_group(data))
+        if not change_base_data:  # Accessing through interactive mode
+            change_base_data = ChangeBaseData(unit_group = get_unit_group(data), new_base_unit=None)
             print(f"All unit types for '{change_base_data.unit_group}' group: " + ", ".join(data.units[change_base_data.unit_group].keys()))
             change_base_data.new_base_unit = get_users_input(f"Enter new base unit for '{change_base_data.unit_group}' group: ").strip().lower()
         # Validates all variables and values

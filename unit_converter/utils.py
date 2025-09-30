@@ -54,7 +54,7 @@ def get_unit_group(data: "DataStore") -> str:
     return unit_group
 
 
-def validate_unit_group(unit_group: str, data: "DataStore") -> None:
+def validate_unit_group(unit_group: str|None, data: "DataStore") -> None:
     if not unit_group:
         raise ValueError("Unit group cannot be empty!")
     if unit_group not in data.units:
@@ -75,31 +75,31 @@ def get_amount(unit_data: "ConversionData") -> float:
     unit_data.amount = get_users_input("Amount: ").strip()
     if not re.search(r"^-?\d+(\.\d+)?$", unit_data.amount):
         raise ValueError("Invalid amount! Please, insert integer or decimals! (e.g. 10 or 10.0)")        
-    unit_data.validate_amount()
-    return float(unit_data.amount)
+    return unit_data.amount  # type: ignore[return-value]
 
 
-def resolve_aliases(data: "DataStore", unit_group: str, unit_type: str) -> str | None:
+def resolve_aliases(data: "DataStore", unit_group: str, unit_type: str) -> str:
     """Checks user's input for any match with unit type or unit's aliases"""
     # Checks for literal name
+    if not unit_type:
+        raise KeyError("Invalid unit type!")
     if unit_type in data.units[unit_group]:
         return unit_type
     # Checks for aliases
     elif unit_type in data.unit_aliases[unit_group]:
         return data.unit_aliases[unit_group][unit_type]
-    else:
-        return False
+    raise KeyError(f"Unit type '{unit_type}' not found in '{unit_group}' group neither its aliases!")
 
 
-def resolve_month_aliases(data: "DataStore", month: str) -> str | None:
+def resolve_month_aliases(data: "DataStore", month: str) -> str:
     """Checks user's input for month's name"""
     # Checks for literal name
     if month in data.month_aliases:
         return data.month_aliases[month]
-    return False
+    raise KeyError(f"Month '{month}' is not a valid month!")
 
 
-def parse_time_input(time_str: str) -> int | None:
+def parse_time_input(time_str: str) -> int:
     """Gets user's input of a time and outputs that correspondent value in seconds"""
     if matches := re.search(r"^(?:(\d+)h)?(?:\:(\d+)m)?(?:\:(\d+)s)?$", time_str):
         hours, minutes, seconds = matches.group(1), matches.group(2), matches.group(3)
@@ -107,8 +107,7 @@ def parse_time_input(time_str: str) -> int | None:
         minutes = check_time_is_none(minutes)
         seconds = check_time_is_none(seconds)
         return hours * 3600 + minutes * 60 + seconds
-    return None
-
+    raise ValueError("Invalid time format!")
 
 def check_time_is_none(time_str: str) -> int:
     """Checks if a specific time unit was provided"""
@@ -128,15 +127,15 @@ def get_seconds(data: "DataStore", unit_group: str, years: int, months: int, day
          raise KeyError(f"'{unit_group}' is not a valid group!")
 
 
-def parse_date_input(time_str: str) -> tuple[int, int,int] | None:
+def parse_date_input(time_str: str) -> tuple[int, int,int]:
     """Gets user's input of a date, and outputs the year, month and day"""
     if matches := re.search(r"^(\d+)-(\d+)-(\d+)$", time_str):
         year, month, day = map(int, matches.groups())
         return year, month, day
-    return None
+    raise ValueError("invalid date format! Usage: YYYY-MM-DD")
 
 
-def format_value(value: float) -> str:
+def format_value(value: float | str) -> str:
     """Format converted value by allowing only 5 decimal values and elimitating all trailling zeroes"""
     formatted_value = f"{value:,.5f}".rstrip("0").rstrip(".")
     # Adds '.0' if formatted value ended up with no decimal values
@@ -178,20 +177,26 @@ def validate_date(year: int, month: int, day: int) -> bool:
     return True
 
 
-def get_days_from_month(data: "DataStore", month: str) -> int | None:
+def get_days_from_month(data: "DataStore", month: str) -> int:
     """Gets days for a specificed month's name"""
-    return next((value[month] for value in data.month_days.values() if month in value), None)
-    # return next((days for value in month_days.values() for name, days in value.items() if name==month), None)
+    days = next((value[month] for value in data.month_days.values() if month in value), None)
+    if days is None:
+        raise KeyError(f"Invalid month: '{month}'")
+    return days
 
-
-def get_index_from_month(data: "DataStore", month: str) -> int | None:
+def get_index_from_month(data: "DataStore", month: str) -> int:
     """Gets month's index given its name"""
-    return next((int(index) for index, value in data.month_days.items() if month in value), None)
+    index = next((int(index) for index, value in data.month_days.items() if month in value), None)
+    if index is None:
+        raise KeyError(f"Invalid month: '{month}'")
+    return index
 
-
-def gets_days_from_index(data: "DataStore", month_index: str) -> int | None:
+def gets_days_from_index(data: "DataStore", month_index: str) -> int:
     """Gets days for a specificed month's index"""
-    return next(iter(data.month_days[month_index].values()), None)
+    days = next(iter(data.month_days[month_index].values()), None)
+    if days is None:
+        raise KeyError(f"Invalid index: {month_index}")
+    return days
 
 
 def print_divider(symbol="-"):
