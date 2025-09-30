@@ -11,6 +11,16 @@
 ### Removed
 
 
+## [0.9.20] - 2025-09-29
+### Changed
+- Improved `validate_from_type`, `validate_to_type`, `validate_from_time`, `validate_to_time`, `validate_factor_time`, `validate_time_args`, `validate_remove_action`, `validate_unit_type` and `validate_for_change_base` class methods
+- Improved `converter_time_3args`, `converter_time_2args`, `resolve_aliases`, `resolve_month_aliases`, `parse_time_input`, `parse_date_input`, `get_days_from_month`, `get_index_from_month`, `gets_days_from_index` and `save_data` functions
+
+### Fixed
+- Fixed all codebase type hints by using `mypy` module
+- Fixed all test files, improving their logic and updating them with new type hints
+
+
 ## [0.9.19] - 2025-09-28
 ### Added
 - Created `month_aliases.json` file to allow users input the full month name or it's respective aliases
@@ -30,6 +40,7 @@
 ### Fixed
 - Fixed time conversion in `converter_time_3args` function
 - Fixed `get_days_from_month` and `get_index_from_month` functions by removing `.lower()`, which was inconsistent with `month_aliases.json` file
+- Fixed `test_utils.py` and `test_project.py` files, to handle updated time conversion logic
 
 
 ## [0.9.18] - 2025-09-27
