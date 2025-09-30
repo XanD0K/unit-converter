@@ -43,7 +43,7 @@ def change_base_data():
         with patch("project.refactor_value") as mocked_refactor_value:
             mocked_save_data.return_value = None
             mocked_refactor_value.return_value = None
-            yield ChangeBaseData(unit_group="length")
+            yield ChangeBaseData(unit_group="length", new_base_unit=None)
 
 
 # TODO: Test 'get_action' function
@@ -355,14 +355,14 @@ def test_converter_time_3args_time(data_store, conversion_data):
     conversion_data.from_time = "17h:28m:36s"
     conversion_data.to_time = "04h:15m:22s"
     conversion_data.factor_time = "seconds"
-    assert converter_time_3args(data_store, conversion_data) == "There are 47,594.0 seconds between 17h:28m:36s and 04h:15m:22s"
+    assert converter_time_3args(data_store, conversion_data) == "There are 38,806.0 seconds between 17h:28m:36s and 04h:15m:22s"
 
 def test_converter_time_3args_months(data_store, conversion_data):
     conversion_data.unit_group = "time"
-    conversion_data.from_time = "JAN"
-    conversion_data.to_time = "DEC"
+    conversion_data.from_time = "jan"
+    conversion_data.to_time = "dec"
     conversion_data.factor_time = "days"
-    assert converter_time_3args(data_store, conversion_data) == "Between jan and dec there are 365.0 days"
+    assert converter_time_3args(data_store, conversion_data) == "Between January and December there are 365.0 days"
 
 def test_converter_time_3args_date(data_store, conversion_data):
     conversion_data.unit_group = "time"
@@ -381,9 +381,9 @@ def test_converter_time_2args_time(data_store, conversion_data):
 
 def test_converter_time_2args_month(data_store, conversion_data):
     conversion_data.unit_group = "time"
-    conversion_data.from_time = "JAN"
+    conversion_data.from_time = "january"
     conversion_data.factor_time = "days"
-    assert converter_time_2args(data_store, conversion_data) == "There are 31.0 days in jan"
+    assert converter_time_2args(data_store, conversion_data) == "There are 31.0 days in January"
 
 def test_converter_time_2args_date(data_store, conversion_data):
     conversion_data.unit_group = "time"
