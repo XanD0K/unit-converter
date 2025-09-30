@@ -522,7 +522,7 @@ Report bugs or suggest features via GitHub Issues
 - Special thanks to the CS50P team, including Professor David Malan and the course staff, for their excellent instructions and support throughout "[CS50’s Introduction to Programming with Python](https://pll.harvard.edu/course/cs50s-introduction-programming-python)" course.
 - Additionally, I used Grok(created by xAI) and chat GPT(created by OpenAI) as learning tools to assist in the implementation of my code:
   - Understand the usage of some modules like `argparse`, `datetime`, `fractions` (which I later decided not to use), `shutil`.
-  - Understand how `next` and `iter` function works
+  - Understand how `next` and `iter` functions work
   - Understand how `patch`, `mock` and `fixture` from `unittest` module work
   - How to work with classes, specially parenting classes and the usage of `super().__init__`.
   - Debugging and resolving `mypy` issues.  
