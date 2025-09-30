@@ -342,7 +342,9 @@ def converter_time_3args(data: DataStore, conversion_data: ConversionData) -> st
     factor_time = conversion_data.factor_time
 
     # E.g. minutes seconds 1
-    if from_time in data.units[unit_group] and to_time in data.units[unit_group]:
+    if (from_time in data.unit_aliases[unit_group] or from_time in data.units[unit_group]) and (to_time in data.unit_aliases[unit_group] or to_time in data.units[unit_group]):
+        from_time = resolve_aliases(data, unit_group, from_time)
+        to_time = resolve_aliases(data, unit_group, to_time)
         total_seconds: float = factor_time * data.units[unit_group][from_time]
         zero_division_checker(data.units[unit_group][to_time])
         conversion_data.new_time = total_seconds / data.units[unit_group][to_time]
@@ -351,7 +353,6 @@ def converter_time_3args(data: DataStore, conversion_data: ConversionData) -> st
     else:
         conversion_data.validate_factor_time(data)
         zero_division_checker(data.units[unit_group][factor_time])
-
         # E.g. 17h:28m:36s 04h:15m:22s seconds
         if any(char in from_time for char in (":", "h", "m", "s")) and any(char in to_time for char in (":", "h", "m", "s")):
             new_from_time: int = parse_time_input(from_time)
@@ -502,18 +503,23 @@ def manage_type(data: DataStore, manage_type_data: Optional[ManageTypeData]=None
     try:
         if manage_type_data is None:  # Accessing through interactive mode
             manage_type_data = ManageTypeData(unit_group = get_unit_group(data))
-            manage_type_data.action = get_users_input(f"Existed types for '{manage_type_data.unit_group}' group: {data.units[manage_type_data.unit_group]}. What do you want to do? (enter 'add' or 'remove') ").strip().lower()
-            manage_type_data.validate_action()
-            if manage_type_data.action == "add":
-                manage_type_data.unit_type = get_users_input(f"Enter new type for '{manage_type_data.unit_group}' group: ").strip().lower()
-                manage_type_data.validate_add_action(data)
-                if manage_type_data.unit_group == "temperature":
-                    manage_type_data.factor = get_users_input(f"Enter conversion factor for '{manage_type_data.unit_type}': ").strip().lower()
-                    manage_type_data.offset = get_users_input(f"Enter conversion offset for '{manage_type_data.unit_type}': ").strip().lower()
-                else:
-                    manage_type_data.value = get_users_input(f"Enter conversion factor to base unit '{data.base_units[manage_type_data.unit_group]}' of '{manage_type_data.unit_group}' group: ").strip().lower()
-            elif manage_type_data.action == "remove":
-                manage_type_data.unit_type = get_users_input(f"Enter type to remove from '{manage_type_data.unit_group}' group: ").strip().lower()
+            if len(data.units[manage_type_data.unit_group]) == 1 and manage_type_data.unit_group != "temperature":
+                manage_type_data.action = "add"
+                manage_type_data.unit_type = get_users_input(f"'{manage_type_data.unit_group}' group has only one type ('{list(data.units[manage_type_data.unit_group].keys())[0]}') which is its base unit. Enter new type: ").strip().lower()
+                manage_type_data.value = get_users_input(f"Enter conversion factor to base unit '{data.base_units[manage_type_data.unit_group]}' of '{manage_type_data.unit_group}' group: ").strip().lower()
+            else:
+                manage_type_data.action = get_users_input(f"Existed types for '{manage_type_data.unit_group}' group: {data.units[manage_type_data.unit_group]}. What do you want to do? (enter 'add' or 'remove') ").strip().lower()
+                manage_type_data.validate_action()
+                if manage_type_data.action == "add":
+                    manage_type_data.unit_type = get_users_input(f"Enter new type for '{manage_type_data.unit_group}' group: ").strip().lower()
+                    manage_type_data.validate_add_action(data)
+                    if manage_type_data.unit_group == "temperature":
+                        manage_type_data.factor = get_users_input(f"Enter conversion factor for '{manage_type_data.unit_type}': ").strip().lower()
+                        manage_type_data.offset = get_users_input(f"Enter conversion offset for '{manage_type_data.unit_type}': ").strip().lower()
+                    else:
+                        manage_type_data.value = get_users_input(f"Enter conversion factor to base unit '{data.base_units[manage_type_data.unit_group]}' of '{manage_type_data.unit_group}' group: ").strip().lower()
+                elif manage_type_data.action == "remove":
+                    manage_type_data.unit_type = get_users_input(f"Enter type to remove from '{manage_type_data.unit_group}' group: ").strip().lower()
         # Validates all variables and values
         manage_type_data.validate_for_manage_type(data)
 
@@ -570,9 +576,13 @@ def manage_aliases(data: DataStore, aliases_data: Optional[AliasesData]=None) ->
             aliases_data.unit_type = get_users_input(f"Enter unit type for '{aliases_data.unit_group}' group: ").strip().lower()
             aliases_data.validate_unit_type(data)
             all_aliases = [alias for alias in data.unit_aliases[aliases_data.unit_group] if aliases_data.unit_type == data.unit_aliases[aliases_data.unit_group].get(alias)]
-            aliases_data.action = get_users_input(f"Existed aliases for '{aliases_data.unit_type}': {all_aliases}. What do you want to do? (enter 'add' or 'remove') ").strip().lower()
-            aliases_data.validate_action()
-            aliases_data.alias = get_users_input(f"Which alias do you want to {aliases_data.action} {"to" if aliases_data.action == "add" else "from"} '{aliases_data.unit_type}'? ").strip().lower()
+            if not all_aliases:
+                aliases_data.action = "add"
+                aliases_data.alias = get_users_input(f"'{aliases_data.unit_type}' has no alias. Enter new alias: ").strip().lower()
+            else:
+                aliases_data.action = get_users_input(f"Existed aliases for '{aliases_data.unit_type}': {all_aliases}. What do you want to do? (enter 'add' or 'remove') ").strip().lower()
+                aliases_data.validate_action()
+                aliases_data.alias = get_users_input(f"Which alias do you want to {aliases_data.action} {"to" if aliases_data.action == "add" else "from"} '{aliases_data.unit_type}'? ").strip().lower()
         # Validates all variables and values
         aliases_data.validate_for_aliases(data)
 

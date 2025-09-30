@@ -8,8 +8,24 @@
 **Progress**
 
 
-## [2025-09-28] - Version 0.9.19
+## [2025-09-29] - Version 0.9.12
+**Plans**
+Make sure everything works before submission
 
+**Progress**
+- Tested all code, with modifications and polishments, improving logic and readability
+- Applied and fixed type hints throughout codebase
+
+
+## [2025-09-28] - Version 0.9.19
+**Plans**
+Allow users to also be able to insert the full month name. instead of just its abreviation
+
+**Progress**
+- Created `month_aliases.json` file that relates the abreviation of a month to its respective name
+- Created `resolve_month_aliases` function to automatically transform any aliases to the full name of its respective month
+- Removed `all_months` from all classes because that new JSON file already has a list of all months available
+- Updated and fixed all functions to use this new logic
 
 
 ## [2025-09-27] - Version 0.9.18

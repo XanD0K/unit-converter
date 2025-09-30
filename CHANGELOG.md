@@ -10,6 +10,14 @@
 
 ### Removed
 
+## [0.9.21] - 2025-09-30
+### Changed
+- Improved logic in `manage_type` and `manage_aliases` functions
+
+### Fixed
+- Fixed conversion format in `converter_time_3args` function
+- Fixed `validate_from_time`, `validate_to_time`, `validate_factor_time`, `validate_unit_type` and `validate_for_change_base` class methods
+
 
 ## [0.9.20] - 2025-09-29
 ### Changed
