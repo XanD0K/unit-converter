@@ -49,9 +49,9 @@
     "volume": {
         "liters": 1.0,
         "milliliters": 0.001,
-        "cup": 0.2365875,
-        "teaspoon": 0.004928906,
-        "gallon": 3.7854,
+        "cups": 0.2365875,
+        "teaspoons": 0.004928906,
+        "gallons": 3.7854,
         "cubic_centimeters": 0.001,
         "cubic_meters": 1000
     },
