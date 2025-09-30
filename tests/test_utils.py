@@ -42,7 +42,7 @@ def test_get_users_input_quit():
 
 
 # Tests 'get_unit_group' function
-def test_get_unit_group_valid(data_store):
+def test_get_unit_group(data_store):
     with patch("unit_converter.utils.get_users_input", return_value=" Length "):
         result = get_unit_group(data_store)
         assert result == "length"
@@ -59,7 +59,7 @@ def test_get_unit_group_invalid(data_store):
 
 
 # Tests 'validate_unit_group' function
-def test_validate_unit_group_valid(data_store):
+def test_validate_unit_group(data_store):
     validate_unit_group("length", data_store)
 
 def test_validate_unit_group_empty(data_store):
@@ -72,7 +72,7 @@ def test_validate_unit_group_invalid(data_store):
 
 
 # Tests 'get_converter_units' function
-def test_get_converter_units_valid(data_store, conversion_data):
+def test_get_converter_units(data_store, conversion_data):
     with patch("unit_converter.utils.get_users_input", side_effect=["meters", "miles"]):        
         assert get_converter_units(data_store, conversion_data) == ("meters", "miles")
 
@@ -91,20 +91,20 @@ def test_get_converter_units_invalid(data_store, conversion_data):
 def test_get_amount_integer(conversion_data):
     with patch("unit_converter.utils.get_users_input", return_value="10"):
         result = get_amount(conversion_data)
-        assert result == 10.0
-        assert conversion_data.amount == 10.0
+        assert result == "10"
+        assert conversion_data.amount == "10"
 
 def test_get_amount_decimal(conversion_data):
     with patch("unit_converter.utils.get_users_input", return_value="10.0"):
         result = get_amount(conversion_data)
-        assert result == 10.0
-        assert conversion_data.amount == 10.0
+        assert result == "10.0"
+        assert conversion_data.amount == "10.0"
 
 def test_get_amount_negative(conversion_data):
     with patch("unit_converter.utils.get_users_input", return_value="-10"):
         result = get_amount(conversion_data)
-        assert result == -10.0
-        assert conversion_data.amount == -10.0
+        assert result == "-10"
+        assert conversion_data.amount == "-10"
 
 def test_get_amount_empty(conversion_data):
     with patch("unit_converter.utils.get_users_input", return_value=""):
@@ -123,14 +123,15 @@ def test_get_amount_str(conversion_data):
 
 
 # Test 'resolve_aliases' function
-def test_resolve_aliases_valid_unit(data_store):
+def test_resolve_aliases_unit(data_store):
     assert resolve_aliases(data_store, "length", "meters") == "meters"
 
-def test_resolve_aliases_valid_alias(data_store):
+def test_resolve_aliases_alias(data_store):
     assert resolve_aliases(data_store, "length", "m") == "meters"
 
 def test_resolve_aliases_invalid(data_store):
-    assert resolve_aliases(data_store, "length", "invalid") is False
+    with pytest.raises(KeyError, match="Unit type 'invalid' not found in 'length' group neither its aliases!"):
+        resolve_aliases(data_store, "length", "invalid")
 
 
 # Test 'parse_time_input' function
@@ -140,36 +141,36 @@ def test_parse_time_input_complete():
 def test_parse_time_input_no_hours():
     assert parse_time_input(":10m:10s") == 10 * 60 + 10
 
-def test_parse_time_input_complete_no_minutes():
+def test_parse_time_input_no_minutes():
     assert parse_time_input("10h:10s") == 10 * 3600 + 10
 
-def test_parse_time_input_complete_no_seconds():
+def test_parse_time_input_no_seconds():
     assert parse_time_input("10h:10m") == 10 * 3600 + 10 * 60
 
-def test_parse_time_input_complete_only_hours():
+def test_parse_time_input_only_hours():
     assert parse_time_input("10h") == 10 * 3600
 
-def test_parse_time_input_complete_only_minutes():
+def test_parse_time_input_only_minutes():
     assert parse_time_input(":10m") == 10 * 60
 
-def test_parse_time_input_complete_only_seconds():
+def test_parse_time_input_only_seconds():
     assert parse_time_input(":10s") == 10
 
-def test_parse_time_input_invalid_format():
-    assert parse_time_input("10h-10m-10s") is None
-
-def test_parse_time_input_invalid_format():
-    assert parse_time_input("10h::10s") is None
+def test_parse_time_input_invalid_sign():
+    with pytest.raises(ValueError, match="Invalid time format!"):
+        parse_time_input("10h-10m-10s")
 
 def test_parse_time_input_str():
-    assert parse_time_input("Ten Hours") is None
+    with pytest.raises(ValueError, match="Invalid time format!"):
+        parse_time_input("Ten Hours")
 
 def test_parse_time_input_empty():
-    assert parse_time_input(" ") is None
+    with pytest.raises(ValueError, match="Invalid time format!"):
+        parse_time_input(" ")
 
 
 # Test 'check_time_is_none' function
-def test_check_time_is_none_valid():
+def test_check_time_is_none():
     assert check_time_is_none("10") == 10
 def test_check_time_is_none_empty():
     assert check_time_is_none("") == 0
@@ -178,7 +179,7 @@ def test_check_time_is_none_none():
 
 
 # Test 'get_seconds' function
-def test_get_seconds_valid(data_store):
+def test_get_seconds(data_store):
     assert get_seconds(data_store, "time", 10, 10, 10) == (10 * 365.2425 * 86400.0) + (10 * 30.436875 * 86400.0) + (10 * 86400.0)
 
 def test_get_seconds_all_zeroes(data_store):
@@ -190,7 +191,7 @@ def test_get_seconds_invalid(data_store):
 
 
 # Test 'parse_date_input' function
-def test_parse_date_input_valid():
+def test_parse_date_input():
     assert parse_date_input("1994-12-1") == (1994, 12, 1)
 
 def test_parse_date_input_big_dates():
@@ -218,10 +219,12 @@ def test_parse_date_input_all_zeroes():
     assert parse_date_input("0-0-0") == (0, 0, 0)
 
 def test_parse_date_input_invalid_format():
-    assert parse_date_input("1994/12/1") is None
+    with pytest.raises(ValueError, match="invalid date format! Usage: YYYY-MM-DD"):
+        parse_date_input("1994/12/1")
 
 def test_parse_date_input_str():
-    assert parse_date_input("December first nineteen ninety four") is None
+    with pytest.raises(ValueError, match="invalid date format! Usage: YYYY-MM-DD"):
+        parse_date_input("December first nineteen ninety four")
 
 
 # Test 'format_value' function
@@ -249,10 +252,6 @@ def test_calculate_leap_years():
 def test_calculate_leap_years_same_year():
     assert calculate_leap_years(2000, 1, 2000, 1, 1) == 0
 
-# Test 'calculate_leap_years' function
-def test_calculate_leap_years_same_year():
-    assert calculate_leap_years(2000, 1, 2000, 1, 1) == 0
-
 
 # Test 'is_leap' function
 def test_is_leap_by4():
@@ -266,7 +265,7 @@ def test_is_leap_by400():
 
 
 # Test 'validate_date' function
-def test_validate_date_valid():
+def test_validate_date():
     assert validate_date(1994, 12, 1) == True
 
 def test_validate_date_invalid_month():
@@ -287,19 +286,21 @@ def test_validate_date_invalid_leap_feb():
 
 
 # Test 'get_days_from_month' function
-def test_get_days_from_month_valid(data_store):
-    assert get_days_from_month(data_store, "DEC") == 31
+def test_get_days_from_month(data_store):
+    assert get_days_from_month(data_store, "December") == 31
 
 def test_get_days_from_month_invalid(data_store):
-    assert get_days_from_month(data_store, "invalid") is None
+    with pytest.raises(KeyError, match="Invalid month: 'invalid'"):
+        get_days_from_month(data_store, "invalid")
 
 
 # Test 'get_index_from_month' function
-def test_get_index_from_month_valid(data_store):
-    assert get_index_from_month(data_store, "DEC") == 12
+def test_get_index_from_month(data_store):
+    assert get_index_from_month(data_store, "December") == 12
 
 def test_get_index_from_month_invalid(data_store):
-    assert get_index_from_month(data_store, "invalid") is None
+    with pytest.raises(KeyError, match="Invalid month: 'invalid'"):
+        get_index_from_month(data_store, "invalid") is None
 
 
 # Test 'gets_days_from_index' function
