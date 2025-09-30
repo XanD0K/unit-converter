@@ -5,15 +5,9 @@
 
 
 ## Refactoring tasks
-- [ ] Polish code, improving readability
-- [ ] Reestructure `project.py` file into multiple files to keep program cleaner
-- [ ] Reestructure `final-project` directory
-- [ ] Improve `--help` message in command-line arguments
 
 
 ## Testing
-- [ ] Validade type checking (by using `mypy`)
-- [ ] Test corner cases (e.g. lower/uper case, invalid values, empty values)
 
 
 ## BACKLOG
@@ -74,3 +68,8 @@
 - [x] Implement test files for all other files (`test_utils.py`, `test_data_models.py`, `test_data_manager.py` and `test_api.py`)
 - [-] Use `inflect` library to customize output message
 - [x] Add style to introductory messages and instruction messages and add separator (e.g. with `-`, `=` or `_`)
+- [x] Test corner cases (e.g. lower/uper case, invalid values, empty values)
+- [x] Validade type checking (by using `mypy`)
+- [x] Polish code, improving readability
+- [x] Reestructure `project.py` file into multiple files to keep program cleaner
+- [x] Reestructure `final-project` directory
