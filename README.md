@@ -9,7 +9,9 @@ In addition to that, users can create and remove groups and types of units, as w
 Users also have the ability to change the base unit of any group, which changes the conversion factor of all unit types in that specific group.  
 Lastly, users can also access the history log, which stores conversion history for the last 3 days.  
 The program uses JSON files to store unit data, which are lightweight, dependency-free and user-friendly, reducing complexity in file manipulation.  
-This program supports interactive, command-line and API modes.  
+This program supports interactive, command-line and API modes.
+
+---
 
 
 ## Features
@@ -22,28 +24,28 @@ This program supports interactive, command-line and API modes.
 - View conversion history for the last 3 days (default: 10 entries)
 - View all available groups
 - View all unit types from an specific group, with their respective aliases
-
+---
 
 ## Table of Contents
 - [Description](#description)
 - [Features](#features)
-- [Motivation & Purpose](#motivation--purpose)
 - [Installation](#installation)
 - [Usage](#usage)
   - [Date & Time Conversion](#date--time-conversion)
 - [Files Overview](#files-overview)
 - [Design Choices](#design-choices)
 - [Development Docs](#development-docs)
-- [Acknowledgments](#acknowledgments)
-- [License](#license)
 - [Contributing](#contributing)
+- [Acknowledgments](#acknowledgments)
 - [Future Plans](#future-plans)
-
-
+- [License](#license)
+---
 
 ## Installation
 This program uses only Python's standard libraries.  
 TBD
+
+---
 
 
 ## Usage
@@ -56,7 +58,7 @@ Enter `python project.py` to launch the interactive menu with a guided experienc
   - Enter: `length`
   - Output: 
   ```
-  'length' units: meters ('m', 'meter', 'metre', 'metres'), centimeters ('cm', 'centimeter', 'centimetre', 'cetimetres'), millimeters ('mm', 'millimeter', 'millimetre', 'millimetres'), kilometers ('km', 'kilometer', 'kilometre', 'kilometres'), feet ('ft', 'foot'), inches ('in', 'inch'), yards ('yd', 'yds', 'yard'), miles ('mi', 'mile'), nautical_miles ('nmi', 'nm', 'nautical_mile')
+  'length' units: meters ('m', 'meter', 'metre', 'metres'), centimeters ('cm', 'centimeter', 'centimetre', 'centimetres'), millimeters ('mm', 'millimeter', 'millimetre', 'millimetres'), kilometers ('km', 'kilometer', 'kilometre', 'kilometres'), feet ('ft', 'foot'), inches ('in', 'inch'), yards ('yd', 'yds', 'yard'), miles ('mi', 'mile'), nautical_miles ('nmi', 'nm', 'nautical_mile')
   ```
 - **History** (`history` or `h`)  
   On interactive mode, it always prints up to 10 entries, with no option to limit this number 
@@ -100,7 +102,7 @@ On CLI approach, follow the usage examples bellow to understand how to use each 
   - Enter`python .\project.py types length` or `python .\project.py t length`
   - Output: 
   ```
-  'length' units: meters ('m', 'meter', 'metre', 'metres'), centimeters ('cm', 'centimeter', 'centimetre', 'cetimetres'), millimeters ('mm', 'millimeter', 'millimetre', 'millimetres'), kilometers ('km', 'kilometer', 'kilometre', 'kilometres'), feet ('ft', 'foot'), inches ('in', 'inch'), yards ('yd', 'yds', 'yard'), miles ('mi', 'mile'), nautical_miles ('nmi', 'nm', 'nautical_mile')
+  'length' units: meters ('m', 'meter', 'metre', 'metres'), centimeters ('cm', 'centimeter', 'centimetre', 'centimetres'), millimeters ('mm', 'millimeter', 'millimetre', 'millimetres'), kilometers ('km', 'kilometer', 'kilometre', 'kilometres'), feet ('ft', 'foot'), inches ('in', 'inch'), yards ('yd', 'yds', 'yard'), miles ('mi', 'mile'), nautical_miles ('nmi', 'nm', 'nautical_mile')
   ```
 
 - **History** (`history`, `h`)  
@@ -176,8 +178,8 @@ The `convert`, `manage-group`, `manage-type`, `aliases` and `change-base` method
 1. Call the method with `print_message` attribute set to `True`, which will directly output the message where it was called.
 2. Call the method with `print_message` attribute set to `False` and assign that to a variable, allowing users to choose where to display that message.
 
-Also, if users don't want the output message, just let `print_message` set to `False` and don't assign it to any variable. The method will be triggered, but no message will be displayed. Whereas, if users set `print_message` set to `True` and also assign it to a variable, it will print the message where it was called, and users will also have that same message stored in a variable, with the possibility to call it wherever they want.  
-The `groups`, `types` and `history` methods don't have that `print_message` attribute. Those commands always need the result to be assigned to a variable so that the output message can be displayed.
+Also, if users don't want the output message, just let `print_message` set to `False` and don't assign it to any variable. The method will be triggered, but no message will be displayed. Whereas, if users use `print_message` set to `True` and also assign it to a variable, it will print the message where it was called, and users will also have that same message stored in a variable, with the possibility to call it wherever they want.  
+The `groups`, `types` and `history` methods don't have that `print_message` attribute. Those commands always need the action trigger to be assigned to a variable so that the output message can be displayed.
 
 - **Groups** (`groups`, `g`)
   - Enter:
@@ -318,7 +320,7 @@ This program handles date and time conversion in a more robust way, so I'll devo
 On Interactive mode, enter `convert` or `c` and then `time` as the unit group, and follow the guided instructions. For API approach, I'll give examples that will display the full output message, but keep in mind that you can directly call the `convert` class method with `print_message` set to `False`, which will just print the result.
 
 - **Simple Unit Type Conversion**  
-  Users can convert from different unit types. 
+  Users can convert from different unit types.  
   Usage: `<unit_type> <unit_type> <amount>`
   - Enter: `minutes seconds 1` or `python .\project.py convert time minutes seconds 1` or 
   ```
@@ -421,7 +423,7 @@ On Interactive mode, enter `convert` or `c` and then `time` as the unit group, a
 - **Simple Date Conversion**  
   Users can calculate the amount of a specific unit type in a given date. On that approach, users can input arbitrary years, months and days, but they must follow the `YYYY-MM-DD` format.
 
-  That approach uses an approximate yeard and month duration on all calculations. year is considered to have 365.2425 days, and a month 30.436875 days.
+  That approach uses an approximate yeard and month duration on all calculations. year is considered to have 365.2425 days, and a month 30.436875 days.  
   Usage: `<DATE> <unit_type>`
   - Enter: `2019-11-04 days` or `python .\project.py convert time 2019-11-04 days` or 
   ```
@@ -454,6 +456,7 @@ On Interactive mode, enter `convert` or `c` and then `time` as the unit group, a
   print(message)
   ```
   - Output: `Between 2056-04-28 and 2019-11-04 there are 13,306.0 days`
+---
 
 
 ## Files Overview  
@@ -468,7 +471,6 @@ This program is organized into a `unit-converter` repository, which is also the 
   - [unit_aliases.json](data/unit_aliases.json): contains all aliases available for every unit type.
   - [units.json](data/units.json): contains all unit groups with all unit types for each group and their respective values. Those values change when users trigger "change-base" action, so it's used for conversions.
 
-
 - **TEST FILES** (`tests/`)
   - [test_api.py](tests/test_api.py): tests all functions in `api.py` file
   - [test_data_manager.py](tests/test_data_manager.py): tests all functions in `data_manager.py` file
@@ -481,26 +483,28 @@ This program is organized into a `unit-converter` repository, which is also the 
   - [data_models.py](unit_converter/data_models.py): defines all classes used in the program with all logic responsible for validate those classes' attributes.
   - [utils.py](unit_converter/utils.py): contains all helper functions.
 
-
 - [project.py](project.py): core file of the program, containing the logic to handle CLI approach, for users that want to use the program through command-line arguments, as well as the logic for an interactive approach. It also contains all files that handles all actions available in the program
 - [test_project.py](test_project.py): tests all functions in `project.py` file
 - [requirements.txt](requirements.txt): empty as only standard libraries are used
+---
 
 
 ## Design Choices
 - I used JSON files to manage all data kept the program simple and fast, reducing external dependencies and allowing simplicity on data manipulation. I chose that approach instead of hard-coding in other `.py` files or using databases.
-- I chose a modular structure over a single file to improve readability (previous version had `project.py` with over 1000 lines), and to better handle multiple approaches, removing repetitions.
+- I chose a modular structure over a single file to improve readability (previous version had `project.py` with over 1000 lines), and to better handle multiple approaches (interactive, API and CLI), removing repetitions.
 - Besides the interactive mode, which was the first approach that I developed, I also wanted to allow users to access the program through command-line arguments and through API. I decided to keep all three access modes on my final version of the program, giving flexibility and improving UX.
 - I created `DataStore` class to globally access all data from those JSON files, instead of manually declaring and accessing them on each file. It kept code cleaner, and improved readability and maintainability.
 - I created multiple classes (located in `data_models.py`) to store data and values related to each action. It allowed to centralize all validation logic for each of those values, keeping all other files cleaner with their specific logic.
 - I created a unique logic for time conversion, segregated from the default conversion logic, because I wanted to allow multiple input formats. Despite that, I kept all under the same "convert" command so that it doesn't get too segregated, allowing users to focus on which command they want to use, without getting overcomplicated.
 - In API mode, all actions return the output message, without displaying it! It means that when a class method is called, the action is triggered, but is up to the users to decide if they want to print it. By assigning that method call to a variable, they can also decide where they want to print that message.
+---
 
 
 ## Development Docs
 - [CHANGELOG.md](CHANGELOG.md): Versions and Updates
 - [DEVLOG.md](DEVLOG.md): Development Process
 - [TODO.md](TODO.md): Features and Goals
+---
 
 
 ## Contributing 
@@ -511,16 +515,20 @@ Contributions are welcomed! Follow those steps:
 
 Report bugs or suggest features via GitHub Issues
 
+---
+
 
 ## Acknowledgments
   Special thanks to the CS50P team, including Professor David Malan and the course staff, for their excellent instructions and support throughout "[CS50’s Introduction to Programming with Python](https://pll.harvard.edu/course/cs50s-introduction-programming-python)" course.
+
+---
 
 
 ## Future Plans
 - Publish the program as a PyPI library
 - Refactor `project.py` into modular files
 - Add support for more unit groups (e.g. money with real-time exchange rates)
-
+---
 
 ## License
 TBD
