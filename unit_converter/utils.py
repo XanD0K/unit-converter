@@ -31,7 +31,7 @@ def print_introductory_messages() -> None:
 def print_time_instructions() -> None:
     """Prints instructions for converting date and time units"""
     print("For date-time conversions, choose from different formats:")
-    print(" - <unit_type> [unit_type] <amount> → E.g. 'minutes [seconds] 10")
+    print(" - <unit_type> [unit_type] <amount> → E.g. 'minutes seconds 10")
     print(" - HH:MM:SS [HH:MM:SS] <unit_type> → E.g. '17h:28m:36s [04h:15m:22s] seconds'")
     print(" - <month_name> [month_name] <unit_type> →E.g. 'JAN [DEC] days'")
     print(" - YYYY-MM-DD [YYYY-MM-DD] <unit_type> → E.g. 2019-11-04 [2056-04-28] days")
