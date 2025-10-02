@@ -14,8 +14,8 @@ converter = Converter()
 # message = converter.history(limit=2)
 # print(message)
 
-# message = converter.convert("length", "meters feet 5", print_message=True)
-# print(message)
+message = converter.convert("length", "meters feet 5", print_message=True)
+print(message)
 
 # message = converter.convert("time", "2019-11-04 days", print_message=True)
 # print(message)
