@@ -3,13 +3,12 @@
 
 
 ## Description
-This program is my final project for "[CS50’s Introduction to Programming with Python](https://pll.harvard.edu/course/cs50s-introduction-programming-python)" course, from Harvard University. It applies skills learned in the course. 
-This program has the purpose of converting units from different groups: "length", "time", "mass", "temperature", "volume", "area" and "speed".  
-In addition to that, users can create and remove groups and types of units, as well as aliases for any unit type.  
-Users also have the ability to change the base unit of any group, which changes the conversion factor of all unit types in that specific group.  
-Lastly, users can also access the history log, which stores conversion history for the last 3 days.  
-The program uses JSON files to store unit data, which are lightweight, dependency-free and user-friendly, reducing complexity in file manipulation.  
-This program supports interactive, command-line and API modes.
+
+UnitConverter is a versatile unit conversion tool written in Python.  
+It supports conversion across multiple categories: length, time, mass, temperature, volume, area, and speed.  
+Users can create and remove custom groups and unit types, add aliases, change the base unit of any group, and view conversion history from the last 3 days.  
+The program supports three modes: Interactive, Command-Line (CLI), and API.
+It uses lightweight JSON files for data storage with no external dependencies.
 
 ---
 
@@ -26,6 +25,7 @@ This program supports interactive, command-line and API modes.
 - View all unit types from an specific group, with their respective aliases
 ---
 
+
 ## Table of Contents
 - [Description](#description)
 - [Features](#features)
@@ -40,6 +40,7 @@ This program supports interactive, command-line and API modes.
 - [Future Plans](#future-plans)
 - [License](#license)
 ---
+
 
 ## Installation
 This program uses only Python's standard libraries.  
@@ -466,6 +467,7 @@ This program is organized into a `unit-converter` repository, which is also the 
 - **DATA FILES** (`data/`)
   - [base_units.json](data/base_units.json): contains a relationship between an unit_group and the base unit for that group.
   - [conversion_log.json](data/conversion_log.json): stores all successful conversions done in the previous 3 days.
+  - [month_aliases.json](data/month_aliases.json): stores all aliases for every month, allowing users to input the full month name, or its abreviation.
   - [month_days.json](data/month_days.json): relates a month's index to its respective name, as well as the number of days in that respective month.
   - [original_units.json](data/original_units.json): contains all unit groups with all unit types for each group and their respective values. Those values don't change, so it's used to recalculate all values when users trigger "change-base" action, avoiding precision loss.
   - [unit_aliases.json](data/unit_aliases.json): contains all aliases available for every unit type.
@@ -519,15 +521,14 @@ Report bugs or suggest features via GitHub Issues
 
 
 ## Acknowledgments
-- Special thanks to the CS50P team, including Professor David Malan and the course staff, for their excellent instructions and support throughout "[CS50’s Introduction to Programming with Python](https://pll.harvard.edu/course/cs50s-introduction-programming-python)" course.
-- Additionally, I used Grok(created by xAI) and chat GPT(created by OpenAI) as learning tools to assist in the implementation of my code:
+I used **Grok (xAI)** and **ChatGPT (OpenAI)** as learning tools to assist during the development of this project. They helped me with:
   - Understand the usage of some modules like `argparse`, `datetime`, `fractions` (which I later decided not to use), `shutil`.
   - Understand how `next` and `iter` functions work
   - Understand how `patch`, `mock` and `fixture` from `unittest` module work
   - How to work with classes, specially parenting classes and the usage of `super().__init__`.
   - Debugging and resolving `mypy` issues.  
 
-  All core logic and implementation remain my own. Those tools were used only as learning tools!
+All core logic and implementation decisions were made by me. These tools were used strictly as learning aids.
 
 ---
 
@@ -539,4 +540,24 @@ Report bugs or suggest features via GitHub Issues
 ---
 
 ## License
-TBD
+MIT License
+
+Copyright (c) 2026 Alexandre D. Ferrari
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
