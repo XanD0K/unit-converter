@@ -1,6 +1,4 @@
 # UnitConverter
-#### Video Demo:  <https://youtu.be/6-0fuoK5I1w>
-
 
 ## Description
 
