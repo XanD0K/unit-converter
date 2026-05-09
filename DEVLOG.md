@@ -33,7 +33,7 @@ Allow users to also be able to insert the full month name. instead of just its a
 Give visibility to this program on GitHub
 
 **Progress**
-- Created a `unit-converter` repository, and moved all files used on this program, previously on `final-project` directory, into that new repository. It allows to show this program directly on my profile on GitHub.
+- Created a `unit-converter` repository, and moved all files used on this program into that new repository.
 
 
 ## [2025-09-20] - Version 0.9.11

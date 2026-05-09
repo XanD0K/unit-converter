@@ -33,7 +33,7 @@ def load_data() -> tuple[dict, dict, list, dict, dict, dict, dict]:
         original_units = json.load(file)
     with open(BASE_DIR / "data" / "month_aliases.json", "r") as file:
         month_aliases = json.load(file)
-    # Validates all thos files
+    # Validates all those files
     validate_data(units, base_units, conversion_log, unit_aliases, month_days, original_units, month_aliases)
     return units, base_units, conversion_log, unit_aliases, month_days, original_units, month_aliases 
 
@@ -66,7 +66,7 @@ def validate_data(units: dict, base_units: dict, conversion_log: list, unit_alia
     if not isinstance(unit_aliases, dict) or not unit_aliases:
         raise ValueError("'unit_aliases.json' structure is corrupted!")
     for unit_group in unit_aliases:
-        # Ensyres every unit+grou in 'unit_aliases.json' is also a unit_group in 'units.json'
+        # Ensures every unit+grou in 'unit_aliases.json' is also a unit_group in 'units.json'
         if unit_group not in units:
             raise KeyError(f"Dictionaries don't match! '{unit_group}' should also be a key in 'units.json' dictionary!")
         # Ensures every unit_group in 'unit_aliases.json' is also a dictionary
