@@ -53,7 +53,7 @@
 
 ## [0.9.18] - 2025-09-27
 ### Changed
-- Moved `final-project` directory (the root directory) out of `cs50p` repository, indo a brand new `unit-converter` repository, dedicated exclusively to this program
+- Moved `final-project` directory (the root directory) into a brand new `unit-converter` repository, dedicated exclusively to this program
 
 ### Removed
 - Removed `test_classes.py`, used for manually testing `Converter` class
